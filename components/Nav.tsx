@@ -14,21 +14,27 @@ export default function Nav() {
 
         <nav className="hidden md:flex items-center gap-8" aria-label="Navigation principale">
           <a
-            href="#comment-ca-marche"
+            href="/#comment-ca-marche"
             className="text-sm font-medium text-charbon/70 hover:text-charbon transition-colors duration-200"
           >
             Comment ça marche
           </a>
           <a
-            href="#tarif"
+            href="/#tarif"
             className="text-sm font-medium text-charbon/70 hover:text-charbon transition-colors duration-200"
           >
             Tarif
           </a>
+          <Link
+            href="/faq"
+            className="text-sm font-medium text-charbon/70 hover:text-charbon transition-colors duration-200"
+          >
+            FAQ
+          </Link>
         </nav>
 
         <a
-          href="#liste-attente"
+          href="/#liste-attente"
           className="inline-flex items-center justify-center bg-terracotta-dark text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-terracotta active:scale-[0.97] transition-all duration-200"
           aria-label="Rejoindre la liste d'attente Estime"
         >
