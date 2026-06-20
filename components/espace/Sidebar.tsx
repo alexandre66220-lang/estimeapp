@@ -79,12 +79,22 @@ export default function Sidebar() {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
   return (
     <>
       {/* Barre mobile : toujours visible, jamais recouverte. Le menu s'ouvre sous elle. */}
       <div className="lg:hidden fixed top-0 inset-x-0 z-50 h-16 bg-white border-b border-charbon/8 flex items-center justify-between px-4">
         <Link
           href="/espace/tableau-de-bord"
+          onClick={() => setOpen(false)}
           className="font-display text-lg font-bold text-charbon tracking-tight"
         >
           Estime
@@ -125,40 +135,29 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      {/* Rideau d'arrière-plan mobile, sous la barre, au-dessus du contenu */}
+      {/* Panneau de navigation mobile : un seul calque opaque, pleine largeur,
+          collé juste sous la barre fixe (top-16). Pas de rideau séparé ni de
+          marges qui laisseraient deviner le contenu de la page en dessous. */}
       <div
-        className={`lg:hidden fixed inset-x-0 top-16 bottom-0 z-30 bg-charbon/40 transition-opacity duration-200 ${
+        className={`lg:hidden fixed inset-x-0 top-16 bottom-0 z-[100] bg-white overflow-y-auto transition-opacity duration-200 ${
           open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-        onClick={() => setOpen(false)}
-        aria-hidden="true"
-      />
-
-      {/* Menu déroulant mobile : ancré juste sous la barre, jamais superposé à elle */}
-      <div
-        className={`lg:hidden fixed left-3 right-3 top-[4.5rem] z-40 origin-top transition-all duration-200 ${
-          open
-            ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
-            : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
         }`}
         aria-hidden={!open}
       >
-        <div className="bg-white rounded-2xl border border-charbon/8 shadow-2xl p-3">
-          <nav className="flex flex-col gap-1" aria-label="Navigation de l'espace artisan">
-            {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.href}
-                href={item.href}
-                label={item.label}
-                icon={item.icon}
-                active={pathname === item.href}
-                onNavigate={() => setOpen(false)}
-              />
-            ))}
-          </nav>
-          <div className="border-t border-charbon/8 pt-2 mt-2">
-            <LogoutButton />
-          </div>
+        <nav className="px-5 py-6 flex flex-col gap-1" aria-label="Navigation de l'espace artisan">
+          {NAV_ITEMS.map((item) => (
+            <NavLink
+              key={item.href}
+              href={item.href}
+              label={item.label}
+              icon={item.icon}
+              active={pathname === item.href}
+              onNavigate={() => setOpen(false)}
+            />
+          ))}
+        </nav>
+        <div className="border-t border-charbon/8 mx-5 pt-4">
+          <LogoutButton />
         </div>
       </div>
     </>
