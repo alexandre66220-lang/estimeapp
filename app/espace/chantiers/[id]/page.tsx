@@ -1,0 +1,303 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import {
+  ArrowLeft,
+  Check,
+  WarningCircle,
+  ClipboardText,
+  ClockCounterClockwise,
+} from "@phosphor-icons/react/dist/ssr";
+import { createClient } from "@/lib/supabase/server";
+import { updateClientInfo } from "@/app/actions/chantier";
+import RelanceAction from "@/components/espace/RelanceAction";
+
+export const metadata: Metadata = {
+  title: "Chantier - Estime",
+};
+
+const RELANCE_LABELS: Record<string, string> = {
+  avis: "Demande d'avis",
+  recommandation: "Demande de recommandation",
+};
+
+const STATUT_LABELS: Record<string, string> = {
+  envoyee: "Envoyée",
+  en_attente: "En attente",
+  echec: "Échec",
+};
+
+export default async function FicheChantier({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ message?: string; error?: string }>;
+}) {
+  const { id } = await params;
+  const { message, error } = await searchParams;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: chantier } = await supabase
+    .from("chantiers")
+    .select(
+      "id, titre, photo_avant_url, photo_apres_url, statut, client_nom, client_email, termine_at, created_at"
+    )
+    .eq("id", id)
+    .eq("user_id", user!.id)
+    .maybeSingle();
+
+  if (!chantier) {
+    notFound();
+  }
+
+  const [{ data: profile }, { data: posts }, { data: relances }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("lien_avis_google")
+      .eq("id", user!.id)
+      .maybeSingle(),
+    supabase
+      .from("posts")
+      .select("id, contenu, image_url, plateforme, created_at")
+      .eq("chantier_id", id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("relances")
+      .select("id, type, statut, envoyee_at, created_at")
+      .eq("chantier_id", id)
+      .order("created_at", { ascending: false }),
+  ]);
+
+  const isTermine = chantier.statut === "termine";
+  const hasLienAvisGoogle = Boolean(profile?.lien_avis_google);
+  const hasClientEmail = Boolean(chantier.client_email);
+
+  return (
+    <div className="max-w-3xl mx-auto px-6 py-12 lg:py-16">
+      <Link
+        href="/espace/mes-chantiers"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-charbon/60 hover:text-charbon transition-colors duration-200 mb-6"
+      >
+        <ArrowLeft size={16} weight="bold" aria-hidden="true" />
+        Retour à mes chantiers
+      </Link>
+
+      <div className="flex items-start justify-between gap-4 mb-8">
+        <div>
+          <h1 className="font-display text-3xl font-bold text-charbon">{chantier.titre}</h1>
+          <p className="text-charbon/50 text-sm mt-1">
+            Créé le{" "}
+            {new Date(chantier.created_at).toLocaleDateString("fr-FR", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </p>
+        </div>
+        <span
+          className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full ${
+            isTermine
+              ? "bg-charbon/5 text-charbon/60"
+              : "bg-terracotta/10 text-terracotta-dark"
+          }`}
+        >
+          {isTermine ? "Terminé" : "En cours"}
+        </span>
+      </div>
+
+      {(chantier.photo_avant_url || chantier.photo_apres_url) && (
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          {chantier.photo_avant_url && (
+            <div>
+              <p className="text-xs font-medium text-charbon/45 mb-1.5">Avant</p>
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-creme-dark">
+                <Image
+                  src={chantier.photo_avant_url}
+                  alt={`Photo avant du chantier ${chantier.titre}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 384px"
+                />
+              </div>
+            </div>
+          )}
+          {chantier.photo_apres_url && (
+            <div>
+              <p className="text-xs font-medium text-charbon/45 mb-1.5">Après</p>
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-creme-dark">
+                <Image
+                  src={chantier.photo_apres_url}
+                  alt={`Photo après du chantier ${chantier.titre}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 384px"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {posts && posts.length > 0 && (
+        <div className="bg-white rounded-2xl border border-charbon/8 p-6 lg:p-8 mb-6">
+          <div className="flex items-center gap-2 text-terracotta-dark mb-4">
+            <ClipboardText size={18} weight="bold" aria-hidden="true" />
+            <span className="text-sm font-semibold">Post Instagram généré</span>
+          </div>
+          <p className="text-charbon/70 text-sm leading-relaxed whitespace-pre-wrap">
+            {posts[0].contenu}
+          </p>
+        </div>
+      )}
+
+      <div className="bg-white rounded-2xl border border-charbon/8 p-6 lg:p-8 mb-6">
+        <h2 className="font-display text-lg font-bold text-charbon mb-1">
+          Informations client
+        </h2>
+        <p className="text-charbon/50 text-sm mb-5">
+          Nécessaires pour pouvoir envoyer la relance avis en fin de chantier.
+        </p>
+
+        {message && (
+          <p className="mb-5 flex items-center gap-2 rounded-xl bg-terracotta/10 text-terracotta-dark text-sm px-4 py-3">
+            <Check size={16} weight="bold" className="shrink-0" aria-hidden="true" />
+            {message}
+          </p>
+        )}
+        {error && (
+          <p className="mb-5 flex items-center gap-2 rounded-xl bg-red-50 text-red-700 text-sm px-4 py-3">
+            <WarningCircle size={16} weight="bold" className="shrink-0" aria-hidden="true" />
+            {error}
+          </p>
+        )}
+
+        <form action={updateClientInfo} className="space-y-5">
+          <input type="hidden" name="chantierId" value={chantier.id} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label
+                htmlFor="clientNom"
+                className="block text-sm font-medium text-charbon/70 mb-1.5"
+              >
+                Nom du client
+              </label>
+              <input
+                type="text"
+                id="clientNom"
+                name="clientNom"
+                defaultValue={chantier.client_nom ?? ""}
+                placeholder="Jean Dupont"
+                className="w-full px-4 py-3 rounded-xl border border-charbon/15 bg-creme text-charbon text-sm placeholder:text-charbon/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta/50 transition-all duration-200"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="clientEmail"
+                className="block text-sm font-medium text-charbon/70 mb-1.5"
+              >
+                Email du client
+              </label>
+              <input
+                type="email"
+                id="clientEmail"
+                name="clientEmail"
+                defaultValue={chantier.client_email ?? ""}
+                placeholder="jean@exemple.fr"
+                className="w-full px-4 py-3 rounded-xl border border-charbon/15 bg-creme text-charbon text-sm placeholder:text-charbon/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta/50 transition-all duration-200"
+              />
+            </div>
+          </div>
+          <button
+            type="submit"
+            className="inline-flex items-center gap-2 text-charbon font-medium text-sm px-5 py-2.5 rounded-full border border-charbon/20 hover:bg-charbon/5 active:scale-[0.97] transition-all duration-200"
+          >
+            Enregistrer
+          </button>
+        </form>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-charbon/8 p-6 lg:p-8 mb-6">
+        <h2 className="font-display text-lg font-bold text-charbon mb-4">
+          Statut du chantier
+        </h2>
+
+        {!isTermine && !hasClientEmail && (
+          <p className="flex items-start gap-2.5 rounded-xl bg-creme text-charbon/60 text-sm px-4 py-3">
+            <WarningCircle size={18} weight="bold" className="shrink-0 mt-0.5 text-charbon/40" aria-hidden="true" />
+            Renseignez l&apos;email du client ci-dessus pour pouvoir marquer ce
+            chantier comme terminé et lui envoyer une relance.
+          </p>
+        )}
+
+        {!isTermine && hasClientEmail && !hasLienAvisGoogle && (
+          <p className="flex items-start gap-2.5 rounded-xl bg-red-50 text-red-700 text-sm px-4 py-3">
+            <WarningCircle size={18} weight="bold" className="shrink-0 mt-0.5" aria-hidden="true" />
+            Renseignez votre lien vers votre fiche Google dans les{" "}
+            <Link href="/espace/parametres" className="font-semibold underline shrink-0">
+              paramètres
+            </Link>{" "}
+            avant de pouvoir envoyer une relance.
+          </p>
+        )}
+
+        {(isTermine || (hasClientEmail && hasLienAvisGoogle)) && (
+          <RelanceAction
+            chantierId={chantier.id}
+            isTermine={isTermine}
+            termineAt={chantier.termine_at}
+          />
+        )}
+      </div>
+
+      <div className="bg-white rounded-2xl border border-charbon/8 p-6 lg:p-8">
+        <div className="flex items-center gap-2 text-charbon/70 mb-4">
+          <ClockCounterClockwise size={18} aria-hidden="true" />
+          <h2 className="font-display text-lg font-bold text-charbon">
+            Historique des relances
+          </h2>
+        </div>
+
+        {!relances || relances.length === 0 ? (
+          <p className="text-charbon/45 text-sm">
+            Aucune relance envoyée pour l&apos;instant.
+          </p>
+        ) : (
+          <ul className="divide-y divide-charbon/8">
+            {relances.map((relance) => (
+              <li key={relance.id} className="flex items-center justify-between gap-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-charbon">
+                    {RELANCE_LABELS[relance.type] ?? relance.type}
+                  </p>
+                  <p className="text-charbon/45 text-xs mt-0.5">
+                    {new Date(relance.envoyee_at ?? relance.created_at).toLocaleDateString(
+                      "fr-FR",
+                      { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }
+                    )}
+                  </p>
+                </div>
+                <span
+                  className={`text-xs font-semibold px-3 py-1 rounded-full shrink-0 ${
+                    relance.statut === "envoyee"
+                      ? "bg-terracotta/10 text-terracotta-dark"
+                      : relance.statut === "echec"
+                        ? "bg-red-50 text-red-700"
+                        : "bg-charbon/5 text-charbon/60"
+                  }`}
+                >
+                  {STATUT_LABELS[relance.statut] ?? relance.statut}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}

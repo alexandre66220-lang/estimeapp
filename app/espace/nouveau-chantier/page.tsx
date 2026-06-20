@@ -282,6 +282,14 @@ export default function NouveauChantier() {
               )}
               {copied ? "Copié" : "Copier le texte"}
             </button>
+            {chantierId && (
+              <Link
+                href={`/espace/chantiers/${chantierId}`}
+                className="inline-flex items-center justify-center gap-2 text-charbon font-medium text-sm px-6 py-3 rounded-full border border-charbon/20 hover:bg-charbon/5 active:scale-[0.97] transition-all duration-200"
+              >
+                Voir le chantier
+              </Link>
+            )}
             <button
               type="button"
               onClick={handleReset}

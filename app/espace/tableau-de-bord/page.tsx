@@ -9,6 +9,8 @@ import {
   Camera,
   Sparkle,
 } from "@phosphor-icons/react/dist/ssr";
+import { createClient } from "@/lib/supabase/server";
+import ChantierCard from "@/components/espace/ChantierCard";
 
 export const metadata: Metadata = {
   title: "Tableau de bord - Estime",
@@ -27,7 +29,25 @@ const ONBOARDING_STEPS = [
   { icon: Star, label: "Relance pour l'avis" },
 ];
 
-export default function TableauDeBord() {
+const CHANTIERS_RECENTS_LIMIT = 5;
+
+export default async function TableauDeBord() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: chantiers, count } = await supabase
+    .from("chantiers")
+    .select("id, titre, statut, photo_avant_url, photo_apres_url, created_at", {
+      count: "exact",
+    })
+    .eq("user_id", user!.id)
+    .order("created_at", { ascending: false })
+    .limit(CHANTIERS_RECENTS_LIMIT);
+
+  const hasChantiers = Boolean(chantiers && chantiers.length > 0);
+
   return (
     <div className="max-w-5xl mx-auto px-6 py-12 lg:py-16">
       <div className="flex items-center justify-between gap-4 mb-8">
@@ -60,50 +80,71 @@ export default function TableauDeBord() {
         ))}
       </div>
 
-      <div className="relative overflow-hidden bg-charbon rounded-2xl p-8 lg:p-10 mb-10">
-        <div
-          className="absolute -top-10 -right-10 w-56 h-56 bg-terracotta/10 rounded-full blur-3xl pointer-events-none"
-          aria-hidden="true"
-        />
-        <h2 className="font-display text-2xl lg:text-3xl font-bold text-creme mb-2 relative">
-          Bienvenue sur Estime
-        </h2>
-        <p className="text-creme/55 text-sm lg:text-base max-w-[52ch] mb-8 relative">
-          Trois étapes séparent votre prochain chantier d&apos;un post Instagram
-          prêt à publier et d&apos;un nouvel avis Google.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 relative">
-          {ONBOARDING_STEPS.map(({ icon: Icon, label }) => (
-            <div key={label} className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-terracotta/20 flex items-center justify-center shrink-0">
-                <Icon size={20} weight="fill" className="text-terracotta" aria-hidden="true" />
+      {!hasChantiers && (
+        <div className="relative overflow-hidden bg-charbon rounded-2xl p-8 lg:p-10 mb-10">
+          <div
+            className="absolute -top-10 -right-10 w-56 h-56 bg-terracotta/10 rounded-full blur-3xl pointer-events-none"
+            aria-hidden="true"
+          />
+          <h2 className="font-display text-2xl lg:text-3xl font-bold text-creme mb-2 relative">
+            Bienvenue sur Estime
+          </h2>
+          <p className="text-creme/55 text-sm lg:text-base max-w-[52ch] mb-8 relative">
+            Trois étapes séparent votre prochain chantier d&apos;un post Instagram
+            prêt à publier et d&apos;un nouvel avis Google.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 relative">
+            {ONBOARDING_STEPS.map(({ icon: Icon, label }) => (
+              <div key={label} className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-terracotta/20 flex items-center justify-center shrink-0">
+                  <Icon size={20} weight="fill" className="text-terracotta" aria-hidden="true" />
+                </div>
+                <p className="text-creme/85 text-sm font-medium leading-snug">{label}</p>
               </div>
-              <p className="text-creme/85 text-sm font-medium leading-snug">{label}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
+      )}
+
+      <div className="flex items-center justify-between gap-4 mb-4">
+        <h2 className="font-display text-lg font-bold text-charbon">Vos chantiers</h2>
+        {hasChantiers && count && count > CHANTIERS_RECENTS_LIMIT && (
+          <Link
+            href="/espace/mes-chantiers"
+            className="text-sm font-medium text-terracotta hover:underline"
+          >
+            Voir tous mes chantiers
+          </Link>
+        )}
       </div>
 
-      <h2 className="font-display text-lg font-bold text-charbon mb-4">Vos chantiers</h2>
-      <div className="bg-white rounded-2xl border border-charbon/8 py-20 px-6 flex flex-col items-center text-center">
-        <div className="w-14 h-14 bg-terracotta/10 rounded-full flex items-center justify-center mb-5">
-          <HardHat size={26} className="text-terracotta" aria-hidden="true" />
+      {hasChantiers ? (
+        <div className="flex flex-col gap-3">
+          {chantiers!.map((chantier) => (
+            <ChantierCard key={chantier.id} chantier={chantier} />
+          ))}
         </div>
-        <h3 className="font-display text-xl font-bold text-charbon mb-2">
-          Aucun chantier pour l&apos;instant
-        </h3>
-        <p className="text-charbon/50 text-sm max-w-[40ch] mb-7">
-          Ajoutez votre premier chantier pour générer vos photos avant/après et
-          vos posts réseaux en quelques secondes.
-        </p>
-        <Link
-          href="/espace/nouveau-chantier"
-          className="inline-flex items-center gap-2 bg-terracotta-dark text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-terracotta active:scale-[0.97] transition-all duration-200"
-        >
-          <Plus size={18} weight="bold" aria-hidden="true" />
-          Nouveau chantier
-        </Link>
-      </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-charbon/8 py-20 px-6 flex flex-col items-center text-center">
+          <div className="w-14 h-14 bg-terracotta/10 rounded-full flex items-center justify-center mb-5">
+            <HardHat size={26} className="text-terracotta" aria-hidden="true" />
+          </div>
+          <h3 className="font-display text-xl font-bold text-charbon mb-2">
+            Aucun chantier pour l&apos;instant
+          </h3>
+          <p className="text-charbon/50 text-sm max-w-[40ch] mb-7">
+            Ajoutez votre premier chantier pour générer vos photos avant/après et
+            vos posts réseaux en quelques secondes.
+          </p>
+          <Link
+            href="/espace/nouveau-chantier"
+            className="inline-flex items-center gap-2 bg-terracotta-dark text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-terracotta active:scale-[0.97] transition-all duration-200"
+          >
+            <Plus size={18} weight="bold" aria-hidden="true" />
+            Nouveau chantier
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
