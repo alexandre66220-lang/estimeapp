@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { HardHat, Plus } from "@phosphor-icons/react/dist/ssr";
 
 export const metadata: Metadata = {
@@ -17,13 +18,13 @@ export default function TableauDeBord() {
             Suivez et valorisez chaque chantier en un coup d&apos;œil.
           </p>
         </div>
-        <button
-          type="button"
+        <Link
+          href="/espace/nouveau-chantier"
           className="hidden sm:inline-flex items-center gap-2 bg-terracotta-dark text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-terracotta active:scale-[0.97] transition-all duration-200"
         >
           <Plus size={18} weight="bold" aria-hidden="true" />
           Nouveau chantier
-        </button>
+        </Link>
       </div>
 
       <div className="bg-white rounded-2xl border border-charbon/8 py-20 px-6 flex flex-col items-center text-center">
@@ -37,13 +38,13 @@ export default function TableauDeBord() {
           Ajoutez votre premier chantier pour générer vos photos avant/après et
           vos posts réseaux en quelques secondes.
         </p>
-        <button
-          type="button"
+        <Link
+          href="/espace/nouveau-chantier"
           className="inline-flex items-center gap-2 bg-terracotta-dark text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-terracotta active:scale-[0.97] transition-all duration-200"
         >
           <Plus size={18} weight="bold" aria-hidden="true" />
           Nouveau chantier
-        </button>
+        </Link>
       </div>
     </div>
   );
