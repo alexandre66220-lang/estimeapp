@@ -94,10 +94,10 @@ export default function Hero() {
             {/* Photo principale */}
             <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-charbon/15 aspect-[4/3]">
               <Image
-                src="https://picsum.photos/seed/artisan-peintre-chantier/800/600"
-                alt="Artisan peintre sur un chantier avant/après renovation"
+                src="/images/hero-peintre.jpg"
+                alt="Artisan peintre en train de travailler sur un chantier"
                 fill
-                className="object-cover"
+                className="object-cover object-center"
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 priority
               />
