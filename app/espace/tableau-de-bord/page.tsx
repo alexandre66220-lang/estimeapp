@@ -51,7 +51,7 @@ export default function TableauDeBord() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {STATS.map(({ label, value, icon: Icon }) => (
           <div key={label} className="bg-white rounded-2xl p-5 border border-charbon/8">
-            <div className="w-10 h-10 bg-terracotta/10 rounded-full flex items-center justify-center mb-4">
+            <div className="inline-flex shrink-0 w-10 h-10 bg-terracotta/10 rounded-full items-center justify-center overflow-hidden mb-4">
               <Icon size={20} className="text-terracotta" aria-hidden="true" />
             </div>
             <p className="font-display text-3xl font-bold text-charbon">{value}</p>
