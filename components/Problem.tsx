@@ -49,12 +49,12 @@ export default function Problem() {
           ))}
         </div>
 
-        {/* Chiffre clé */}
+        {/* Phrase qualitative */}
         <AnimateIn delay={0.25}>
-          <div className="mt-12 flex flex-col sm:flex-row gap-2 sm:items-center">
-            <p className="font-display text-4xl font-bold text-terracotta">73%</p>
-            <p className="text-creme/50 text-sm max-w-[38ch] sm:ml-2">
-              des artisans déclarent ne pas avoir le temps de gérer leur présence en ligne. (Source : CAPEB 2023)
+          <div className="mt-12 flex flex-col sm:flex-row gap-2 sm:items-start">
+            <p className="font-display text-4xl font-bold text-terracotta shrink-0">Et</p>
+            <p className="text-creme/50 text-sm max-w-[42ch] sm:ml-2 sm:mt-2 leading-relaxed">
+              après une journée sur le chantier, s'asseoir devant un écran pour rédiger un post est la dernière chose qu'un artisan a envie de faire.
             </p>
           </div>
         </AnimateIn>
