@@ -44,7 +44,7 @@ const FAQS = [
   {
     question: "J'ai une question qui n'est pas dans cette FAQ.",
     answer:
-      "Contactez-nous directement à spark@alcalspark.com. Nous répondons sous 48h ouvrées.",
+      "Contactez-nous directement à contact@alcalspark.com. Nous répondons sous 48h ouvrées.",
   },
 ];
 

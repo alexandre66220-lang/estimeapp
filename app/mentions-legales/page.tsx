@@ -14,7 +14,7 @@ const SECTIONS = [
       ["Statut juridique", "Micro-entrepreneur"],
       ["Responsable de publication", "Alexandre"],
       ["Adresse", "90 avenue Georges Guynemer, 81200 Mazamet, France"],
-      ["Email", "spark@alcalspark.com"],
+      ["Email", "contact@alcalspark.com"],
       ["SIRET", "[SIRET à compléter]"],
     ],
   },
@@ -77,10 +77,10 @@ export default function MentionsLegales() {
               et Libertés, vous disposez d'un droit d'accès, de rectification et de suppression de vos données.
               Pour exercer ce droit, contactez-nous à{" "}
               <a
-                href="mailto:spark@alcalspark.com"
+                href="mailto:contact@alcalspark.com"
                 className="text-terracotta hover:underline"
               >
-                spark@alcalspark.com
+                contact@alcalspark.com
               </a>
               .
             </p>

@@ -37,11 +37,11 @@ const ARTICLES = [
   },
   {
     title: "Article 8 - Données personnelles",
-    body: `Les données collectées dans le cadre de l'utilisation du service sont traitées conformément au Règlement Général sur la Protection des Données (RGPD). Pour toute demande relative à vos données, contactez-nous à spark@alcalspark.com.`,
+    body: `Les données collectées dans le cadre de l'utilisation du service sont traitées conformément au Règlement Général sur la Protection des Données (RGPD). Pour toute demande relative à vos données, contactez-nous à contact@alcalspark.com.`,
   },
   {
     title: "Article 9 - Droit applicable et médiation",
-    body: `Les présentes CGV sont soumises au droit français. En cas de litige, une solution amiable sera recherchée en priorité.\n\nConformément à l'article L612-1 du Code de la consommation, vous pouvez recourir gratuitement à un médiateur de la consommation en cas de litige non résolu.\n\nContact : spark@alcalspark.com`,
+    body: `Les présentes CGV sont soumises au droit français. En cas de litige, une solution amiable sera recherchée en priorité.\n\nConformément à l'article L612-1 du Code de la consommation, vous pouvez recourir gratuitement à un médiateur de la consommation en cas de litige non résolu.\n\nContact : contact@alcalspark.com`,
   },
 ];
 
@@ -70,8 +70,8 @@ export default function CGV() {
         <div className="bg-terracotta/8 rounded-xl p-6 border border-terracotta/15">
           <p className="text-sm text-charbon/70 leading-relaxed">
             Pour toute question relative à ces conditions, contactez-nous :{" "}
-            <a href="mailto:spark@alcalspark.com" className="text-terracotta hover:underline font-medium">
-              spark@alcalspark.com
+            <a href="mailto:contact@alcalspark.com" className="text-terracotta hover:underline font-medium">
+              contact@alcalspark.com
             </a>
           </p>
         </div>

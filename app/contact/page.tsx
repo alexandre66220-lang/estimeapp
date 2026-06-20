@@ -20,7 +20,7 @@ export default function Contact() {
             {
               icon: EnvelopeSimple,
               label: "Email",
-              value: "spark@alcalspark.com",
+              value: "contact@alcalspark.com",
             },
             {
               icon: Clock,
@@ -40,9 +40,9 @@ export default function Contact() {
               <div className="w-9 h-9 bg-terracotta/10 rounded-full flex items-center justify-center shrink-0">
                 <Icon size={18} className="text-terracotta" aria-hidden="true" />
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <p className="text-xs text-charbon/45 font-medium mb-0.5">{label}</p>
-                <p className="text-sm text-charbon font-semibold">{value}</p>
+                <p className="text-sm text-charbon font-semibold break-words">{value}</p>
               </div>
             </div>
           ))}
@@ -57,7 +57,7 @@ export default function Contact() {
           </p>
 
           <form
-            action="mailto:spark@alcalspark.com"
+            action="mailto:contact@alcalspark.com"
             method="post"
             encType="text/plain"
             className="space-y-5"
@@ -115,10 +115,10 @@ export default function Contact() {
               <span className="text-charbon/40 text-xs">
                 ou directement via{" "}
                 <a
-                  href="mailto:spark@alcalspark.com"
+                  href="mailto:contact@alcalspark.com"
                   className="text-terracotta hover:underline"
                 >
-                  spark@alcalspark.com
+                  contact@alcalspark.com
                 </a>
               </span>
             </div>
