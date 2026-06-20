@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ensureProfile } from "@/lib/supabase/profile";
-import { logout } from "@/app/actions/auth";
+import Sidebar from "@/components/espace/Sidebar";
 
 export default async function EspaceLayout({
   children,
@@ -21,26 +20,20 @@ export default async function EspaceLayout({
   await ensureProfile(supabase, user);
 
   return (
-    <div className="min-h-screen flex flex-col bg-creme">
-      <header className="border-b border-charbon/8 bg-white">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link
-            href="/espace/tableau-de-bord"
-            className="font-display text-xl font-bold text-charbon tracking-tight"
-          >
-            Estime
-          </Link>
-          <form action={logout}>
-            <button
-              type="submit"
-              className="text-sm font-medium text-charbon/60 hover:text-charbon transition-colors duration-200"
-            >
-              Déconnexion
-            </button>
-          </form>
-        </div>
-      </header>
-      <main className="flex-1">{children}</main>
+    <div className="min-h-screen bg-creme">
+      <Sidebar />
+
+      <div
+        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+        aria-hidden="true"
+      >
+        <div className="absolute -top-24 right-0 w-[28rem] h-[28rem] bg-terracotta/[0.06] rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-1/4 w-[26rem] h-[26rem] bg-terracotta/[0.05] rounded-full blur-3xl" />
+      </div>
+
+      <div className="lg:pl-64">
+        <main className="pt-16 lg:pt-0">{children}</main>
+      </div>
     </div>
   );
 }
