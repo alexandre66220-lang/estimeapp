@@ -3,7 +3,7 @@ import { AnimateIn } from "./AnimateIn";
 
 const FEATURES = [
   "Posts réseaux sociaux illimités",
-  "Relances automatiques par SMS",
+  "Relances automatiques par email",
   "Lien direct vers votre fiche Google",
   "Historique de tous vos chantiers",
   "Support humain par chat et téléphone",

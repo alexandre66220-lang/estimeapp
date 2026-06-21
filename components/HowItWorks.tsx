@@ -18,7 +18,7 @@ const STEPS = [
     number: "03",
     icon: Star,
     title: "Relance auto pour l'avis",
-    body: "48h après la fin du chantier, votre client reçoit un SMS avec un lien direct vers votre fiche Google. Simple pour lui, précieux pour vous.",
+    body: "48h après la fin du chantier, votre client reçoit un email avec un lien direct vers votre fiche Google. Simple pour lui, précieux pour vous.",
   },
 ];
 
