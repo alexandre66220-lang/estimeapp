@@ -87,15 +87,15 @@ export default function RelanceAction({
 
     return (
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <span className="inline-flex items-center gap-2 bg-charbon/5 text-charbon/70 text-sm font-medium px-4 py-2 rounded-full">
-          <Check size={16} weight="bold" className="text-terracotta" aria-hidden="true" />
+        <span className="inline-flex items-center gap-2 bg-dusk/5 text-dusk/70 text-sm font-medium px-4 py-2 rounded-full">
+          <Check size={16} weight="bold" className="text-ambre" aria-hidden="true" />
           {formatted ? `Terminé le ${formatted}` : "Terminé"}
         </span>
         <button
           type="button"
           onClick={handleResend}
           disabled={status === "loading"}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-charbon/60 hover:text-charbon transition-colors duration-200 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-dusk/60 hover:text-dusk transition-colors duration-200 disabled:opacity-50"
         >
           {status === "loading" ? (
             <CircleNotch size={14} weight="bold" className="animate-spin" aria-hidden="true" />
@@ -120,7 +120,7 @@ export default function RelanceAction({
         type="button"
         onClick={handleMarquerTermine}
         disabled={status === "loading"}
-        className="inline-flex items-center gap-2 bg-terracotta-dark text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-terracotta active:scale-[0.97] transition-all duration-200 disabled:opacity-70"
+        className="inline-flex items-center gap-2 bg-braise text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-ambre active:scale-[0.97] transition-all duration-200 disabled:opacity-70"
       >
         {status === "loading" ? (
           <CircleNotch size={18} weight="bold" className="animate-spin" aria-hidden="true" />

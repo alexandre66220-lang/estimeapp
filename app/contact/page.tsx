@@ -35,24 +35,24 @@ export default function Contact() {
           ].map(({ icon: Icon, label, value }) => (
             <div
               key={label}
-              className="bg-white rounded-xl p-5 border border-charbon/8 flex items-start gap-4"
+              className="bg-white rounded-xl p-5 border border-dusk/8 flex items-start gap-4"
             >
-              <div className="w-9 h-9 bg-terracotta/10 rounded-full flex items-center justify-center shrink-0">
-                <Icon size={18} className="text-terracotta" aria-hidden="true" />
+              <div className="w-9 h-9 bg-ambre/10 rounded-full flex items-center justify-center shrink-0">
+                <Icon size={18} className="text-ambre" aria-hidden="true" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs text-charbon/45 font-medium mb-0.5">{label}</p>
-                <p className="text-sm text-charbon font-semibold break-words">{value}</p>
+                <p className="text-xs text-dusk/45 font-medium mb-0.5">{label}</p>
+                <p className="text-sm text-dusk font-semibold break-words">{value}</p>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="bg-white rounded-2xl p-8 lg:p-10 border border-charbon/8">
-          <h2 className="font-display text-2xl font-bold text-charbon mb-2">
+        <div className="bg-white rounded-2xl p-8 lg:p-10 border border-dusk/8">
+          <h2 className="font-display text-2xl font-bold text-dusk mb-2">
             Écrire un message
           </h2>
-          <p className="text-charbon/50 text-sm mb-8">
+          <p className="text-dusk/50 text-sm mb-8">
             Ce formulaire ouvre votre application email avec les informations pré-remplies.
           </p>
 
@@ -64,7 +64,7 @@ export default function Contact() {
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-charbon/70 mb-1.5">
+                <label htmlFor="name" className="block text-sm font-medium text-dusk/70 mb-1.5">
                   Nom
                 </label>
                 <input
@@ -72,12 +72,12 @@ export default function Contact() {
                   id="name"
                   name="Nom"
                   required
-                  className="w-full px-4 py-3 rounded-xl border border-charbon/15 bg-creme text-charbon text-sm placeholder:text-charbon/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta/50 transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200"
                   placeholder="Jean Dupont"
                 />
               </div>
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-charbon/70 mb-1.5">
+                <label htmlFor="email" className="block text-sm font-medium text-dusk/70 mb-1.5">
                   Email
                 </label>
                 <input
@@ -85,14 +85,14 @@ export default function Contact() {
                   id="email"
                   name="Email"
                   required
-                  className="w-full px-4 py-3 rounded-xl border border-charbon/15 bg-creme text-charbon text-sm placeholder:text-charbon/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta/50 transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200"
                   placeholder="jean@exemple.fr"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="message" className="block text-sm font-medium text-charbon/70 mb-1.5">
+              <label htmlFor="message" className="block text-sm font-medium text-dusk/70 mb-1.5">
                 Message
               </label>
               <textarea
@@ -100,7 +100,7 @@ export default function Contact() {
                 name="Message"
                 rows={5}
                 required
-                className="w-full px-4 py-3 rounded-xl border border-charbon/15 bg-creme text-charbon text-sm placeholder:text-charbon/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta/50 transition-all duration-200 resize-none"
+                className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200 resize-none"
                 placeholder="Votre question ou message..."
               />
             </div>
@@ -108,15 +108,15 @@ export default function Contact() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-2">
               <button
                 type="submit"
-                className="inline-flex items-center gap-2 bg-terracotta-dark text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-terracotta active:scale-[0.97] transition-all duration-200"
+                className="inline-flex items-center gap-2 bg-braise text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-ambre active:scale-[0.97] transition-all duration-200"
               >
                 Envoyer le message
               </button>
-              <span className="text-charbon/40 text-xs">
+              <span className="text-dusk/40 text-xs">
                 ou directement via{" "}
                 <a
                   href="mailto:contact@alcalspark.com"
-                  className="text-terracotta hover:underline"
+                  className="text-ambre hover:underline"
                 >
                   contact@alcalspark.com
                 </a>

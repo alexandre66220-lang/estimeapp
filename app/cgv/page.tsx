@@ -51,15 +51,15 @@ export default function CGV() {
       title="Conditions générales de vente"
       subtitle="Version 1.0 - applicable à compter du lancement commercial d'Estime."
     >
-      <div className="space-y-10 text-charbon">
+      <div className="space-y-10 text-dusk">
         {ARTICLES.map((article) => (
           <section key={article.title}>
-            <h2 className="font-display text-lg font-bold text-charbon mb-3 pb-2 border-b border-charbon/10">
+            <h2 className="font-display text-lg font-bold text-dusk mb-3 pb-2 border-b border-dusk/10">
               {article.title}
             </h2>
             <div className="space-y-3">
               {article.body.split("\n\n").map((paragraph, i) => (
-                <p key={i} className="text-sm text-charbon/70 leading-relaxed">
+                <p key={i} className="text-sm text-dusk/70 leading-relaxed">
                   {paragraph}
                 </p>
               ))}
@@ -67,16 +67,16 @@ export default function CGV() {
           </section>
         ))}
 
-        <div className="bg-terracotta/8 rounded-xl p-6 border border-terracotta/15">
-          <p className="text-sm text-charbon/70 leading-relaxed">
+        <div className="bg-ambre/8 rounded-xl p-6 border border-ambre/15">
+          <p className="text-sm text-dusk/70 leading-relaxed">
             Pour toute question relative à ces conditions, contactez-nous :{" "}
-            <a href="mailto:contact@alcalspark.com" className="text-terracotta hover:underline font-medium">
+            <a href="mailto:contact@alcalspark.com" className="text-ambre hover:underline font-medium">
               contact@alcalspark.com
             </a>
           </p>
         </div>
 
-        <p className="text-xs text-charbon/35 pt-4 border-t border-charbon/10">
+        <p className="text-xs text-dusk/35 pt-4 border-t border-dusk/10">
           Dernière mise à jour : juin 2026
         </p>
       </div>

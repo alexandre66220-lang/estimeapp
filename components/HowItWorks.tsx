@@ -24,76 +24,56 @@ const STEPS = [
 
 export default function HowItWorks() {
   return (
-    <section className="bg-creme py-24 lg:py-32" id="comment-ca-marche">
+    <section className="bg-dust py-24 lg:py-32" id="comment-ca-marche">
       <div className="max-w-6xl mx-auto px-6">
 
         <AnimateIn>
           <div className="mb-16 lg:mb-20">
-            <h2 className="font-display text-4xl lg:text-5xl font-bold text-charbon leading-tight mb-4">
+            <h2 className="font-display text-4xl lg:text-5xl font-bold text-dusk leading-tight mb-4">
               Trois étapes. Zéro effort.
             </h2>
-            <p className="text-charbon/55 text-lg max-w-[44ch]">
+            <p className="text-dusk/55 text-lg max-w-[44ch]">
               De la photo au post publié et à l'avis Google, tout est automatique.
             </p>
           </div>
         </AnimateIn>
 
-        {/* Steps: layout asymétrique - grand / petit-petit */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr_1fr] gap-6">
-          {STEPS.map((step, i) => {
-            const Icon = step.icon;
-            const isFirst = i === 0;
+        {/* Fil de lumière reliant les trois étapes, de l'ambre au crépuscule */}
+        <div className="relative max-w-3xl">
+          <div
+            className="absolute left-7 lg:left-9 top-3 bottom-3 w-px"
+            style={{ background: "linear-gradient(to bottom, #D9883D, #95624A, #2B3138)" }}
+            aria-hidden="true"
+          />
 
-            return (
-              <AnimateIn key={step.number} delay={i * 0.1}>
-                <div
-                  className={`relative rounded-2xl border border-charbon/10 p-8 lg:p-10 overflow-hidden h-full ${
-                    isFirst ? "bg-charbon" : "bg-white"
-                  }`}
-                >
-                  {/* Large number behind */}
-                  <span
-                    className={`absolute top-4 right-6 font-display text-8xl font-bold leading-none pointer-events-none select-none ${
-                      isFirst ? "text-terracotta/15" : "text-charbon/6"
-                    }`}
-                    aria-hidden="true"
-                  >
-                    {step.number}
-                  </span>
-
-                  {/* Icon */}
-                  <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center mb-6 ${
-                      isFirst ? "bg-terracotta/20" : "bg-terracotta/10"
-                    }`}
-                  >
-                    <Icon
-                      size={22}
-                      weight="fill"
-                      className="text-terracotta"
+          <div className="space-y-14 lg:space-y-16">
+            {STEPS.map((step, i) => {
+              const Icon = step.icon;
+              return (
+                <AnimateIn key={step.number} delay={i * 0.12}>
+                  <div className="relative flex gap-6 lg:gap-9 items-start">
+                    <div
+                      className="relative z-10 shrink-0 w-14 lg:w-[4.5rem] h-14 lg:h-[4.5rem] rounded-full bg-white border border-dusk/12 flex items-center justify-center font-display text-lg lg:text-xl font-bold text-dusk"
                       aria-hidden="true"
-                    />
+                    >
+                      {step.number}
+                    </div>
+                    <div className="pt-1 lg:pt-2.5 max-w-[46ch]">
+                      <div className="inline-flex w-9 h-9 rounded-lg bg-ambre/10 items-center justify-center mb-3.5">
+                        <Icon size={18} weight="fill" className="text-ambre" aria-hidden="true" />
+                      </div>
+                      <h3 className="font-display text-xl lg:text-2xl font-semibold text-dusk mb-2.5 leading-snug">
+                        {step.title}
+                      </h3>
+                      <p className="text-dusk/60 text-base leading-relaxed">
+                        {step.body}
+                      </p>
+                    </div>
                   </div>
-
-                  {/* Content */}
-                  <h3
-                    className={`font-display text-xl font-semibold mb-3 leading-snug ${
-                      isFirst ? "text-creme" : "text-charbon"
-                    }`}
-                  >
-                    {step.title}
-                  </h3>
-                  <p
-                    className={`text-base leading-relaxed ${
-                      isFirst ? "text-creme/60" : "text-charbon/60"
-                    }`}
-                  >
-                    {step.body}
-                  </p>
-                </div>
-              </AnimateIn>
-            );
-          })}
+                </AnimateIn>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>

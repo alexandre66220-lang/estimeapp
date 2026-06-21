@@ -52,16 +52,16 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border-b border-charbon/10 last:border-0">
+    <div className="border-b border-dusk/10 last:border-0">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-start justify-between gap-4 py-5 text-left group"
         aria-expanded={open}
       >
-        <span className="font-display font-semibold text-charbon text-base group-hover:text-terracotta transition-colors duration-200">
+        <span className="font-display font-semibold text-dusk text-base group-hover:text-ambre transition-colors duration-200">
           {question}
         </span>
-        <span className="shrink-0 mt-0.5 text-charbon/40 group-hover:text-terracotta transition-colors duration-200">
+        <span className="shrink-0 mt-0.5 text-dusk/40 group-hover:text-ambre transition-colors duration-200">
           {open ? (
             <Minus size={18} weight="bold" aria-hidden="true" />
           ) : (
@@ -70,7 +70,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
         </span>
       </button>
       {open && (
-        <p className="pb-5 text-sm text-charbon/65 leading-relaxed max-w-[60ch]">
+        <p className="pb-5 text-sm text-dusk/65 leading-relaxed max-w-[60ch]">
           {answer}
         </p>
       )}
@@ -82,35 +82,36 @@ export default function FAQ() {
   return (
     <>
       <Nav />
-      <main className="min-h-screen bg-creme">
-        <div className="bg-charbon pt-32 pb-16">
+      <main className="min-h-screen bg-dust">
+        <div className="bg-dusk pt-32 pb-16">
           <div className="max-w-3xl mx-auto px-6">
-            <h1 className="font-display text-4xl lg:text-5xl font-bold text-creme leading-tight">
+            <h1 className="font-display text-4xl lg:text-5xl font-bold text-dust leading-tight">
               Questions fréquentes
             </h1>
-            <p className="mt-4 text-creme/50 text-lg max-w-[50ch]">
+            <p className="mt-4 text-dust/50 text-lg max-w-[50ch]">
               Tout ce qu'un artisan veut savoir avant de se lancer.
             </p>
           </div>
         </div>
+        <div className="lumiere-fin-chantier h-1" aria-hidden="true" />
 
         <div className="max-w-3xl mx-auto px-6 py-16 lg:py-20">
-          <div className="bg-white rounded-2xl px-6 sm:px-8 border border-charbon/8">
+          <div>
             {FAQS.map((faq) => (
               <FaqItem key={faq.question} question={faq.question} answer={faq.answer} />
             ))}
           </div>
 
-          <div className="mt-12 bg-terracotta/8 rounded-2xl p-8 border border-terracotta/15">
-            <p className="font-display text-xl font-bold text-charbon mb-2">
+          <div className="mt-12 bg-ambre/8 rounded-2xl p-8 border border-ambre/15">
+            <p className="font-display text-xl font-bold text-dusk mb-2">
               Vous n'avez pas trouvé votre réponse ?
             </p>
-            <p className="text-charbon/60 text-sm mb-5">
+            <p className="text-dusk/60 text-sm mb-5">
               Notre équipe répond sous 48h ouvrées.
             </p>
             <a
               href="/contact"
-              className="inline-flex items-center gap-2 bg-terracotta-dark text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-terracotta active:scale-[0.97] transition-all duration-200"
+              className="inline-flex items-center gap-2 bg-braise text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-ambre active:scale-[0.97] transition-all duration-200"
             >
               Nous contacter
             </a>

@@ -82,7 +82,7 @@ export default async function FicheChantier({
     <div className="max-w-3xl mx-auto px-6 py-12 lg:py-16">
       <Link
         href="/espace/mes-chantiers"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-charbon/60 hover:text-charbon transition-colors duration-200 mb-6"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-dusk/60 hover:text-dusk transition-colors duration-200 mb-6"
       >
         <ArrowLeft size={16} weight="bold" aria-hidden="true" />
         Retour à mes chantiers
@@ -90,8 +90,8 @@ export default async function FicheChantier({
 
       <div className="flex items-start justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-display text-3xl font-bold text-charbon">{chantier.titre}</h1>
-          <p className="text-charbon/50 text-sm mt-1">
+          <h1 className="font-display text-3xl font-bold text-dusk">{chantier.titre}</h1>
+          <p className="text-dusk/50 text-sm mt-1">
             Créé le{" "}
             {new Date(chantier.created_at).toLocaleDateString("fr-FR", {
               day: "numeric",
@@ -103,8 +103,8 @@ export default async function FicheChantier({
         <span
           className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full ${
             isTermine
-              ? "bg-charbon/5 text-charbon/60"
-              : "bg-terracotta/10 text-terracotta-dark"
+              ? "bg-dusk/5 text-dusk/60"
+              : "bg-ambre/10 text-braise"
           }`}
         >
           {isTermine ? "Terminé" : "En cours"}
@@ -115,8 +115,8 @@ export default async function FicheChantier({
         <div className="grid grid-cols-2 gap-4 mb-8">
           {chantier.photo_avant_url && (
             <div>
-              <p className="text-xs font-medium text-charbon/45 mb-1.5">Avant</p>
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-creme-dark">
+              <p className="text-xs font-medium text-dusk/45 mb-1.5">Avant</p>
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-dust-dark">
                 <Image
                   src={chantier.photo_avant_url}
                   alt={`Photo avant du chantier ${chantier.titre}`}
@@ -129,8 +129,8 @@ export default async function FicheChantier({
           )}
           {chantier.photo_apres_url && (
             <div>
-              <p className="text-xs font-medium text-charbon/45 mb-1.5">Après</p>
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-creme-dark">
+              <p className="text-xs font-medium text-dusk/45 mb-1.5">Après</p>
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-dust-dark">
                 <Image
                   src={chantier.photo_apres_url}
                   alt={`Photo après du chantier ${chantier.titre}`}
@@ -145,27 +145,27 @@ export default async function FicheChantier({
       )}
 
       {posts && posts.length > 0 && (
-        <div className="bg-white rounded-2xl border border-charbon/8 p-6 lg:p-8 mb-6">
-          <div className="flex items-center gap-2 text-terracotta-dark mb-4">
+        <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 mb-6">
+          <div className="flex items-center gap-2 text-braise mb-4">
             <ClipboardText size={18} weight="bold" aria-hidden="true" />
             <span className="text-sm font-semibold">Post Instagram généré</span>
           </div>
-          <p className="text-charbon/70 text-sm leading-relaxed whitespace-pre-wrap">
+          <p className="text-dusk/70 text-sm leading-relaxed whitespace-pre-wrap">
             {posts[0].contenu}
           </p>
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-charbon/8 p-6 lg:p-8 mb-6">
-        <h2 className="font-display text-lg font-bold text-charbon mb-1">
+      <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 mb-6">
+        <h2 className="font-display text-lg font-bold text-dusk mb-1">
           Informations client
         </h2>
-        <p className="text-charbon/50 text-sm mb-5">
+        <p className="text-dusk/50 text-sm mb-5">
           Nécessaires pour pouvoir envoyer la relance avis en fin de chantier.
         </p>
 
         {message && (
-          <p className="mb-5 flex items-center gap-2 rounded-xl bg-terracotta/10 text-terracotta-dark text-sm px-4 py-3">
+          <p className="mb-5 flex items-center gap-2 rounded-xl bg-ambre/10 text-braise text-sm px-4 py-3">
             <Check size={16} weight="bold" className="shrink-0" aria-hidden="true" />
             {message}
           </p>
@@ -183,7 +183,7 @@ export default async function FicheChantier({
             <div>
               <label
                 htmlFor="clientNom"
-                className="block text-sm font-medium text-charbon/70 mb-1.5"
+                className="block text-sm font-medium text-dusk/70 mb-1.5"
               >
                 Nom du client
               </label>
@@ -193,13 +193,13 @@ export default async function FicheChantier({
                 name="clientNom"
                 defaultValue={chantier.client_nom ?? ""}
                 placeholder="Jean Dupont"
-                className="w-full px-4 py-3 rounded-xl border border-charbon/15 bg-creme text-charbon text-sm placeholder:text-charbon/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta/50 transition-all duration-200"
+                className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200"
               />
             </div>
             <div>
               <label
                 htmlFor="clientEmail"
-                className="block text-sm font-medium text-charbon/70 mb-1.5"
+                className="block text-sm font-medium text-dusk/70 mb-1.5"
               >
                 Email du client
               </label>
@@ -209,27 +209,27 @@ export default async function FicheChantier({
                 name="clientEmail"
                 defaultValue={chantier.client_email ?? ""}
                 placeholder="jean@exemple.fr"
-                className="w-full px-4 py-3 rounded-xl border border-charbon/15 bg-creme text-charbon text-sm placeholder:text-charbon/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta/50 transition-all duration-200"
+                className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200"
               />
             </div>
           </div>
           <button
             type="submit"
-            className="inline-flex items-center gap-2 text-charbon font-medium text-sm px-5 py-2.5 rounded-full border border-charbon/20 hover:bg-charbon/5 active:scale-[0.97] transition-all duration-200"
+            className="inline-flex items-center gap-2 text-dusk font-medium text-sm px-5 py-2.5 rounded-full border border-dusk/20 hover:bg-dusk/5 active:scale-[0.97] transition-all duration-200"
           >
             Enregistrer
           </button>
         </form>
       </div>
 
-      <div className="bg-white rounded-2xl border border-charbon/8 p-6 lg:p-8 mb-6">
-        <h2 className="font-display text-lg font-bold text-charbon mb-4">
+      <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 mb-6">
+        <h2 className="font-display text-lg font-bold text-dusk mb-4">
           Statut du chantier
         </h2>
 
         {!isTermine && !hasClientEmail && (
-          <p className="flex items-start gap-2.5 rounded-xl bg-creme text-charbon/60 text-sm px-4 py-3">
-            <WarningCircle size={18} weight="bold" className="shrink-0 mt-0.5 text-charbon/40" aria-hidden="true" />
+          <p className="flex items-start gap-2.5 rounded-xl bg-dust text-dusk/60 text-sm px-4 py-3">
+            <WarningCircle size={18} weight="bold" className="shrink-0 mt-0.5 text-dusk/40" aria-hidden="true" />
             Renseignez l&apos;email du client ci-dessus pour pouvoir marquer ce
             chantier comme terminé et lui envoyer une relance.
           </p>
@@ -255,27 +255,27 @@ export default async function FicheChantier({
         )}
       </div>
 
-      <div className="bg-white rounded-2xl border border-charbon/8 p-6 lg:p-8">
-        <div className="flex items-center gap-2 text-charbon/70 mb-4">
+      <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
+        <div className="flex items-center gap-2 text-dusk/70 mb-4">
           <ClockCounterClockwise size={18} aria-hidden="true" />
-          <h2 className="font-display text-lg font-bold text-charbon">
+          <h2 className="font-display text-lg font-bold text-dusk">
             Historique des relances
           </h2>
         </div>
 
         {!relances || relances.length === 0 ? (
-          <p className="text-charbon/45 text-sm">
+          <p className="text-dusk/45 text-sm">
             Aucune relance envoyée pour l&apos;instant.
           </p>
         ) : (
-          <ul className="divide-y divide-charbon/8">
+          <ul className="divide-y divide-dusk/8">
             {relances.map((relance) => (
               <li key={relance.id} className="flex items-center justify-between gap-4 py-3">
                 <div>
-                  <p className="text-sm font-medium text-charbon">
+                  <p className="text-sm font-medium text-dusk">
                     {RELANCE_LABELS[relance.type] ?? relance.type}
                   </p>
-                  <p className="text-charbon/45 text-xs mt-0.5">
+                  <p className="text-dusk/45 text-xs mt-0.5">
                     {new Date(relance.envoyee_at ?? relance.created_at).toLocaleDateString(
                       "fr-FR",
                       { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }
@@ -285,10 +285,10 @@ export default async function FicheChantier({
                 <span
                   className={`text-xs font-semibold px-3 py-1 rounded-full shrink-0 ${
                     relance.statut === "envoyee"
-                      ? "bg-terracotta/10 text-terracotta-dark"
+                      ? "bg-ambre/10 text-braise"
                       : relance.statut === "echec"
                         ? "bg-red-50 text-red-700"
-                        : "bg-charbon/5 text-charbon/60"
+                        : "bg-dusk/5 text-dusk/60"
                   }`}
                 >
                   {STATUT_LABELS[relance.statut] ?? relance.statut}

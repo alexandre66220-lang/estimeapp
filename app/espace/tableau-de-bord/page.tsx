@@ -52,54 +52,59 @@ export default async function TableauDeBord() {
     <div className="max-w-5xl mx-auto px-6 py-12 lg:py-16">
       <div className="flex items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-display text-3xl font-bold text-charbon">
+          <h1 className="font-display text-3xl font-bold text-dusk">
             Tableau de bord
           </h1>
-          <p className="text-charbon/50 text-sm mt-1">
+          <p className="text-dusk/50 text-sm mt-1">
             Vue d&apos;ensemble de votre activité.
           </p>
         </div>
         <Link
           href="/espace/nouveau-chantier"
-          className="hidden sm:inline-flex items-center gap-2 bg-terracotta-dark text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-terracotta active:scale-[0.97] transition-all duration-200"
+          className="hidden sm:inline-flex items-center gap-2 bg-braise text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-ambre active:scale-[0.97] transition-all duration-200"
         >
           <Plus size={18} weight="bold" aria-hidden="true" />
           Nouveau chantier
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {STATS.map(({ label, value, icon: Icon }) => (
-          <div key={label} className="bg-white rounded-2xl p-5 border border-charbon/8">
-            <div className="inline-flex shrink-0 w-10 h-10 bg-terracotta/10 rounded-full items-center justify-center overflow-hidden mb-4">
-              <Icon size={20} className="text-terracotta" aria-hidden="true" />
+      <div className="flex flex-wrap items-stretch gap-x-10 gap-y-6 py-7 border-y border-dusk/10 mb-10">
+        {STATS.map(({ label, value, icon: Icon }, i) => (
+          <div
+            key={label}
+            className={`flex items-center gap-3.5 pr-10 ${
+              i < STATS.length - 1 ? "sm:border-r border-dusk/10" : ""
+            }`}
+          >
+            <Icon size={22} className="text-ambre shrink-0" aria-hidden="true" />
+            <div>
+              <p className="font-display text-2xl font-bold text-dusk leading-none">{value}</p>
+              <p className="text-dusk/45 text-xs mt-1.5">{label}</p>
             </div>
-            <p className="font-display text-3xl font-bold text-charbon">{value}</p>
-            <p className="text-charbon/50 text-sm mt-1">{label}</p>
           </div>
         ))}
       </div>
 
       {!hasChantiers && (
-        <div className="relative overflow-hidden bg-charbon rounded-2xl p-8 lg:p-10 mb-10">
+        <div className="relative overflow-hidden bg-dusk rounded-2xl p-8 lg:p-10 mb-10">
           <div
-            className="absolute -top-10 -right-10 w-56 h-56 bg-terracotta/10 rounded-full blur-3xl pointer-events-none"
+            className="lumiere-fin-chantier absolute -top-10 -right-10 w-56 h-56 rounded-full blur-3xl opacity-50 pointer-events-none"
             aria-hidden="true"
           />
-          <h2 className="font-display text-2xl lg:text-3xl font-bold text-creme mb-2 relative">
+          <h2 className="font-display text-2xl lg:text-3xl font-bold text-dust mb-2 relative">
             Bienvenue sur Estime
           </h2>
-          <p className="text-creme/55 text-sm lg:text-base max-w-[52ch] mb-8 relative">
+          <p className="text-dust/55 text-sm lg:text-base max-w-[52ch] mb-8 relative">
             Trois étapes séparent votre prochain chantier d&apos;un post Instagram
             prêt à publier et d&apos;un nouvel avis Google.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 relative">
             {ONBOARDING_STEPS.map(({ icon: Icon, label }) => (
               <div key={label} className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-terracotta/20 flex items-center justify-center shrink-0">
-                  <Icon size={20} weight="fill" className="text-terracotta" aria-hidden="true" />
+                <div className="w-10 h-10 rounded-xl bg-ambre/20 flex items-center justify-center shrink-0">
+                  <Icon size={20} weight="fill" className="text-ambre" aria-hidden="true" />
                 </div>
-                <p className="text-creme/85 text-sm font-medium leading-snug">{label}</p>
+                <p className="text-dust/85 text-sm font-medium leading-snug">{label}</p>
               </div>
             ))}
           </div>
@@ -107,11 +112,11 @@ export default async function TableauDeBord() {
       )}
 
       <div className="flex items-center justify-between gap-4 mb-4">
-        <h2 className="font-display text-lg font-bold text-charbon">Vos chantiers</h2>
+        <h2 className="font-display text-lg font-bold text-dusk">Vos chantiers</h2>
         {hasChantiers && count && count > CHANTIERS_RECENTS_LIMIT && (
           <Link
             href="/espace/mes-chantiers"
-            className="text-sm font-medium text-terracotta hover:underline"
+            className="text-sm font-medium text-ambre hover:underline"
           >
             Voir tous mes chantiers
           </Link>
@@ -125,20 +130,20 @@ export default async function TableauDeBord() {
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-charbon/8 py-20 px-6 flex flex-col items-center text-center">
-          <div className="w-14 h-14 bg-terracotta/10 rounded-full flex items-center justify-center mb-5">
-            <HardHat size={26} className="text-terracotta" aria-hidden="true" />
+        <div className="bg-white rounded-2xl border border-dusk/8 py-20 px-6 flex flex-col items-center text-center">
+          <div className="w-14 h-14 bg-ambre/10 rounded-full flex items-center justify-center mb-5">
+            <HardHat size={26} className="text-ambre" aria-hidden="true" />
           </div>
-          <h3 className="font-display text-xl font-bold text-charbon mb-2">
+          <h3 className="font-display text-xl font-bold text-dusk mb-2">
             Aucun chantier pour l&apos;instant
           </h3>
-          <p className="text-charbon/50 text-sm max-w-[40ch] mb-7">
+          <p className="text-dusk/50 text-sm max-w-[40ch] mb-7">
             Ajoutez votre premier chantier pour générer vos photos avant/après et
             vos posts réseaux en quelques secondes.
           </p>
           <Link
             href="/espace/nouveau-chantier"
-            className="inline-flex items-center gap-2 bg-terracotta-dark text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-terracotta active:scale-[0.97] transition-all duration-200"
+            className="inline-flex items-center gap-2 bg-braise text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-ambre active:scale-[0.97] transition-all duration-200"
           >
             <Plus size={18} weight="bold" aria-hidden="true" />
             Nouveau chantier

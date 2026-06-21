@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --color-terracotta: #C75D3B;
-  --color-terracotta-dark: #A64B2E;
-  --color-charbon: #2B2521;
-  --color-creme: #F8F5F2;
-  --color-creme-dark: #EDE8E3;
-  --color-muted: #6B6460;
+  --color-ambre: #D9883D;
+  --color-braise: #B8552E;
+  --color-dusk: #2B3138;
+  --color-dust: #F2EDE4;
+  --color-dust-dark: #E8E0D2;
+  --color-mauve: #6B6470;
 
-  --font-display: var(--font-fraunces);
-  --font-sans: var(--font-jakarta);
+  --font-display: var(--font-bricolage);
+  --font-sans: var(--font-public-sans);
 }
 
 *, *::before, *::after {
@@ -21,14 +21,26 @@ html {
 }
 
 body {
-  font-family: var(--font-jakarta), system-ui, sans-serif;
-  background-color: #F8F5F2;
-  color: #2B2521;
+  font-family: var(--font-public-sans), system-ui, sans-serif;
+  background-color: #F2EDE4;
+  color: #2B3138;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background-color: #C75D3B;
-  color: #F8F5F2;
+  background-color: #D9883D;
+  color: #2B3138;
+}
+
+/* Signature : lumiere de fin de chantier - degrade ambre vers crepuscule */
+.lumiere-fin-chantier {
+  background: linear-gradient(
+    100deg,
+    #D9883D 0%,
+    #C9762F 22%,
+    #95624A 45%,
+    #4D4A55 68%,
+    #2B3138 100%
+  );
 }

@@ -15,15 +15,15 @@ const PAINS = [
 
 export default function Problem() {
   return (
-    <section className="bg-charbon py-24 lg:py-32" id="probleme">
+    <section className="bg-dusk py-24 lg:py-32" id="probleme">
       <div className="max-w-6xl mx-auto px-6">
 
         {/* Titre principal */}
         <AnimateIn>
-          <h2 className="font-display text-4xl lg:text-5xl font-bold text-creme leading-tight max-w-2xl mb-16 lg:mb-20">
+          <h2 className="font-display text-4xl lg:text-5xl font-bold text-dust leading-tight max-w-2xl mb-16 lg:mb-20">
             Votre travail est excellent.
             <br />
-            <span className="text-terracotta italic">Personne ne le voit.</span>
+            <span className="text-ambre italic">Personne ne le voit.</span>
           </h2>
         </AnimateIn>
 
@@ -31,17 +31,17 @@ export default function Problem() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-white/8 rounded-2xl overflow-hidden">
           {PAINS.map((pain, i) => (
             <AnimateIn key={pain.number} delay={i * 0.12}>
-              <div className="bg-charbon p-8 lg:p-10 h-full">
+              <div className="bg-dusk p-8 lg:p-10 h-full">
                 <span
-                  className="block font-display text-6xl font-bold text-terracotta/20 mb-4 leading-none"
+                  className="block font-display text-6xl font-bold text-ambre/20 mb-4 leading-none"
                   aria-hidden="true"
                 >
                   {pain.number}
                 </span>
-                <h3 className="font-display text-xl font-semibold text-creme mb-3 leading-snug">
+                <h3 className="font-display text-xl font-semibold text-dust mb-3 leading-snug">
                   {pain.title}
                 </h3>
-                <p className="text-creme/55 text-base leading-relaxed max-w-[40ch]">
+                <p className="text-dust/55 text-base leading-relaxed max-w-[40ch]">
                   {pain.body}
                 </p>
               </div>
@@ -52,13 +52,14 @@ export default function Problem() {
         {/* Phrase qualitative */}
         <AnimateIn delay={0.25}>
           <div className="mt-12 flex flex-col sm:flex-row gap-2 sm:items-start">
-            <p className="font-display text-4xl font-bold text-terracotta shrink-0">Et</p>
-            <p className="text-creme/50 text-sm max-w-[42ch] sm:ml-2 sm:mt-2 leading-relaxed">
+            <p className="font-display text-4xl font-bold text-ambre shrink-0">Et</p>
+            <p className="text-dust/50 text-sm max-w-[42ch] sm:ml-2 sm:mt-2 leading-relaxed">
               après une journée sur le chantier, s'asseoir devant un écran pour rédiger un post est la dernière chose qu'un artisan a envie de faire.
             </p>
           </div>
         </AnimateIn>
       </div>
+      <div className="lumiere-fin-chantier h-1.5 mt-16 lg:mt-20" aria-hidden="true" />
     </section>
   );
 }

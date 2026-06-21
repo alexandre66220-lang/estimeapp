@@ -18,20 +18,20 @@ export default function ChantierCard({ chantier }: { chantier: Chantier }) {
   return (
     <Link
       href={`/espace/chantiers/${chantier.id}`}
-      className="flex items-center gap-4 bg-white rounded-2xl border border-charbon/8 p-4 hover:border-terracotta/30 transition-colors duration-200"
+      className="flex items-center gap-4 bg-white rounded-2xl border border-dusk/8 p-4 hover:border-ambre/30 transition-colors duration-200"
     >
-      <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-creme-dark shrink-0">
+      <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-dust-dark shrink-0">
         {thumbnail ? (
           <Image src={thumbnail} alt="" fill className="object-cover" sizes="56px" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <HardHat size={20} className="text-terracotta/40" aria-hidden="true" />
+            <HardHat size={20} className="text-ambre/40" aria-hidden="true" />
           </div>
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-charbon truncate">{chantier.titre}</p>
-        <p className="text-charbon/45 text-xs mt-0.5">
+        <p className="font-medium text-dusk truncate">{chantier.titre}</p>
+        <p className="text-dusk/45 text-xs mt-0.5">
           {new Date(chantier.created_at).toLocaleDateString("fr-FR", {
             day: "numeric",
             month: "long",
@@ -41,12 +41,12 @@ export default function ChantierCard({ chantier }: { chantier: Chantier }) {
       </div>
       <span
         className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full ${
-          isTermine ? "bg-charbon/5 text-charbon/60" : "bg-terracotta/10 text-terracotta-dark"
+          isTermine ? "bg-dusk/5 text-dusk/60" : "bg-ambre/10 text-braise"
         }`}
       >
         {isTermine ? "Terminé" : "En cours"}
       </span>
-      <CaretRight size={16} className="text-charbon/30 shrink-0" aria-hidden="true" />
+      <CaretRight size={16} className="text-dusk/30 shrink-0" aria-hidden="true" />
     </Link>
   );
 }

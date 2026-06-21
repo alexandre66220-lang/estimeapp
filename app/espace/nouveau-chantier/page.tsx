@@ -39,7 +39,7 @@ function PhotoField({
 }) {
   return (
     <div>
-      <label htmlFor={inputId} className="block text-sm font-medium text-charbon/70 mb-1.5">
+      <label htmlFor={inputId} className="block text-sm font-medium text-dusk/70 mb-1.5">
         {label}
       </label>
       <div className="relative aspect-[4/3] rounded-xl overflow-hidden">
@@ -57,7 +57,7 @@ function PhotoField({
               onClick={onClear}
               disabled={disabled}
               aria-label={`Retirer la photo ${label.toLowerCase()}`}
-              className="absolute top-2 right-2 w-9 h-9 rounded-full bg-charbon/70 text-white flex items-center justify-center hover:bg-charbon transition-colors duration-200 disabled:opacity-50"
+              className="absolute top-2 right-2 w-9 h-9 rounded-full bg-dusk/70 text-white flex items-center justify-center hover:bg-dusk transition-colors duration-200 disabled:opacity-50"
             >
               <X size={16} weight="bold" aria-hidden="true" />
             </button>
@@ -65,10 +65,10 @@ function PhotoField({
         ) : (
           <label
             htmlFor={inputId}
-            className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-charbon/20 bg-creme cursor-pointer hover:border-terracotta/40 hover:bg-terracotta/5 transition-colors duration-200"
+            className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-dusk/20 bg-dust cursor-pointer hover:border-ambre/40 hover:bg-ambre/5 transition-colors duration-200"
           >
-            <ImageSquare size={28} className="text-charbon/35" aria-hidden="true" />
-            <span className="text-xs text-charbon/45 font-medium">Ajouter une photo</span>
+            <ImageSquare size={28} className="text-dusk/35" aria-hidden="true" />
+            <span className="text-xs text-dusk/45 font-medium">Ajouter une photo</span>
           </label>
         )}
         <input
@@ -225,27 +225,27 @@ export default function NouveauChantier() {
     <div className="max-w-2xl mx-auto px-6 py-12 lg:py-16">
       <Link
         href="/espace/tableau-de-bord"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-charbon/60 hover:text-charbon transition-colors duration-200 mb-6"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-dusk/60 hover:text-dusk transition-colors duration-200 mb-6"
       >
         <ArrowLeft size={16} weight="bold" aria-hidden="true" />
         Retour au tableau de bord
       </Link>
 
       <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold text-charbon">Nouveau chantier</h1>
-        <p className="text-charbon/50 text-sm mt-1">
+        <h1 className="font-display text-3xl font-bold text-dusk">Nouveau chantier</h1>
+        <p className="text-dusk/50 text-sm mt-1">
           Ajoutez vos photos avant/après, Estime génère votre post Instagram.
         </p>
       </div>
 
       {status === "success" && post ? (
-        <div className="bg-white rounded-2xl border border-charbon/8 p-6 lg:p-8">
-          <div className="flex items-center gap-2 text-terracotta-dark mb-5">
+        <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
+          <div className="flex items-center gap-2 text-braise mb-5">
             <Check size={18} weight="bold" aria-hidden="true" />
             <span className="text-sm font-semibold">Post Instagram généré</span>
           </div>
 
-          <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-5 bg-creme-dark">
+          <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-5 bg-dust-dark">
             <Image
               src={post.image_url}
               alt="Photo du chantier utilisée pour le post"
@@ -255,7 +255,7 @@ export default function NouveauChantier() {
             />
           </div>
 
-          <label htmlFor="caption" className="block text-sm font-medium text-charbon/70 mb-1.5">
+          <label htmlFor="caption" className="block text-sm font-medium text-dusk/70 mb-1.5">
             Légende
           </label>
           <textarea
@@ -263,9 +263,9 @@ export default function NouveauChantier() {
             value={caption}
             onChange={(event) => setCaption(event.target.value)}
             rows={7}
-            className="w-full px-4 py-3 rounded-xl border border-charbon/15 bg-creme text-charbon text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta/50 transition-all duration-200 resize-none"
+            className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200 resize-none"
           />
-          <p className="text-charbon/45 text-xs mt-1.5 mb-6">
+          <p className="text-dusk/45 text-xs mt-1.5 mb-6">
             Ajustez le texte si besoin, puis publiez-le manuellement avec la photo sur vos réseaux.
           </p>
 
@@ -273,7 +273,7 @@ export default function NouveauChantier() {
             <button
               type="button"
               onClick={handleCopy}
-              className="inline-flex items-center justify-center gap-2 bg-terracotta-dark text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-terracotta active:scale-[0.97] transition-all duration-200"
+              className="inline-flex items-center justify-center gap-2 bg-braise text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-ambre active:scale-[0.97] transition-all duration-200"
             >
               {copied ? (
                 <Check size={18} weight="bold" aria-hidden="true" />
@@ -285,7 +285,7 @@ export default function NouveauChantier() {
             {chantierId && (
               <Link
                 href={`/espace/chantiers/${chantierId}`}
-                className="inline-flex items-center justify-center gap-2 text-charbon font-medium text-sm px-6 py-3 rounded-full border border-charbon/20 hover:bg-charbon/5 active:scale-[0.97] transition-all duration-200"
+                className="inline-flex items-center justify-center gap-2 text-dusk font-medium text-sm px-6 py-3 rounded-full border border-dusk/20 hover:bg-dusk/5 active:scale-[0.97] transition-all duration-200"
               >
                 Voir le chantier
               </Link>
@@ -293,7 +293,7 @@ export default function NouveauChantier() {
             <button
               type="button"
               onClick={handleReset}
-              className="inline-flex items-center justify-center gap-2 text-charbon font-medium text-sm px-6 py-3 rounded-full border border-charbon/20 hover:bg-charbon/5 active:scale-[0.97] transition-all duration-200"
+              className="inline-flex items-center justify-center gap-2 text-dusk font-medium text-sm px-6 py-3 rounded-full border border-dusk/20 hover:bg-dusk/5 active:scale-[0.97] transition-all duration-200"
             >
               <Plus size={18} weight="bold" aria-hidden="true" />
               Créer un autre chantier
@@ -303,10 +303,10 @@ export default function NouveauChantier() {
       ) : (
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl border border-charbon/8 p-6 lg:p-8 space-y-6"
+          className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 space-y-6"
         >
           <div>
-            <label htmlFor="titre" className="block text-sm font-medium text-charbon/70 mb-1.5">
+            <label htmlFor="titre" className="block text-sm font-medium text-dusk/70 mb-1.5">
               Titre du chantier
             </label>
             <input
@@ -318,7 +318,7 @@ export default function NouveauChantier() {
               value={titre}
               onChange={(event) => setTitre(event.target.value)}
               placeholder="Ravalement façade, 12 rue des Tilleuls"
-              className="w-full px-4 py-3 rounded-xl border border-charbon/15 bg-creme text-charbon text-sm placeholder:text-charbon/30 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta/50 transition-all duration-200 disabled:opacity-60"
+              className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200 disabled:opacity-60"
             />
           </div>
 
@@ -340,7 +340,7 @@ export default function NouveauChantier() {
               onClear={() => clearPhoto("apres")}
             />
           </div>
-          <p className="text-charbon/45 text-xs">
+          <p className="text-dusk/45 text-xs">
             Au moins une des deux photos est nécessaire.
           </p>
 
@@ -366,7 +366,7 @@ export default function NouveauChantier() {
           <button
             type="submit"
             disabled={isBusy}
-            className="w-full inline-flex items-center justify-center gap-2 bg-terracotta-dark text-white font-semibold text-sm px-6 py-3.5 rounded-full hover:bg-terracotta active:scale-[0.97] transition-all duration-200 disabled:opacity-70 disabled:active:scale-100"
+            className="w-full inline-flex items-center justify-center gap-2 bg-braise text-white font-semibold text-sm px-6 py-3.5 rounded-full hover:bg-ambre active:scale-[0.97] transition-all duration-200 disabled:opacity-70 disabled:active:scale-100"
           >
             {isBusy && <CircleNotch size={18} weight="bold" className="animate-spin" aria-hidden="true" />}
             {status === "uploading" && "Envoi des photos en cours..."}
