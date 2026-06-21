@@ -93,15 +93,22 @@ export default function Hero() {
 
             {/* Photo principale, étalonnée dans la lumière ambre/crépuscule */}
             <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-dusk/20 aspect-[4/3]">
-              <Image
-                src="/images/hero-peintre.jpg"
-                alt="Artisan peintre en train de travailler sur un chantier"
-                fill
-                className="object-cover object-center"
-                style={{ filter: "sepia(0.32) saturate(1.35) hue-rotate(-6deg) contrast(1.05) brightness(0.95)" }}
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                priority
-              />
+              <motion.div
+                className="absolute inset-0"
+                initial={shouldReduce ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
+              >
+                <Image
+                  src="/images/hero-peintre.jpg"
+                  alt="Artisan peintre en train de travailler sur un chantier"
+                  fill
+                  className="object-cover object-center"
+                  style={{ filter: "sepia(0.32) saturate(1.35) hue-rotate(-6deg) contrast(1.05) brightness(0.95)" }}
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority
+                />
+              </motion.div>
               {/* Voile lumière ambre vers crépuscule, en mode incrustation */}
               <div
                 className="lumiere-fin-chantier absolute inset-0 opacity-35 mix-blend-overlay pointer-events-none"

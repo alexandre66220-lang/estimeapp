@@ -1,5 +1,6 @@
 import Nav from "./Nav";
 import Footer from "./Footer";
+import { LumiereSeam } from "./LumiereSeam";
 
 interface PageShellProps {
   children: React.ReactNode;
@@ -22,7 +23,7 @@ export default function PageShell({ children, title, subtitle }: PageShellProps)
             )}
           </div>
         </div>
-        <div className="lumiere-fin-chantier h-1" aria-hidden="true" />
+        <LumiereSeam />
         <div className="max-w-3xl mx-auto px-6 py-16 lg:py-20">
           {children}
         </div>

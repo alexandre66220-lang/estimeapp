@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus, Minus } from "@phosphor-icons/react";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import { LumiereSeam } from "@/components/LumiereSeam";
 
 const FAQS = [
   {
@@ -93,7 +94,7 @@ export default function FAQ() {
             </p>
           </div>
         </div>
-        <div className="lumiere-fin-chantier h-1" aria-hidden="true" />
+        <LumiereSeam />
 
         <div className="max-w-3xl mx-auto px-6 py-16 lg:py-20">
           <div>

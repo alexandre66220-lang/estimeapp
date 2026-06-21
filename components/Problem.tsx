@@ -1,4 +1,5 @@
 import { AnimateIn } from "./AnimateIn";
+import { LumiereSeam } from "./LumiereSeam";
 
 const PAINS = [
   {
@@ -59,7 +60,7 @@ export default function Problem() {
           </div>
         </AnimateIn>
       </div>
-      <div className="lumiere-fin-chantier h-1.5 mt-16 lg:mt-20" aria-hidden="true" />
+      <LumiereSeam className="h-1.5 mt-16 lg:mt-20" />
     </section>
   );
 }
