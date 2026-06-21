@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
+import ManageCookiesLink from "@/components/ManageCookiesLink";
 
 export const metadata: Metadata = {
   title: "Mentions légales - Estime",
@@ -91,10 +92,19 @@ export default function MentionsLegales() {
           <h2 className="font-display text-xl font-bold text-dusk mb-5 pb-3 border-b border-dusk/10">
             5. Cookies
           </h2>
-          <p className="text-sm text-dusk/70 leading-relaxed">
-            Ce site peut utiliser des cookies techniques nécessaires à son fonctionnement. Aucun cookie de
-            traçage publicitaire n'est utilisé à ce jour.
-          </p>
+          <div className="space-y-3 text-sm text-dusk/70 leading-relaxed">
+            <p>
+              Le site Estime utilise des cookies essentiels à son fonctionnement (notamment le maintien de
+              votre session de connexion à l&apos;espace client). Ces cookies ne sont pas soumis à votre
+              consentement et restent toujours actifs.
+            </p>
+            <p>
+              Le site pourra à l&apos;avenir utiliser des cookies de mesure d&apos;audience. Lors de votre
+              première visite, une bannière vous permet d&apos;accepter ou de refuser le dépôt de ces
+              cookies. Vous pouvez modifier ce choix à tout moment via le lien{" "}
+              <ManageCookiesLink className="text-ambre hover:underline" /> situé en bas de chaque page.
+            </p>
+          </div>
         </section>
 
         <section>

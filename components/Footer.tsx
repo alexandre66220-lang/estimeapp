@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ManageCookiesLink from "./ManageCookiesLink";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -54,6 +55,9 @@ export default function Footer() {
                     <Link href="/cgv" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
                       CGV
                     </Link>
+                  </li>
+                  <li>
+                    <ManageCookiesLink className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200 text-left" />
                   </li>
                 </ul>
               </div>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Public_Sans } from "next/font/google";
+import CookieConsent from "@/components/CookieConsent";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -48,7 +49,10 @@ export default function RootLayout({
       lang="fr"
       className={`${bricolage.variable} ${publicSans.variable} antialiased`}
     >
-      <body className="min-h-screen flex flex-col">{children}</body>
+      <body className="min-h-screen flex flex-col">
+        {children}
+        <CookieConsent />
+      </body>
     </html>
   );
 }
