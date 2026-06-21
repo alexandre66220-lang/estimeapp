@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 const ARTICLES = [
   {
     title: "Article 1 - Objet",
-    body: `Les présentes conditions générales de vente (CGV) régissent l'accès et l'utilisation du service Estime, édité par AlcalSpark (micro-entrepreneur, SIRET : [SIRET à compléter]), ci-après "l'éditeur".\n\nEstime est un outil en ligne destiné aux artisans du BTP, permettant la génération automatisée de contenus pour les réseaux sociaux et l'envoi de demandes d'avis Google.`,
+    body: `Les présentes conditions générales de vente (CGV) régissent l'accès et l'utilisation du service Estime, édité par AlcalSpark (micro-entrepreneur, SIRET : 104 516 547 00015), ci-après "l'éditeur".\n\nEstime est un outil en ligne destiné aux artisans du BTP, permettant la génération automatisée de contenus pour les réseaux sociaux et l'envoi de demandes d'avis Google.`,
   },
   {
     title: "Article 2 - Phase de pré-lancement",

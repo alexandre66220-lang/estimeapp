@@ -15,7 +15,7 @@ const SECTIONS = [
       ["Responsable de publication", "Alexandre"],
       ["Adresse", "90 avenue Georges Guynemer, 81200 Mazamet, France"],
       ["Email", "contact@alcalspark.com"],
-      ["SIRET", "[SIRET à compléter]"],
+      ["SIRET", "104 516 547 00015"],
     ],
   },
   {
