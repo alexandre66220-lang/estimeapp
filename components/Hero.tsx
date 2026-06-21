@@ -117,11 +117,6 @@ export default function Hero() {
                 </div>
               </div>
             </div>
-
-            {/* Badge avis */}
-            <div className="absolute -top-3 -right-3 bg-terracotta text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg shadow-terracotta/30">
-              +12 avis ce mois
-            </div>
           </motion.div>
         </div>
       </div>

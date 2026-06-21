@@ -18,6 +18,7 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://estime-app.netlify.app"),
   title: "Estime - L'assistant post-chantier pour artisans",
   description:
     "Transformez chaque chantier en vitrine. Photo avant/après, post réseaux prêt en 30 secondes, relance automatique pour vos avis Google. 24,99€/mois.",
@@ -27,6 +28,14 @@ export const metadata: Metadata = {
       "Photo avant/après + IA = post réseaux prêt en 30 secondes. Relance auto pour vos avis Google.",
     locale: "fr_FR",
     type: "website",
+    images: [
+      {
+        url: "/images/hero-peintre.jpg",
+        width: 1200,
+        height: 900,
+        alt: "Artisan peintre en train de travailler sur un chantier",
+      },
+    ],
   },
 };
 
