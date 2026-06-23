@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       .maybeSingle(),
     supabase
       .from("profiles")
-      .select("lien_avis_google, company_name")
+      .select("lien_avis_google, company_name, prenom, metier, template_email")
       .eq("id", user.id)
       .maybeSingle(),
   ]);
@@ -74,6 +74,9 @@ export async function POST(request: Request) {
       chantierTitre: chantier.titre,
       companyName: profile.company_name,
       lienAvisGoogle: profile.lien_avis_google,
+      prenomArtisan: profile.prenom,
+      metier: profile.metier,
+      templateEmail: profile.template_email,
     });
   } catch (error) {
     console.error("envoyer-relance: échec de l'envoi", error);

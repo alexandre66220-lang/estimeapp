@@ -1,5 +1,6 @@
 import "server-only";
 import { Resend } from "resend";
+import { appliquerVariablesTemplate } from "@/lib/email-template";
 
 const FROM = `Estime <${process.env.RESEND_FROM_EMAIL || "noreply@estime-app.com"}>`;
 
@@ -9,6 +10,9 @@ export async function sendRelanceAvis(params: {
   chantierTitre: string;
   companyName: string | null;
   lienAvisGoogle: string;
+  prenomArtisan?: string | null;
+  metier?: string | null;
+  templateEmail?: string | null;
 }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
@@ -24,6 +28,29 @@ export async function sendRelanceAvis(params: {
   const chantierMention = params.chantierTitre
     ? ` pour « ${params.chantierTitre} »`
     : "";
+
+  if (params.templateEmail?.trim()) {
+    const texte = appliquerVariablesTemplate(params.templateEmail, {
+      prenomClient: params.clientNom?.trim() || "",
+      prenomArtisan: params.prenomArtisan?.trim() || artisanName,
+      metier: params.metier?.trim() || "artisan",
+      lienAvis: params.lienAvisGoogle,
+      titreChantier: params.chantierTitre || "",
+    });
+
+    const { error } = await resend.emails.send({
+      from: FROM,
+      to: params.clientEmail,
+      subject: "Merci pour votre confiance !",
+      text: texte,
+      html: `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color:#F8F5F2; padding: 40px 20px;"><div style="max-width: 480px; margin: 0 auto; background-color:#ffffff; border-radius:16px; padding: 40px 32px;"><p style="color:#2B2521; font-size:16px; line-height:1.6; white-space:pre-wrap; margin:0;">${texte}</p></div></div>`,
+    });
+
+    if (error) {
+      throw new Error(error.message || "Échec de l'envoi de l'email.");
+    }
+    return;
+  }
 
   const html = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color:#F8F5F2; padding: 40px 20px;">
