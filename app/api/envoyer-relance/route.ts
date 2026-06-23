@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendRelanceAvis } from "@/lib/resend/send-relance";
 
+export const runtime = "edge";
+
 export async function POST(request: Request) {
   let chantierId: string | undefined;
   try {
