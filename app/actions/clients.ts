@@ -1,8 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { clientsCacheTag } from "@/lib/supabase/clients";
 
 export async function addClient(formData: FormData) {
   const prenom = (formData.get("prenom") as string)?.trim();
@@ -44,6 +45,7 @@ export async function addClient(formData: FormData) {
     );
   }
 
+  updateTag(clientsCacheTag(user.id));
   revalidatePath("/espace/clients");
   redirect(`${redirectTo}?message=${encodeURIComponent("Client ajouté au carnet.")}`);
 }
@@ -88,6 +90,7 @@ export async function addClientFromChantier(formData: FormData) {
     );
   }
 
+  updateTag(clientsCacheTag(user.id));
   revalidatePath("/espace/clients");
   redirect(
     `/espace/chantiers/${chantierId}?message=${encodeURIComponent(
@@ -114,6 +117,7 @@ export async function deleteClient(formData: FormData) {
 
   await supabase.from("clients").delete().eq("id", clientId).eq("user_id", user.id);
 
+  updateTag(clientsCacheTag(user.id));
   revalidatePath("/espace/clients");
   redirect("/espace/clients");
 }

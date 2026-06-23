@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getCurrentUser } from "@/lib/supabase/server";
+import { getCachedClients } from "@/lib/supabase/clients";
 import { ClientsManager } from "@/components/espace/ClientsManager";
 
 export const metadata: Metadata = {
@@ -39,13 +40,9 @@ async function ClientsSection({
 }) {
   const { supabase, user } = await getCurrentUser();
 
-  const { data: clients } = await supabase
-    .from("clients")
-    .select("id, prenom, nom, email, telephone, created_at")
-    .eq("user_id", user!.id)
-    .order("created_at", { ascending: false });
+  const clients = await getCachedClients(supabase, user!.id);
 
-  return <ClientsManager clients={clients ?? []} message={message} error={error} />;
+  return <ClientsManager clients={clients} message={message} error={error} />;
 }
 
 function ClientsListSkeleton() {
