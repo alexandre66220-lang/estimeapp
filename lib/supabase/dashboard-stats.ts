@@ -1,0 +1,99 @@
+import "server-only";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+export type DashboardStats = {
+  totalChantiers: number;
+  totalPosts: number;
+  totalEmails: number;
+  chantiersCeMois: number;
+};
+
+export type ActiviteChantier = {
+  id: string;
+  titre: string;
+  created_at: string;
+  aPost: boolean;
+  aEmail: boolean;
+};
+
+function startOfMonthISO() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+}
+
+export async function getDashboardStats(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<DashboardStats> {
+  const [
+    { count: totalChantiers },
+    { count: totalPosts },
+    { count: totalEmails },
+    { count: chantiersCeMois },
+  ] = await Promise.all([
+    supabase
+      .from("chantiers")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId),
+    supabase
+      .from("posts")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId),
+    supabase
+      .from("relances")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("statut", "envoyee"),
+    supabase
+      .from("chantiers")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .gte("created_at", startOfMonthISO()),
+  ]);
+
+  return {
+    totalChantiers: totalChantiers ?? 0,
+    totalPosts: totalPosts ?? 0,
+    totalEmails: totalEmails ?? 0,
+    chantiersCeMois: chantiersCeMois ?? 0,
+  };
+}
+
+export async function getActiviteRecente(
+  supabase: SupabaseClient,
+  userId: string,
+  limit = 5
+): Promise<ActiviteChantier[]> {
+  const { data: chantiers } = await supabase
+    .from("chantiers")
+    .select("id, titre, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (!chantiers || chantiers.length === 0) return [];
+
+  const chantierIds = chantiers.map((chantier) => chantier.id);
+
+  const [{ data: posts }, { data: relances }] = await Promise.all([
+    supabase.from("posts").select("chantier_id").in("chantier_id", chantierIds),
+    supabase
+      .from("relances")
+      .select("chantier_id")
+      .eq("statut", "envoyee")
+      .in("chantier_id", chantierIds),
+  ]);
+
+  const chantiersAvecPost = new Set((posts ?? []).map((post) => post.chantier_id));
+  const chantiersAvecEmail = new Set(
+    (relances ?? []).map((relance) => relance.chantier_id)
+  );
+
+  return chantiers.map((chantier) => ({
+    id: chantier.id,
+    titre: chantier.titre,
+    created_at: chantier.created_at,
+    aPost: chantiersAvecPost.has(chantier.id),
+    aEmail: chantiersAvecEmail.has(chantier.id),
+  }));
+}
