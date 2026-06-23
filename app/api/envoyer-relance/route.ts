@@ -27,12 +27,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
   }
 
-  const { data: chantier, error: chantierError } = await supabase
-    .from("chantiers")
-    .select("id, titre, client_email, client_nom")
-    .eq("id", chantierId)
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const [
+    { data: chantier, error: chantierError },
+    { data: profile },
+  ] = await Promise.all([
+    supabase
+      .from("chantiers")
+      .select("id, titre, client_email, client_nom")
+      .eq("id", chantierId)
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("profiles")
+      .select("lien_avis_google, company_name")
+      .eq("id", user.id)
+      .maybeSingle(),
+  ]);
 
   if (chantierError || !chantier) {
     return NextResponse.json({ error: "Chantier introuvable." }, { status: 404 });
@@ -44,12 +54,6 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("lien_avis_google, company_name")
-    .eq("id", user.id)
-    .maybeSingle();
 
   if (!profile?.lien_avis_google) {
     return NextResponse.json(
