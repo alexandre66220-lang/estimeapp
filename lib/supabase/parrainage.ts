@@ -79,19 +79,66 @@ export async function registerFilleulParrainage(
   filleulId: string,
   filleulEmail: string
 ): Promise<void> {
-  const { data: parrainId } = await supabase.rpc("resolve_code_parrainage", {
+  const { data: rows } = await supabase.rpc("resolve_parrain_info", {
     p_code: code,
   });
+  const parrain = rows?.[0] as { id: string; email: string } | undefined;
 
-  if (!parrainId || parrainId === filleulId) return;
+  if (!parrain || parrain.id === filleulId) return;
 
   await supabase.from("parrainages").insert({
-    parrain_id: parrainId,
+    parrain_id: parrain.id,
+    parrain_email: parrain.email,
     filleul_id: filleulId,
     filleul_email: filleulEmail,
     code_parrainage: code,
     statut: "en_attente",
   });
+}
+
+export type ParrainageEnAttente = {
+  id: string;
+  parrain_id: string;
+  parrain_email: string | null;
+  filleul_email: string | null;
+  created_at: string;
+};
+
+export async function getParrainagesEnAttente(
+  supabase: SupabaseClient
+): Promise<ParrainageEnAttente[]> {
+  const { data } = await supabase
+    .from("parrainages")
+    .select("id, parrain_id, parrain_email, filleul_email, created_at")
+    .eq("statut", "en_attente")
+    .not("filleul_id", "is", null)
+    .order("created_at", { ascending: false });
+
+  return data ?? [];
+}
+
+export async function marquerParrainageConverti(
+  supabase: SupabaseClient,
+  parrainageId: string
+): Promise<{ parrainId: string; parrainEmail: string | null; filleulEmail: string | null } | null> {
+  const { data: parrainage } = await supabase
+    .from("parrainages")
+    .select("parrain_id, parrain_email, filleul_email")
+    .eq("id", parrainageId)
+    .maybeSingle();
+
+  if (!parrainage) return null;
+
+  await supabase
+    .from("parrainages")
+    .update({ statut: "converti", converti_at: new Date().toISOString() })
+    .eq("id", parrainageId);
+
+  return {
+    parrainId: parrainage.parrain_id,
+    parrainEmail: parrainage.parrain_email,
+    filleulEmail: parrainage.filleul_email,
+  };
 }
 
 export async function ensureCodeParrainage(
