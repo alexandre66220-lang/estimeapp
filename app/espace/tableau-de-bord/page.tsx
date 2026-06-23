@@ -21,6 +21,8 @@ import {
   DashboardStatsCards,
   DashboardStatsSkeleton,
 } from "@/components/espace/DashboardStats";
+import { computeReputationScore, enregistrerHistoriqueScore } from "@/lib/score/reputation";
+import { ReputationCard } from "@/components/espace/ReputationCard";
 
 export const metadata: Metadata = {
   title: "Tableau de bord - Estime",
@@ -55,6 +57,10 @@ export default function TableauDeBord() {
         </Link>
       </div>
 
+      <Suspense fallback={<ReputationCardSkeleton />}>
+        <ReputationCardSection />
+      </Suspense>
+
       <Suspense fallback={<DashboardStatsSkeleton />}>
         <DashboardStatsSection />
       </Suspense>
@@ -76,6 +82,26 @@ async function DashboardStatsSection() {
   const stats = await getDashboardStats(supabase, user!.id);
 
   return <DashboardStatsCards stats={stats} />;
+}
+
+async function ReputationCardSection() {
+  const { supabase, user } = await getCurrentUser();
+
+  const score = await computeReputationScore(supabase, user!.id);
+  await enregistrerHistoriqueScore(supabase, user!.id, score.total);
+
+  return <ReputationCard score={score} />;
+}
+
+function ReputationCardSkeleton() {
+  return (
+    <div className="bg-dusk rounded-2xl p-6 lg:p-7 mb-10 animate-pulse">
+      <div className="h-4 w-40 bg-dust/10 rounded mb-4" />
+      <div className="h-10 w-24 bg-dust/10 rounded mb-4" />
+      <div className="h-2.5 w-full bg-dust/10 rounded-full mb-4" />
+      <div className="h-4 w-3/4 bg-dust/10 rounded" />
+    </div>
+  );
 }
 
 async function ActiviteRecente() {
