@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 
 interface AnimateInProps {
@@ -26,7 +26,7 @@ export function AnimateIn({
         : { opacity: 0, y: 28 };
 
   return (
-    <motion.div
+    <m.div
       className={className}
       initial={initial}
       whileInView={{ opacity: 1, y: 0, x: 0 }}
@@ -38,6 +38,6 @@ export function AnimateIn({
       }}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }

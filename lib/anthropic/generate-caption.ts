@@ -23,14 +23,24 @@ function guessMediaType(contentType: string | null): SupportedMediaType {
   }
 }
 
+function arrayBufferToBase64(buffer: ArrayBuffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
 async function fetchImageAsBase64(url: string) {
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Impossible de récupérer la photo (${response.status}).`);
   }
   const mediaType = guessMediaType(response.headers.get("content-type"));
-  const buffer = Buffer.from(await response.arrayBuffer());
-  return { mediaType, data: buffer.toString("base64") };
+  const data = arrayBufferToBase64(await response.arrayBuffer());
+  return { mediaType, data };
 }
 
 export async function generateInstagramCaption(params: {

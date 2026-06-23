@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import { ArrowRight, CheckCircle } from "@phosphor-icons/react";
 
@@ -22,31 +22,31 @@ export default function Hero() {
 
           {/* Texte */}
           <div>
-            <motion.p
+            <m.p
               {...fadeUp(0)}
               className="text-xs font-semibold tracking-[0.18em] uppercase text-ambre mb-6"
             >
               Pour peintres, plombiers, maçons et électriciens
-            </motion.p>
+            </m.p>
 
-            <motion.h1
+            <m.h1
               {...fadeUp(0.1)}
               className="font-display text-5xl lg:text-[3.75rem] font-bold text-dusk leading-[1.1] mb-6"
             >
               Finissez le chantier.
               <br />
               <em className="not-italic text-ambre">L'IA fait le reste.</em>
-            </motion.h1>
+            </m.h1>
 
-            <motion.p
+            <m.p
               {...fadeUp(0.2)}
               className="text-lg text-dusk/65 leading-relaxed mb-10 max-w-[48ch]"
             >
               Photo avant/après + IA = post réseaux prêt en 30 secondes.
               Relance automatique pour vos avis Google et recommandations.
-            </motion.p>
+            </m.p>
 
-            <motion.div
+            <m.div
               {...fadeUp(0.3)}
               className="flex flex-col sm:flex-row gap-4 items-start"
             >
@@ -63,9 +63,9 @@ export default function Hero() {
               >
                 Comment ça marche
               </a>
-            </motion.div>
+            </m.div>
 
-            <motion.div
+            <m.div
               {...fadeUp(0.4)}
               className="flex items-center gap-6 mt-10"
             >
@@ -75,11 +75,11 @@ export default function Hero() {
                   <span>{item}</span>
                 </div>
               ))}
-            </motion.div>
+            </m.div>
           </div>
 
           {/* Visuel */}
-          <motion.div
+          <m.div
             initial={shouldReduce ? { opacity: 0 } : { opacity: 0, x: 32 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.9, delay: 0.15, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
@@ -93,7 +93,7 @@ export default function Hero() {
 
             {/* Photo principale, étalonnée dans la lumière ambre/crépuscule */}
             <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-dusk/20 aspect-[4/3]">
-              <motion.div
+              <m.div
                 className="absolute inset-0"
                 initial={shouldReduce ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1.05 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -108,7 +108,7 @@ export default function Hero() {
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   priority
                 />
-              </motion.div>
+              </m.div>
               {/* Voile lumière ambre vers crépuscule, en mode incrustation */}
               <div
                 className="lumiere-fin-chantier absolute inset-0 opacity-35 mix-blend-overlay pointer-events-none"
@@ -129,7 +129,7 @@ export default function Hero() {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </m.div>
         </div>
       </div>
     </section>

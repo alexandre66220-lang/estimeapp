@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 import { ArrowRight, CheckCircle } from "@phosphor-icons/react";
 
 export default function FinalCTA() {
@@ -30,7 +30,7 @@ export default function FinalCTA() {
       <div className="relative max-w-6xl mx-auto px-6">
         <div className="max-w-2xl">
 
-          <motion.h2
+          <m.h2
             initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
@@ -38,9 +38,9 @@ export default function FinalCTA() {
             className="font-display text-4xl lg:text-5xl font-bold text-dust leading-tight mb-5"
           >
             Rejoignez les premiers artisans à communiquer sans effort.
-          </motion.h2>
+          </m.h2>
 
-          <motion.p
+          <m.p
             initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
@@ -49,10 +49,10 @@ export default function FinalCTA() {
           >
             La liste d'attente est ouverte. On vous contacte personnellement
             dès l'ouverture, avec un tarif réservé aux premiers inscrits.
-          </motion.p>
+          </m.p>
 
           {sent ? (
-            <motion.div
+            <m.div
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
@@ -67,9 +67,9 @@ export default function FinalCTA() {
                   On vous écrira à <strong className="text-dust">{email}</strong> dès l'ouverture.
                 </p>
               </div>
-            </motion.div>
+            </m.div>
           ) : (
-            <motion.form
+            <m.form
               initial={shouldReduce ? { opacity: 0 } : { opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
@@ -119,7 +119,7 @@ export default function FinalCTA() {
               <p className="text-dust/50 text-xs mt-4 ml-1">
                 Aucune carte requise. Pas de spam. Désinscription en un clic.
               </p>
-            </motion.form>
+            </m.form>
           )}
         </div>
       </div>

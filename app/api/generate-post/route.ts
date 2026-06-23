@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateInstagramCaption } from "@/lib/anthropic/generate-caption";
 
+export const runtime = "edge";
+
 export async function POST(request: Request) {
   let chantierId: string | undefined;
   try {
