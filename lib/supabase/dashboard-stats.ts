@@ -8,6 +8,7 @@ export type DashboardStats = {
   totalEmails: number;
   chantiersCeMois: number;
   noteMoyenne: number | null;
+  tauxConversion: number | null;
 };
 
 export type ActiviteChantier = {
@@ -36,6 +37,8 @@ export function getDashboardStats(
         { count: totalEmails },
         { count: chantiersCeMois },
         { data: chantiersNotes },
+        { count: totalEmailsAvis },
+        { count: totalAvis },
       ] = await Promise.all([
         supabase
           .from("chantiers")
@@ -60,6 +63,16 @@ export function getDashboardStats(
           .select("note")
           .eq("user_id", userId)
           .not("note", "is", null),
+        supabase
+          .from("relances")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .eq("type", "avis")
+          .eq("statut", "envoyee"),
+        supabase
+          .from("avis")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId),
       ]);
 
       const notes = (chantiersNotes ?? []).map((chantier) => chantier.note as number);
@@ -68,12 +81,18 @@ export function getDashboardStats(
           ? notes.reduce((sum, note) => sum + note, 0) / notes.length
           : null;
 
+      const tauxConversion =
+        totalEmailsAvis && totalEmailsAvis > 0
+          ? Math.round(((totalAvis ?? 0) / totalEmailsAvis) * 1000) / 10
+          : null;
+
       return {
         totalChantiers: totalChantiers ?? 0,
         totalPosts: totalPosts ?? 0,
         totalEmails: totalEmails ?? 0,
         chantiersCeMois: chantiersCeMois ?? 0,
         noteMoyenne,
+        tauxConversion,
       };
     },
     ["dashboard-stats", userId],
