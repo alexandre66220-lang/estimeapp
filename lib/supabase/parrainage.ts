@@ -34,6 +34,45 @@ export async function generateUniqueCodeParrainage(
   return `ESTIME-${base}${Date.now().toString().slice(-6)}`;
 }
 
+export type ParrainageEntry = {
+  id: string;
+  filleul_email: string | null;
+  statut: "en_attente" | "converti";
+  created_at: string;
+  converti_at: string | null;
+};
+
+export type ParrainageStats = {
+  code: string | null;
+  totalFilleuls: number;
+  moisGagnes: number;
+  parrainages: ParrainageEntry[];
+};
+
+export async function getParrainageStats(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<ParrainageStats> {
+  const [{ data: profile }, { data: parrainages }] = await Promise.all([
+    supabase.from("profiles").select("code_parrainage").eq("id", userId).maybeSingle(),
+    supabase
+      .from("parrainages")
+      .select("id, filleul_email, statut, created_at, converti_at")
+      .eq("parrain_id", userId)
+      .not("filleul_id", "is", null)
+      .order("created_at", { ascending: false }),
+  ]);
+
+  const entries = parrainages ?? [];
+
+  return {
+    code: profile?.code_parrainage ?? null,
+    totalFilleuls: entries.length,
+    moisGagnes: entries.filter((entry) => entry.statut === "converti").length,
+    parrainages: entries,
+  };
+}
+
 export async function ensureCodeParrainage(
   supabase: SupabaseClient,
   userId: string,
