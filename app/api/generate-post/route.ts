@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       .maybeSingle(),
     supabase
       .from("profiles")
-      .select("prenom, nom, metier, ton_post")
+      .select("prenom, nom, metier, ville, ton_post")
       .eq("id", user.id)
       .maybeSingle(),
   ]);
@@ -66,14 +66,15 @@ export async function POST(request: Request) {
     );
   }
 
-  let contenu: string;
+  let generated: { legende: string; hashtags: string[] };
   try {
-    contenu = await generateInstagramCaption({
+    generated = await generateInstagramCaption({
       titre: chantier.titre,
       images,
       prenom: profile?.prenom,
       nom: profile?.nom,
       metier: profile?.metier,
+      ville: profile?.ville,
       tonPost: profile?.ton_post,
     });
   } catch (error) {
@@ -91,11 +92,12 @@ export async function POST(request: Request) {
     .insert({
       chantier_id: chantier.id,
       user_id: user.id,
-      contenu,
+      contenu: generated.legende,
+      hashtags: generated.hashtags,
       image_url: imageUrl,
       plateforme: "instagram",
     })
-    .select("id, contenu, image_url, plateforme, created_at")
+    .select("id, contenu, hashtags, image_url, plateforme, created_at")
     .single();
 
   if (insertError || !post) {
