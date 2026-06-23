@@ -16,12 +16,13 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { ShareActions } from "@/components/espace/ShareActions";
 import { NotationChantier } from "@/components/espace/NotationChantier";
+import { HashtagsEditor } from "@/components/espace/HashtagsEditor";
 
 type Photo = { file: File; preview: string };
 
 type Status = "idle" | "uploading" | "generating" | "success" | "error";
 
-type GeneratedPost = { contenu: string; image_url: string };
+type GeneratedPost = { contenu: string; image_url: string; hashtags: string[] };
 
 function PhotoField({
   inputId,
@@ -97,6 +98,7 @@ export default function NouveauChantier() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [post, setPost] = useState<GeneratedPost | null>(null);
   const [caption, setCaption] = useState("");
+  const [hashtags, setHashtags] = useState<string[]>([]);
 
   const [chantierId, setChantierId] = useState<string | null>(null);
   const isBusy = status === "uploading" || status === "generating";
@@ -129,6 +131,7 @@ export default function NouveauChantier() {
     }
     setPost(json.post);
     setCaption(json.post.contenu);
+    setHashtags(json.post.hashtags ?? []);
     setStatus("success");
   }
 
@@ -212,6 +215,7 @@ export default function NouveauChantier() {
     setErrorMessage(null);
     setPost(null);
     setCaption("");
+    setHashtags([]);
     setChantierId(null);
   }
 
@@ -264,7 +268,11 @@ export default function NouveauChantier() {
             Ajustez le texte si besoin, puis publiez-le manuellement avec la photo sur vos réseaux.
           </p>
 
-          <div className="mb-6">
+          <div className="mb-6 pt-6 border-t border-dusk/8">
+            <HashtagsEditor hashtags={hashtags} onChange={setHashtags} />
+          </div>
+
+          <div className="mb-6 pt-6 border-t border-dusk/8">
             <ShareActions caption={caption} imageUrl={post.image_url} />
           </div>
 
