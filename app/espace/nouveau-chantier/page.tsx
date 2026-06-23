@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   ImageSquare,
   X,
-  ClipboardText,
   Check,
   CircleNotch,
   WarningCircle,
@@ -15,6 +14,7 @@ import {
   Plus,
 } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
+import { ShareActions } from "@/components/espace/ShareActions";
 
 type Photo = { file: File; preview: string };
 
@@ -96,7 +96,6 @@ export default function NouveauChantier() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [post, setPost] = useState<GeneratedPost | null>(null);
   const [caption, setCaption] = useState("");
-  const [copied, setCopied] = useState(false);
 
   const [chantierId, setChantierId] = useState<string | null>(null);
   const isBusy = status === "uploading" || status === "generating";
@@ -202,12 +201,6 @@ export default function NouveauChantier() {
     }
   }
 
-  async function handleCopy() {
-    await navigator.clipboard.writeText(caption);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
   function handleReset() {
     if (avant) URL.revokeObjectURL(avant.preview);
     if (apres) URL.revokeObjectURL(apres.preview);
@@ -269,19 +262,11 @@ export default function NouveauChantier() {
             Ajustez le texte si besoin, puis publiez-le manuellement avec la photo sur vos réseaux.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="inline-flex items-center justify-center gap-2 bg-braise text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-ambre active:scale-[0.97] transition-all duration-200"
-            >
-              {copied ? (
-                <Check size={18} weight="bold" aria-hidden="true" />
-              ) : (
-                <ClipboardText size={18} weight="bold" aria-hidden="true" />
-              )}
-              {copied ? "Copié" : "Copier le texte"}
-            </button>
+          <div className="mb-6">
+            <ShareActions caption={caption} imageUrl={post.image_url} />
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-dusk/8">
             {chantierId && (
               <Link
                 href={`/espace/chantiers/${chantierId}`}
