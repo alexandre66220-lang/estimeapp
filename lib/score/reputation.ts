@@ -54,6 +54,11 @@ export function niveauPourScore(score: number): NiveauScore {
   return "expert";
 }
 
+/**
+ * La fonction Postgres `public.get_reputation_badge` (utilisée par le badge
+ * public) reproduit cette même formule de score. Toute modification des
+ * pondérations ci-dessous doit être répercutée dans cette fonction SQL.
+ */
 export async function computeReputationScore(
   supabase: SupabaseClient,
   userId: string
