@@ -9,11 +9,12 @@ const STAT_CARDS: {
   { key: "totalPosts", emoji: "📸", label: "Posts générés" },
   { key: "totalEmails", emoji: "📧", label: "Emails envoyés" },
   { key: "chantiersCeMois", emoji: "📅", label: "Chantiers ce mois" },
+  { key: "noteMoyenne", emoji: "⭐", label: "Note moyenne" },
 ];
 
 export function DashboardStatsCards({ stats }: { stats: DashboardStats }) {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+    <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
       {STAT_CARDS.map(({ key, emoji, label }) => (
         <div
           key={key}
@@ -23,7 +24,11 @@ export function DashboardStatsCards({ stats }: { stats: DashboardStats }) {
             {emoji}
           </span>
           <p className="font-display text-3xl font-bold text-dusk leading-none mt-3">
-            {stats[key]}
+            {key === "noteMoyenne"
+              ? stats.noteMoyenne !== null
+                ? stats.noteMoyenne.toFixed(1)
+                : "—"
+              : stats[key]}
           </p>
           <p className="text-dusk/45 text-xs mt-1.5">{label}</p>
         </div>
@@ -34,8 +39,8 @@ export function DashboardStatsCards({ stats }: { stats: DashboardStats }) {
 
 export function DashboardStatsSkeleton() {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10 animate-pulse">
-      {Array.from({ length: 4 }).map((_, i) => (
+    <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-10 animate-pulse">
+      {Array.from({ length: 5 }).map((_, i) => (
         <div
           key={i}
           className="bg-white rounded-2xl border border-dusk/8 p-5 lg:p-6"

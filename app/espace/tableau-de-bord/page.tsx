@@ -12,6 +12,7 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { getCurrentUser } from "@/lib/supabase/server";
 import ChantierCard from "@/components/espace/ChantierCard";
+import { EtoilesNote } from "@/components/espace/EtoilesNote";
 import {
   getDashboardStats,
   getActiviteRecente,
@@ -116,6 +117,7 @@ async function ActiviteRecente() {
                 </p>
               </div>
               <div className="flex items-center gap-3 shrink-0">
+                {Boolean(chantier.note) && <EtoilesNote note={chantier.note!} />}
                 {(chantier.aPost || chantier.aEmail) && (
                   <span className="flex items-center gap-1.5 text-xs font-medium text-dusk/55">
                     {chantier.aPost && (
@@ -154,7 +156,7 @@ async function ChantiersRecents() {
 
   const { data: chantiers, count } = await supabase
     .from("chantiers")
-    .select("id, titre, statut, photo_avant_url, photo_apres_url, created_at", {
+    .select("id, titre, statut, photo_avant_url, photo_apres_url, created_at, note", {
       count: "exact",
     })
     .eq("user_id", user!.id)
