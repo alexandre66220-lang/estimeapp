@@ -13,6 +13,8 @@ import { getCurrentUser } from "@/lib/supabase/server";
 import { updateClientInfo } from "@/app/actions/chantier";
 import { addClientFromChantier } from "@/app/actions/clients";
 import RelanceAction from "@/components/espace/RelanceAction";
+import { MarquerAvisRecu } from "@/components/espace/MarquerAvisRecu";
+import { EtoilesNote } from "@/components/espace/EtoilesNote";
 
 export const metadata: Metadata = {
   title: "Chantier - Estime",
@@ -54,7 +56,7 @@ export default async function FicheChantier({
     notFound();
   }
 
-  const [{ data: profile }, { data: posts }, { data: relances }, { data: carnetClients }] =
+  const [{ data: profile }, { data: posts }, { data: relances }, { data: carnetClients }, { data: avis }] =
     await Promise.all([
       supabase
         .from("profiles")
@@ -75,6 +77,11 @@ export default async function FicheChantier({
         .from("clients")
         .select("prenom, nom, email")
         .eq("user_id", user!.id),
+      supabase
+        .from("avis")
+        .select("id, note_google, date_avis")
+        .eq("chantier_id", id)
+        .maybeSingle(),
     ]);
 
   const isTermine = chantier.statut === "termine";
@@ -286,6 +293,33 @@ export default async function FicheChantier({
             chantierId={chantier.id}
             isTermine={isTermine}
             termineAt={chantier.termine_at}
+          />
+        )}
+      </div>
+
+      <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 mb-6">
+        <h2 className="font-display text-lg font-bold text-dusk mb-1">Avis Google</h2>
+        <p className="text-dusk/50 text-sm mb-5">
+          Renseignez manuellement l&apos;avis Google laissé par ce client.
+        </p>
+
+        {avis ? (
+          <div className="flex items-center gap-3">
+            <EtoilesNote note={avis.note_google} />
+            <p className="text-dusk/50 text-sm">
+              Reçu le{" "}
+              {new Date(avis.date_avis).toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+          </div>
+        ) : (
+          <MarquerAvisRecu
+            chantierId={chantier.id}
+            clientPrenom={chantier.client_nom}
+            clientEmail={chantier.client_email}
           />
         )}
       </div>
