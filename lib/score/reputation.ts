@@ -86,10 +86,9 @@ export async function computeReputationScore(
       .eq("type", "avis")
       .eq("statut", "envoyee"),
     supabase
-      .from("chantiers")
+      .from("avis")
       .select("id", { count: "exact", head: true })
-      .eq("user_id", userId)
-      .not("note", "is", null),
+      .eq("user_id", userId),
     supabase
       .from("chantiers")
       .select("id")
@@ -145,7 +144,7 @@ export async function computeReputationScore(
       label: "Avis reçus confirmés",
       points: pointsAvis,
       pointsMax: 40,
-      conseil: "Faites noter un chantier pour gagner jusqu'à 8 points.",
+      conseil: "Marquez un avis Google reçu pour gagner jusqu'à 8 points.",
     },
     {
       cle: "profil",
