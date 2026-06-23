@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -99,9 +99,41 @@ export default function NouveauChantier() {
   const [post, setPost] = useState<GeneratedPost | null>(null);
   const [caption, setCaption] = useState("");
   const [hashtags, setHashtags] = useState<string[]>([]);
+  const [favoris, setFavoris] = useState<string[]>([]);
 
   const [chantierId, setChantierId] = useState<string | null>(null);
   const isBusy = status === "uploading" || status === "generating";
+
+  useEffect(() => {
+    async function loadFavoris() {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("hashtags_favoris")
+        .eq("id", user.id)
+        .maybeSingle();
+      setFavoris(data?.hashtags_favoris ?? []);
+    }
+    loadFavoris();
+  }, []);
+
+  async function handleToggleFavori(tag: string) {
+    const next = favoris.includes(tag)
+      ? favoris.filter((t) => t !== tag)
+      : [...favoris, tag];
+    setFavoris(next);
+
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("profiles").update({ hashtags_favoris: next }).eq("id", user.id);
+  }
 
   function setPhoto(slot: "avant" | "apres", file: File) {
     const preview = URL.createObjectURL(file);
@@ -269,7 +301,12 @@ export default function NouveauChantier() {
           </p>
 
           <div className="mb-6 pt-6 border-t border-dusk/8">
-            <HashtagsEditor hashtags={hashtags} onChange={setHashtags} />
+            <HashtagsEditor
+              hashtags={hashtags}
+              onChange={setHashtags}
+              favoris={favoris}
+              onToggleFavori={handleToggleFavori}
+            />
           </div>
 
           <div className="mb-6 pt-6 border-t border-dusk/8">

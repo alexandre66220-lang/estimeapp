@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Plus, ClipboardText, Check } from "@phosphor-icons/react";
+import { X, Plus, ClipboardText, Check, PushPin } from "@phosphor-icons/react";
 
 function normalizeHashtag(value: string) {
   const trimmed = value.trim().replace(/^#/, "");
@@ -12,9 +12,13 @@ function normalizeHashtag(value: string) {
 export function HashtagsEditor({
   hashtags,
   onChange,
+  favoris = [],
+  onToggleFavori,
 }: {
   hashtags: string[];
   onChange: (hashtags: string[]) => void;
+  favoris?: string[];
+  onToggleFavori?: (tag: string) => void;
 }) {
   const [nouveauTag, setNouveauTag] = useState("");
   const [copied, setCopied] = useState(false);
@@ -47,22 +51,46 @@ export function HashtagsEditor({
         {hashtags.length === 0 && (
           <p className="text-dusk/45 text-sm">Aucun hashtag pour l&apos;instant.</p>
         )}
-        {hashtags.map((tag) => (
-          <button
-            key={tag}
-            type="button"
-            onClick={() => handleRemove(tag)}
-            className="group inline-flex items-center gap-1.5 bg-braise/10 text-dusk text-sm font-medium px-3 py-1.5 rounded-full hover:bg-braise/20 transition-colors duration-200"
-          >
-            {tag}
-            <X
-              size={13}
-              weight="bold"
-              className="text-dusk/50 group-hover:text-dusk transition-colors duration-200"
-              aria-hidden="true"
-            />
-          </button>
-        ))}
+        {hashtags.map((tag) => {
+          const isFavori = favoris.includes(tag);
+          return (
+            <span
+              key={tag}
+              className="group inline-flex items-center gap-1.5 bg-braise/10 text-dusk text-sm font-medium pl-3 pr-1.5 py-1.5 rounded-full"
+            >
+              {tag}
+              {onToggleFavori && (
+                <button
+                  type="button"
+                  onClick={() => onToggleFavori(tag)}
+                  aria-label={isFavori ? "Retirer des favoris" : "Épingler en favori"}
+                  aria-pressed={isFavori}
+                  className="p-0.5"
+                >
+                  <PushPin
+                    size={13}
+                    weight={isFavori ? "fill" : "regular"}
+                    className={isFavori ? "text-braise" : "text-dusk/40 hover:text-dusk/70"}
+                    aria-hidden="true"
+                  />
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => handleRemove(tag)}
+                aria-label={`Supprimer ${tag}`}
+                className="p-0.5"
+              >
+                <X
+                  size={13}
+                  weight="bold"
+                  className="text-dusk/50 group-hover:text-dusk transition-colors duration-200"
+                  aria-hidden="true"
+                />
+              </button>
+            </span>
+          );
+        })}
       </div>
 
       <div className="flex flex-wrap items-center gap-2 mb-4">

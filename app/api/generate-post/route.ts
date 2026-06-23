@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       .maybeSingle(),
     supabase
       .from("profiles")
-      .select("prenom, nom, metier, ville, ton_post")
+      .select("prenom, nom, metier, ville, ton_post, hashtags_favoris")
       .eq("id", user.id)
       .maybeSingle(),
   ]);
@@ -76,6 +76,7 @@ export async function POST(request: Request) {
       metier: profile?.metier,
       ville: profile?.ville,
       tonPost: profile?.ton_post,
+      hashtagsFavoris: profile?.hashtags_favoris,
     });
   } catch (error) {
     console.error("generate-post: échec de l'appel à Claude", error);
@@ -85,6 +86,11 @@ export async function POST(request: Request) {
     );
   }
 
+  const favoris = (profile?.hashtags_favoris ?? []).filter(
+    (tag: string) => typeof tag === "string" && tag.trim().length > 0
+  );
+  const hashtags = Array.from(new Set([...favoris, ...generated.hashtags]));
+
   const imageUrl = chantier.photo_apres_url ?? chantier.photo_avant_url;
 
   const { data: post, error: insertError } = await supabase
@@ -93,7 +99,7 @@ export async function POST(request: Request) {
       chantier_id: chantier.id,
       user_id: user.id,
       contenu: generated.legende,
-      hashtags: generated.hashtags,
+      hashtags,
       image_url: imageUrl,
       plateforme: "instagram",
     })
