@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/server";
 import { ClientsManager } from "@/components/espace/ClientsManager";
 
 export const metadata: Metadata = {
@@ -37,10 +37,7 @@ async function ClientsSection({
   message?: string;
   error?: string;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getCurrentUser();
 
   const { data: clients } = await supabase
     .from("clients")

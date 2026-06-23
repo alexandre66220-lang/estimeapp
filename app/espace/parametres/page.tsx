@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { GearSix, Star, Check, WarningCircle } from "@phosphor-icons/react/dist/ssr";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/server";
 import { getCachedProfile } from "@/lib/supabase/profile";
 import { updateLienAvisGoogle } from "@/app/actions/profile";
 
@@ -49,10 +49,7 @@ async function FicheGoogle({
   message?: string;
   error?: string;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getCurrentUser();
 
   const profile = await getCachedProfile<{ lien_avis_google: string | null }>(
     supabase,

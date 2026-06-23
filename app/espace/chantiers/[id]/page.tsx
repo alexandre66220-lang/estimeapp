@@ -9,7 +9,7 @@ import {
   ClipboardText,
   ClockCounterClockwise,
 } from "@phosphor-icons/react/dist/ssr";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/server";
 import { updateClientInfo } from "@/app/actions/chantier";
 import { addClientFromChantier } from "@/app/actions/clients";
 import RelanceAction from "@/components/espace/RelanceAction";
@@ -39,10 +39,7 @@ export default async function FicheChantier({
   const { id } = await params;
   const { message, error } = await searchParams;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getCurrentUser();
 
   const { data: chantier } = await supabase
     .from("chantiers")

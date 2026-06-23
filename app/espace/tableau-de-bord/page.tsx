@@ -10,7 +10,7 @@ import {
   PaperPlaneTilt,
   Megaphone,
 } from "@phosphor-icons/react/dist/ssr";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/server";
 import ChantierCard from "@/components/espace/ChantierCard";
 import {
   getDashboardStats,
@@ -70,10 +70,7 @@ export default function TableauDeBord() {
 }
 
 async function DashboardStatsSection() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getCurrentUser();
 
   const stats = await getDashboardStats(supabase, user!.id);
 
@@ -81,10 +78,7 @@ async function DashboardStatsSection() {
 }
 
 async function ActiviteRecente() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getCurrentUser();
 
   const activite = await getActiviteRecente(supabase, user!.id, 5);
 
@@ -156,10 +150,7 @@ function ActiviteRecenteSkeleton() {
 }
 
 async function ChantiersRecents() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getCurrentUser();
 
   const { data: chantiers, count } = await supabase
     .from("chantiers")

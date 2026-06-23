@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
@@ -26,3 +27,16 @@ export async function createClient() {
     }
   );
 }
+
+/**
+ * Dédoublonne createClient() + auth.getUser() au sein d'une même requête :
+ * plusieurs Suspense boundaries qui l'appellent ne déclenchent qu'un seul
+ * aller-retour réseau vers Supabase.
+ */
+export const getCurrentUser = cache(async () => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return { supabase, user };
+});

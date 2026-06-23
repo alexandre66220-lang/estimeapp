@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
 import { HardHat, Plus } from "@phosphor-icons/react/dist/ssr";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/server";
 import ChantierCard from "@/components/espace/ChantierCard";
 
 export const metadata: Metadata = {
@@ -36,10 +36,7 @@ export default function MesChantiers() {
 }
 
 async function ChantiersList() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getCurrentUser();
 
   const { data: chantiers } = await supabase
     .from("chantiers")

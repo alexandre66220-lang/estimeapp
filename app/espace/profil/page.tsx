@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/server";
 import { getCachedProfile } from "@/lib/supabase/profile";
 import { ProfilForm, type ProfilData } from "@/components/espace/ProfilForm";
 
@@ -38,10 +38,7 @@ async function ProfilFormSection({
   message?: string;
   error?: string;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getCurrentUser();
 
   const profile = await getCachedProfile<ProfilData>(
     supabase,
