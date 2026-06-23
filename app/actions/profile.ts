@@ -118,3 +118,65 @@ export async function updateProfil(formData: FormData) {
     `/espace/profil?message=${encodeURIComponent("Profil enregistré.")}`
   );
 }
+
+export async function updateTemplateEmail(formData: FormData) {
+  const templateEmail = (formData.get("templateEmail") as string)?.trim() || null;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/connexion");
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ template_email: templateEmail })
+    .eq("id", user.id);
+
+  if (error) {
+    redirect(
+      `/espace/parametres?error=${encodeURIComponent(
+        "Impossible d'enregistrer le template d'email. Réessayez."
+      )}`
+    );
+  }
+
+  updateTag(profileCacheTag(user.id));
+
+  redirect(
+    `/espace/parametres?message=${encodeURIComponent("Template d'email enregistré.")}`
+  );
+}
+
+export async function reinitialiserTemplateEmail() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/connexion");
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ template_email: null })
+    .eq("id", user.id);
+
+  if (error) {
+    redirect(
+      `/espace/parametres?error=${encodeURIComponent(
+        "Impossible de réinitialiser le template d'email. Réessayez."
+      )}`
+    );
+  }
+
+  updateTag(profileCacheTag(user.id));
+
+  redirect(
+    `/espace/parametres?message=${encodeURIComponent("Template d'email réinitialisé.")}`
+  );
+}

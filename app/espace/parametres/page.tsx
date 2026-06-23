@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { GearSix, Star, Check, WarningCircle } from "@phosphor-icons/react/dist/ssr";
+import { GearSix, Star, Envelope, Check, WarningCircle } from "@phosphor-icons/react/dist/ssr";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getCachedProfile } from "@/lib/supabase/profile";
 import { updateLienAvisGoogle } from "@/app/actions/profile";
+import { TemplateEmailForm } from "@/components/espace/TemplateEmailForm";
 
 export const metadata: Metadata = {
   title: "Paramètres - Estime",
@@ -28,6 +29,12 @@ export default async function Parametres({
       <Suspense fallback={<FicheGoogleSkeleton />}>
         <FicheGoogle message={message} error={error} />
       </Suspense>
+
+      <div className="mt-6">
+        <Suspense fallback={<TemplateEmailSkeleton />}>
+          <TemplateEmailSection message={message} error={error} />
+        </Suspense>
+      </div>
 
       <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 max-w-2xl mt-6 flex items-center gap-4 text-dusk/40">
         <div className="w-11 h-11 bg-dusk/5 rounded-xl flex items-center justify-center shrink-0">
@@ -122,6 +129,63 @@ async function FicheGoogle({
           Enregistrer
         </button>
       </form>
+    </div>
+  );
+}
+
+async function TemplateEmailSection({
+  message,
+  error,
+}: {
+  message?: string;
+  error?: string;
+}) {
+  const { supabase, user } = await getCurrentUser();
+
+  const profile = await getCachedProfile<{ template_email: string | null }>(
+    supabase,
+    user!.id,
+    "template_email"
+  );
+
+  return (
+    <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 max-w-2xl">
+      <div className="w-11 h-11 bg-ambre/10 rounded-xl flex items-center justify-center mb-5">
+        <Envelope size={22} className="text-ambre" aria-hidden="true" />
+      </div>
+      <h2 className="font-display text-xl font-bold text-dusk mb-2">
+        Personnaliser mon email
+      </h2>
+      <p className="text-dusk/50 text-sm mb-6 max-w-[60ch]">
+        Modifiez le modèle d&apos;email envoyé à vos clients pour leur
+        demander un avis Google.
+      </p>
+
+      {message && (
+        <p className="mb-5 flex items-center gap-2 rounded-xl bg-ambre/10 text-braise text-sm px-4 py-3">
+          <Check size={16} weight="bold" className="shrink-0" aria-hidden="true" />
+          {message}
+        </p>
+      )}
+      {error && (
+        <p className="mb-5 flex items-center gap-2 rounded-xl bg-red-50 text-red-700 text-sm px-4 py-3">
+          <WarningCircle size={16} weight="bold" className="shrink-0" aria-hidden="true" />
+          {error}
+        </p>
+      )}
+
+      <TemplateEmailForm templateInitial={profile?.template_email ?? null} />
+    </div>
+  );
+}
+
+function TemplateEmailSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 max-w-2xl animate-pulse">
+      <div className="w-11 h-11 bg-ambre/10 rounded-xl mb-5" />
+      <div className="h-6 w-56 bg-dusk/8 rounded mb-2" />
+      <div className="h-4 w-full bg-dusk/8 rounded mb-6" />
+      <div className="h-48 w-full bg-dust rounded-xl" />
     </div>
   );
 }
