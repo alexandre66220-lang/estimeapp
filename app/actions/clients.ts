@@ -48,6 +48,54 @@ export async function addClient(formData: FormData) {
   redirect(`${redirectTo}?message=${encodeURIComponent("Client ajouté au carnet.")}`);
 }
 
+export async function addClientFromChantier(formData: FormData) {
+  const chantierId = formData.get("chantierId") as string;
+  const nomComplet = ((formData.get("nomComplet") as string) ?? "").trim();
+  const email = (formData.get("email") as string)?.trim();
+
+  if (!chantierId) {
+    redirect("/espace/mes-chantiers");
+  }
+
+  if (!email) {
+    redirect(`/espace/chantiers/${chantierId}`);
+  }
+
+  const [prenom, ...rest] = nomComplet.split(/\s+/).filter(Boolean);
+  const nom = rest.join(" ");
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/connexion");
+  }
+
+  const { error } = await supabase.from("clients").insert({
+    user_id: user.id,
+    prenom: prenom || nomComplet || email,
+    nom: nom || "",
+    email,
+  });
+
+  if (error) {
+    redirect(
+      `/espace/chantiers/${chantierId}?error=${encodeURIComponent(
+        "Impossible d'ajouter ce client au carnet."
+      )}`
+    );
+  }
+
+  revalidatePath("/espace/clients");
+  redirect(
+    `/espace/chantiers/${chantierId}?message=${encodeURIComponent(
+      "Client ajouté à votre carnet d'adresses."
+    )}`
+  );
+}
+
 export async function deleteClient(formData: FormData) {
   const clientId = formData.get("clientId") as string;
 
