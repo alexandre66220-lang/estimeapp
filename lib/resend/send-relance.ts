@@ -1,7 +1,7 @@
 import "server-only";
 import { Resend } from "resend";
 
-const FROM = "Estime <onboarding@resend.dev>";
+const FROM = `Estime <${process.env.RESEND_FROM_EMAIL || "noreply@estime-app.com"}>`;
 
 export async function sendRelanceAvis(params: {
   clientEmail: string;
