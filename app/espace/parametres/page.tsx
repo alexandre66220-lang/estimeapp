@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { GearSix, Star, Check, WarningCircle } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/lib/supabase/server";
+import { getCachedProfile } from "@/lib/supabase/profile";
 import { updateLienAvisGoogle } from "@/app/actions/profile";
 
 export const metadata: Metadata = {
@@ -19,11 +20,11 @@ export default async function Parametres({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("lien_avis_google")
-    .eq("id", user!.id)
-    .maybeSingle();
+  const profile = await getCachedProfile<{ lien_avis_google: string | null }>(
+    supabase,
+    user!.id,
+    "lien_avis_google"
+  );
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-12 lg:py-16">

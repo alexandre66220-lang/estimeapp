@@ -1,7 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { updateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { profileCacheTag } from "@/lib/supabase/profile";
 
 export async function updateLienAvisGoogle(formData: FormData) {
   const lienAvisGoogle = (formData.get("lienAvisGoogle") as string)?.trim();
@@ -35,6 +37,8 @@ export async function updateLienAvisGoogle(formData: FormData) {
       )}`
     );
   }
+
+  updateTag(profileCacheTag(user.id));
 
   redirect(
     `/espace/parametres?message=${encodeURIComponent("Lien Google enregistré.")}`
