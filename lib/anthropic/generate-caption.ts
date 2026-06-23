@@ -43,9 +43,19 @@ async function fetchImageAsBase64(url: string) {
   return { mediaType, data };
 }
 
+const TON_INSTRUCTIONS: Record<string, string> = {
+  professionnel: "Ton sobre et direct, orienté résultat, sans familiarité.",
+  decontracte: "Ton chaleureux et convivial, comme si tu parlais à un voisin.",
+  technique: "Ton précis qui emploie le vocabulaire métier approprié.",
+};
+
 export async function generateInstagramCaption(params: {
   titre: string;
   images: ImageInput[];
+  prenom?: string | null;
+  nom?: string | null;
+  metier?: string | null;
+  tonPost?: string | null;
 }) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
@@ -74,6 +84,11 @@ export async function generateInstagramCaption(params: {
     })
   );
 
+  const nomComplet = [params.prenom, params.nom].filter(Boolean).join(" ");
+  const tonInstruction = params.tonPost
+    ? TON_INSTRUCTIONS[params.tonPost]
+    : undefined;
+
   const message = await anthropic.messages.create({
     model: MODEL,
     max_tokens: 600,
@@ -83,14 +98,20 @@ export async function generateInstagramCaption(params: {
         content: [
           {
             type: "text",
-            text: `Tu es le community manager d'un artisan du bâtiment (peintre, plombier, maçon ou électricien) qui utilise Estime pour valoriser ses chantiers sur les réseaux sociaux.
+            text: `Tu es le community manager ${
+              nomComplet ? `de ${nomComplet}, ` : "d'"
+            }un artisan du bâtiment${
+              params.metier ? ` (${params.metier})` : " (peintre, plombier, maçon ou électricien)"
+            } qui utilise Estime pour valoriser ses chantiers sur les réseaux sociaux.
 
 Chantier : "${params.titre}".
 
 Regarde la ou les photos ci-dessous (avant/après travaux) et rédige une légende Instagram en français à partir de ce qu'elles montrent réellement.
 
 Consignes :
-- Ton engageant et professionnel, à la première personne (l'artisan qui parle de son travail), sans emphase excessive ni superlatifs creux.
+- Ton engageant et professionnel, à la première personne (l'artisan qui parle de son travail), sans emphase excessive ni superlatifs creux.${
+              tonInstruction ? `\n- ${tonInstruction}` : ""
+            }
 - 2 à 4 phrases courtes maximum, qui décrivent concrètement la transformation visible sur les photos.
 - Termine par une ligne de 5 à 8 hashtags pertinents (métier, type de travaux, région si déductible, "avantapres", "renovation", etc.), sans inventer de localisation si elle n'est pas visible.
 - N'utilise pas de tiret cadratin (—) ni d'emoji.

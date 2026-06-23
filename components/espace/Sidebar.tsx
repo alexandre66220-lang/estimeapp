@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   SquaresFour,
   HardHat,
+  User,
   GearSix,
   CreditCard,
   SignOut,
@@ -18,6 +19,7 @@ import { logout } from "@/app/actions/auth";
 const NAV_ITEMS: { href: string; label: string; icon: PhosphorIcon }[] = [
   { href: "/espace/tableau-de-bord", label: "Tableau de bord", icon: SquaresFour },
   { href: "/espace/mes-chantiers", label: "Mes chantiers", icon: HardHat },
+  { href: "/espace/profil", label: "Mon profil", icon: User },
   { href: "/espace/parametres", label: "Paramètres", icon: GearSix },
   { href: "/espace/abonnement", label: "Abonnement", icon: CreditCard },
 ];

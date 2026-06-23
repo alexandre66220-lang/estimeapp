@@ -29,12 +29,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
   }
 
-  const { data: chantier, error: chantierError } = await supabase
-    .from("chantiers")
-    .select("id, titre, photo_avant_url, photo_apres_url, user_id")
-    .eq("id", chantierId)
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const [
+    { data: chantier, error: chantierError },
+    { data: profile },
+  ] = await Promise.all([
+    supabase
+      .from("chantiers")
+      .select("id, titre, photo_avant_url, photo_apres_url, user_id")
+      .eq("id", chantierId)
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("profiles")
+      .select("prenom, nom, metier, ton_post")
+      .eq("id", user.id)
+      .maybeSingle(),
+  ]);
 
   if (chantierError || !chantier) {
     return NextResponse.json({ error: "Chantier introuvable." }, { status: 404 });
@@ -58,7 +68,14 @@ export async function POST(request: Request) {
 
   let contenu: string;
   try {
-    contenu = await generateInstagramCaption({ titre: chantier.titre, images });
+    contenu = await generateInstagramCaption({
+      titre: chantier.titre,
+      images,
+      prenom: profile?.prenom,
+      nom: profile?.nom,
+      metier: profile?.metier,
+      tonPost: profile?.ton_post,
+    });
   } catch (error) {
     console.error("generate-post: échec de l'appel à Claude", error);
     return NextResponse.json(
