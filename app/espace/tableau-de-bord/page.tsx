@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import {
   HardHat,
@@ -31,23 +32,7 @@ const ONBOARDING_STEPS = [
 
 const CHANTIERS_RECENTS_LIMIT = 5;
 
-export default async function TableauDeBord() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { data: chantiers, count } = await supabase
-    .from("chantiers")
-    .select("id, titre, statut, photo_avant_url, photo_apres_url, created_at", {
-      count: "exact",
-    })
-    .eq("user_id", user!.id)
-    .order("created_at", { ascending: false })
-    .limit(CHANTIERS_RECENTS_LIMIT);
-
-  const hasChantiers = Boolean(chantiers && chantiers.length > 0);
-
+export default function TableauDeBord() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-12 lg:py-16">
       <div className="flex items-center justify-between gap-4 mb-8">
@@ -85,6 +70,32 @@ export default async function TableauDeBord() {
         ))}
       </div>
 
+      <Suspense fallback={<ChantiersRecentsSkeleton />}>
+        <ChantiersRecents />
+      </Suspense>
+    </div>
+  );
+}
+
+async function ChantiersRecents() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: chantiers, count } = await supabase
+    .from("chantiers")
+    .select("id, titre, statut, photo_avant_url, photo_apres_url, created_at", {
+      count: "exact",
+    })
+    .eq("user_id", user!.id)
+    .order("created_at", { ascending: false })
+    .limit(CHANTIERS_RECENTS_LIMIT);
+
+  const hasChantiers = Boolean(chantiers && chantiers.length > 0);
+
+  return (
+    <>
       {!hasChantiers && (
         <div className="relative overflow-hidden bg-dusk rounded-2xl p-8 lg:p-10 mb-10">
           <div
@@ -150,6 +161,17 @@ export default async function TableauDeBord() {
           </Link>
         </div>
       )}
+    </>
+  );
+}
+
+function ChantiersRecentsSkeleton() {
+  return (
+    <div className="flex flex-col gap-3 animate-pulse">
+      <div className="h-6 w-40 bg-dusk/8 rounded mb-4" />
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="h-20 bg-white border border-dusk/8 rounded-2xl" />
+      ))}
     </div>
   );
 }
