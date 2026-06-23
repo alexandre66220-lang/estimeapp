@@ -10,7 +10,7 @@
   NEXT_TELEMETRY_DISABLED = "1"
 
 [build.processing.css]
-  minify = false
+  minify = true
 
 [build.processing.js]
-  minify = false
+  minify = true
