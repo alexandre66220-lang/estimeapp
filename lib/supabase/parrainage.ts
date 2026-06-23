@@ -73,6 +73,27 @@ export async function getParrainageStats(
   };
 }
 
+export async function registerFilleulParrainage(
+  supabase: SupabaseClient,
+  code: string,
+  filleulId: string,
+  filleulEmail: string
+): Promise<void> {
+  const { data: parrainId } = await supabase.rpc("resolve_code_parrainage", {
+    p_code: code,
+  });
+
+  if (!parrainId || parrainId === filleulId) return;
+
+  await supabase.from("parrainages").insert({
+    parrain_id: parrainId,
+    filleul_id: filleulId,
+    filleul_email: filleulEmail,
+    code_parrainage: code,
+    statut: "en_attente",
+  });
+}
+
 export async function ensureCodeParrainage(
   supabase: SupabaseClient,
   userId: string,

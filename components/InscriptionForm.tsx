@@ -6,6 +6,7 @@ import { signup } from "@/app/actions/auth";
 export function InscriptionForm() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  const ref = searchParams.get("ref");
 
   return (
     <div className="bg-white rounded-2xl p-8 border border-dusk/8">
@@ -23,6 +24,7 @@ export function InscriptionForm() {
       )}
 
       <form action={signup} className="space-y-5">
+        {ref && <input type="hidden" name="ref" value={ref} />}
         <div>
           <label
             htmlFor="companyName"
