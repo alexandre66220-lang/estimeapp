@@ -1,6 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { ensureCodeParrainage } from "@/lib/supabase/parrainage";
 
 export function profileCacheTag(userId: string) {
   return `profile-${userId}`;
@@ -26,13 +27,23 @@ export function getCachedProfile<T = { id: string }>(
 }
 
 export async function ensureProfile(supabase: SupabaseClient, user: User) {
-  const existing = await getCachedProfile(supabase, user.id, "id");
+  const existing = await getCachedProfile<{ id: string; code_parrainage: string | null }>(
+    supabase,
+    user.id,
+    "id, code_parrainage"
+  );
 
-  if (existing) return;
+  const companyName = (user.user_metadata?.company_name as string | undefined) ?? null;
 
-  await supabase.from("profiles").insert({
-    id: user.id,
-    email: user.email ?? "",
-    company_name: (user.user_metadata?.company_name as string | undefined) ?? null,
-  });
+  if (!existing) {
+    await supabase.from("profiles").insert({
+      id: user.id,
+      email: user.email ?? "",
+      company_name: companyName,
+    });
+  }
+
+  if (!existing?.code_parrainage) {
+    await ensureCodeParrainage(supabase, user.id, companyName ?? user.email ?? user.id);
+  }
 }
