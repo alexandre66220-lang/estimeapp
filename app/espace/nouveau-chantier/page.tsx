@@ -15,6 +15,7 @@ import {
 } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
 import { ShareActions } from "@/components/espace/ShareActions";
+import { NotationChantier } from "@/components/espace/NotationChantier";
 
 type Photo = { file: File; preview: string };
 
@@ -232,6 +233,7 @@ export default function NouveauChantier() {
       </div>
 
       {status === "success" && post ? (
+        <>
         <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
           <div className="flex items-center gap-2 text-braise mb-5">
             <Check size={18} weight="bold" aria-hidden="true" />
@@ -285,6 +287,9 @@ export default function NouveauChantier() {
             </button>
           </div>
         </div>
+
+        {chantierId && <NotationChantier chantierId={chantierId} />}
+        </>
       ) : (
         <form
           onSubmit={handleSubmit}
