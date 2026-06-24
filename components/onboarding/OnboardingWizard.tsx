@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { completeOnboarding, skipOnboarding, METIERS, TONS } from "@/app/actions/onboarding";
+import { completeOnboarding, skipOnboarding } from "@/app/actions/onboarding";
+import { METIERS, TONS } from "@/lib/onboarding-constants";
 
 interface OnboardingWizardProps {
   initialError?: string;
@@ -88,7 +89,7 @@ export default function OnboardingWizard({ initialError }: OnboardingWizardProps
                   <option value="" disabled>
                     Métier
                   </option>
-                  {METIERS.map((m) => (
+                  {(METIERS ?? []).map((m) => (
                     <option key={m} value={m}>
                       {m}
                     </option>
@@ -201,7 +202,7 @@ export default function OnboardingWizard({ initialError }: OnboardingWizardProps
                 <input type="hidden" name="lienAvisGoogle" value={lienAvisGoogle} />
 
                 <div className="space-y-3">
-                  {TONS.map((ton) => (
+                  {(TONS ?? []).map((ton) => (
                     <button
                       key={ton.value}
                       type="button"

@@ -5,22 +5,6 @@ import { updateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { profileCacheTag } from "@/lib/supabase/profile";
 
-export const METIERS = [
-  "Peintre",
-  "Plombier",
-  "Électricien",
-  "Maçon",
-  "Carreleur",
-  "Menuisier",
-  "Autre",
-];
-
-export const TONS = [
-  { value: "professionnel", label: "Professionnel" },
-  { value: "decontracte", label: "Décontracté" },
-  { value: "technique", label: "Technique" },
-];
-
 export async function completeOnboarding(formData: FormData) {
   const prenom = (formData.get("prenom") as string)?.trim();
   const nom = (formData.get("nom") as string)?.trim();
