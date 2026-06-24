@@ -63,7 +63,7 @@ export default function Hero() {
 
         <m.div
           {...fadeUp(0.4)}
-          className="flex flex-col sm:flex-row gap-5 justify-center items-center sm:items-stretch mt-14"
+          className="flex flex-col sm:flex-row gap-5 justify-center items-center sm:items-stretch mt-7"
         >
           <div
             className="w-full sm:w-72 rounded-2xl border border-[rgba(199,93,59,0.18)] p-5 text-left"
@@ -88,8 +88,18 @@ export default function Hero() {
             <span className="inline-flex items-center gap-1.5 bg-green-500/15 text-green-400 text-xs font-semibold px-2.5 py-1 rounded-full mb-3">
               ✓ Email envoyé
             </span>
-            <div className="text-3xl mb-3" aria-hidden="true">
-              ⭐
+            <div className="flex gap-1 mb-3" aria-hidden="true">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <svg
+                  key={i}
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="#C75D3B"
+                >
+                  <path d="M12 2.5l2.95 6.46 7.05.78-5.27 4.78 1.5 6.98L12 17.9l-6.23 3.6 1.5-6.98-5.27-4.78 7.05-.78z" />
+                </svg>
+              ))}
             </div>
             <p className="font-landing-sans text-dust text-sm leading-relaxed mb-1">
               Demande d&apos;avis envoyée à Martin D.
