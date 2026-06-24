@@ -70,8 +70,9 @@ export default function MentionsLegales() {
           </h2>
           <div className="space-y-3 text-sm text-dusk/70 leading-relaxed">
             <p>
-              Dans le cadre de la liste d'attente Estime, nous collectons votre adresse email uniquement afin de
-              vous informer du lancement du service. Ces données ne sont pas transmises à des tiers.
+              Dans le cadre de l'utilisation d'Estime, nous collectons les données nécessaires à la création de
+              votre compte et à la fourniture du service (email, profil, contenus liés à vos chantiers). Ces
+              données ne sont pas transmises à des tiers.
             </p>
             <p>
               Conformément au Règlement Général sur la Protection des Données (RGPD) et à la loi Informatique

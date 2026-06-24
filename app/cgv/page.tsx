@@ -12,8 +12,8 @@ const ARTICLES = [
     body: `Les présentes conditions générales de vente (CGV) régissent l'accès et l'utilisation du service Estime, édité par AlcalSpark (micro-entrepreneur, SIRET : 104 516 547 00015), ci-après "l'éditeur".\n\nEstime est un outil en ligne destiné aux artisans du BTP, permettant la génération automatisée de contenus pour les réseaux sociaux et l'envoi de demandes d'avis Google.`,
   },
   {
-    title: "Article 2 - Phase de pré-lancement",
-    body: `À la date des présentes, Estime n'est pas encore commercialisé. La souscription à la liste d'attente est gratuite et sans engagement. Aucun prélèvement n'est effectué lors de l'inscription.\n\nLes personnes inscrites sur la liste d'attente seront informées par email de la date d'ouverture du service et des conditions tarifaires définitives.`,
+    title: "Article 2 - Essai gratuit",
+    body: `L'inscription à Estime ouvre droit à une période d'essai gratuite de 14 jours, sans carte bancaire requise et sans engagement. À l'issue de cette période, l'abonnement payant débute selon les conditions tarifaires décrites à l'article 3, sauf résiliation préalable.`,
   },
   {
     title: "Article 3 - Prix",

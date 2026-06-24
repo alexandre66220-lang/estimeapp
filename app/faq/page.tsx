@@ -38,9 +38,9 @@ const FAQS = [
       "Oui, sans engagement et sans justification requise. La résiliation se fait en un clic depuis votre espace client. Votre accès reste actif jusqu'à la fin de la période mensuelle en cours. Aucun frais de résiliation.",
   },
   {
-    question: "Quand le service sera-t-il disponible ?",
+    question: "Comment puis-je commencer ?",
     answer:
-      "Estime est actuellement en développement. En rejoignant la liste d'attente dès maintenant, vous serez parmi les premiers informés du lancement et bénéficierez d'un tarif préférentiel réservé aux premiers inscrits.",
+      "Estime est disponible dès maintenant. Inscrivez-vous gratuitement, sans carte bancaire, et profitez de 14 jours d'essai pour tester l'ensemble des fonctionnalités.",
   },
   {
     question: "J'ai une question qui n'est pas dans cette FAQ.",

@@ -33,13 +33,13 @@ export default function Nav() {
           </Link>
         </nav>
 
-        <a
-          href="/#liste-attente"
+        <Link
+          href="/inscription"
           className="inline-flex items-center justify-center bg-braise text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-ambre active:scale-[0.97] transition-all duration-200"
-          aria-label="Rejoindre la liste d'attente Estime"
+          aria-label="Essayer Estime gratuitement"
         >
-          Liste d'attente
-        </a>
+          Essayer gratuitement
+        </Link>
       </div>
     </header>
   );
