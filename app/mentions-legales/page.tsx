@@ -5,7 +5,7 @@ export const dynamic = "force-static";
 
 export const metadata: Metadata = {
   title: "Mentions légales - Estime",
-  description: "Mentions légales du site Estime, édité par Alexandre Lenique.",
+  description: "Mentions légales du site Estime, édité par AlcalSpark.",
 };
 
 export default function MentionsLegales() {
@@ -16,14 +16,14 @@ export default function MentionsLegales() {
           Éditeur du site
         </h2>
         <p className="font-landing-sans text-dust/70 text-base leading-relaxed">
-          Le site Estime est édité par Alexandre Lenique, micro-entrepreneur
+          Le site Estime est édité par AlcalSpark, micro-entrepreneur
           (EI), domicilié 90 avenue Georges Guynemer, 81200 Mazamet, France.
           <br />
           SIRET : 10451654700015
           <br />
           Email :{" "}
-          <a href="mailto:spark@alcalspark.com" className="text-ambre hover:underline">
-            spark@alcalspark.com
+          <a href="mailto:contact@alcalspark.com" className="text-ambre hover:underline">
+            contact@alcalspark.com
           </a>
         </p>
       </section>
@@ -43,7 +43,7 @@ export default function MentionsLegales() {
           Directeur de publication
         </h2>
         <p className="font-landing-sans text-dust/70 text-base leading-relaxed">
-          Alexandre Lenique.
+          AlcalSpark.
         </p>
       </section>
     </LegalPageShell>

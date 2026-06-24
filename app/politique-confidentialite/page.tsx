@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const SECTIONS = [
   {
     title: "Responsable du traitement",
-    body: `Le responsable du traitement des données personnelles collectées sur Estime est Alexandre Lenique, micro-entrepreneur.`,
+    body: `Le responsable du traitement des données personnelles collectées sur Estime est AlcalSpark, micro-entrepreneur.`,
   },
   {
     title: "Données collectées",
@@ -62,10 +62,10 @@ export default function PolitiqueConfidentialite() {
             ))}
             {section.title === "Contact" && (
               <a
-                href="mailto:spark@alcalspark.com"
+                href="mailto:contact@alcalspark.com"
                 className="font-landing-sans text-ambre hover:underline text-base"
               >
-                spark@alcalspark.com
+                contact@alcalspark.com
               </a>
             )}
           </div>

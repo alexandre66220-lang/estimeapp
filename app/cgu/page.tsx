@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const ARTICLES = [
   {
     title: "1. Objet du service",
-    body: `Estime est un service en ligne (SaaS) destiné aux artisans du bâtiment, édité par Alexandre Lenique, micro-entrepreneur. Il permet notamment :\n\n- la génération automatisée de posts pour les réseaux sociaux à partir de photos de chantier ;\n- l'envoi automatique d'emails de demande d'avis Google aux clients ;\n- le suivi d'un score de réputation en ligne basé sur l'activité de l'utilisateur.\n\nLes présentes conditions générales d'utilisation (CGU) régissent l'accès et l'utilisation du service par tout utilisateur inscrit, ci-après "l'utilisateur".`,
+    body: `Estime est un service en ligne (SaaS) destiné aux artisans du bâtiment, édité par AlcalSpark, micro-entrepreneur. Il permet notamment :\n\n- la génération automatisée de posts pour les réseaux sociaux à partir de photos de chantier ;\n- l'envoi automatique d'emails de demande d'avis Google aux clients ;\n- le suivi d'un score de réputation en ligne basé sur l'activité de l'utilisateur.\n\nLes présentes conditions générales d'utilisation (CGU) régissent l'accès et l'utilisation du service par tout utilisateur inscrit, ci-après "l'utilisateur".`,
   },
   {
     title: "2. Conditions d'accès et d'inscription",
@@ -27,7 +27,7 @@ const ARTICLES = [
   },
   {
     title: "5. Propriété intellectuelle",
-    body: `L'ensemble des éléments du service Estime (textes, structure, logo, code, design) est la propriété exclusive d'Alexandre Lenique, sauf mention contraire. Toute reproduction ou exploitation non autorisée est interdite.\n\nL'utilisateur conserve la propriété des photos et contenus qu'il importe. Il accorde à Estime une licence limitée à la seule fourniture du service (génération et envoi des contenus), sans cession de droits.`,
+    body: `L'ensemble des éléments du service Estime (textes, structure, logo, code, design) est la propriété exclusive d'AlcalSpark, sauf mention contraire. Toute reproduction ou exploitation non autorisée est interdite.\n\nL'utilisateur conserve la propriété des photos et contenus qu'il importe. Il accorde à Estime une licence limitée à la seule fourniture du service (génération et envoi des contenus), sans cession de droits.`,
   },
   {
     title: "6. Limitation de responsabilité",
