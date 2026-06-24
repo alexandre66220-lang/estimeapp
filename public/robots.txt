@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /espace/
+Disallow: /api/
+
+Sitemap: https://estime-app.com/sitemap.xml
