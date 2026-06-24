@@ -47,5 +47,31 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  const isOnboardingRoute = path === "/espace/onboarding";
+
+  if (isProtectedRoute && user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("onboarding_complete")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const onboardingComplete = profile?.onboarding_complete ?? false;
+
+    if (!onboardingComplete && !isOnboardingRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/espace/onboarding";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+
+    if (onboardingComplete && isOnboardingRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/espace/tableau-de-bord";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+  }
+
   return supabaseResponse;
 }
