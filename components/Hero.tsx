@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { m, useReducedMotion } from "motion/react";
 
 export default function Hero() {
@@ -15,6 +16,23 @@ export default function Hero() {
 
   return (
     <section className="bg-noir min-h-[100dvh] flex items-center pt-28 pb-20 relative overflow-hidden">
+      <header className="absolute top-0 left-0 right-0 z-20">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link
+            href="/"
+            className="font-landing-display text-xl font-semibold text-dust tracking-tight hover:text-dust/80 transition-colors duration-200"
+            aria-label="Estime - Retour à l'accueil"
+          >
+            Estime
+          </Link>
+          <Link
+            href="/connexion"
+            className="font-landing-sans text-sm text-[#F8F5F2] hover:text-dust/70 transition-colors duration-200"
+          >
+            Se connecter
+          </Link>
+        </div>
+      </header>
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -59,6 +77,13 @@ export default function Hero() {
 
         <m.p {...fadeUp(0.3)} className="text-sm text-dust/45 mt-6">
           Sans carte bancaire. Sans engagement.
+        </m.p>
+
+        <m.p {...fadeUp(0.35)} className="font-landing-sans text-sm text-dust/40 mt-3">
+          Déjà un compte ?{" "}
+          <Link href="/connexion" className="text-[#C75D3B] hover:underline">
+            Se connecter →
+          </Link>
         </m.p>
 
         <m.div
