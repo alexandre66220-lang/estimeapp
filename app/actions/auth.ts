@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ensureProfile } from "@/lib/supabase/profile";
 import { translateAuthError } from "@/lib/supabase/auth-errors";
 import { registerFilleulParrainage } from "@/lib/supabase/parrainage";
+import { sendWelcomeEmail } from "@/lib/resend/send-welcome";
 
 export async function login(formData: FormData) {
   const email = (formData.get("email") as string)?.trim();
@@ -62,6 +63,11 @@ export async function signup(formData: FormData) {
     await ensureProfile(supabase, data.user);
     if (ref) {
       await registerFilleulParrainage(supabase, ref, data.user.id, data.user.email ?? "");
+    }
+    if (data.user.email) {
+      sendWelcomeEmail({ email: data.user.email, prenom: null }).catch((err) =>
+        console.error("Échec de l'envoi de l'email de bienvenue :", err)
+      );
     }
     redirect("/espace/tableau-de-bord");
   }
