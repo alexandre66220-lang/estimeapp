@@ -4,6 +4,9 @@ import PageShell from "@/components/PageShell";
 export const metadata: Metadata = {
   title: "Conditions générales de vente - Estime",
   description: "Conditions générales de vente de l'abonnement Estime à 24,99€/mois.",
+  alternates: {
+    canonical: "/cgv",
+  },
 };
 
 const ARTICLES = [

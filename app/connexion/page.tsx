@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: "Connexion — Estime",
   description:
     "Connectez-vous à votre espace artisan Estime pour gérer vos chantiers et votre réputation en ligne.",
+  alternates: {
+    canonical: "/connexion",
+  },
 };
 
 export default function Connexion() {

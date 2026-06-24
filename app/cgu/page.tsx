@@ -6,6 +6,9 @@ export const dynamic = "force-static";
 export const metadata: Metadata = {
   title: "CGU — Estime",
   description: "Conditions générales d'utilisation du service Estime.",
+  alternates: {
+    canonical: "/cgu",
+  },
 };
 
 const ARTICLES = [

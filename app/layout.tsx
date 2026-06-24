@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/og-image.svg",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "Estime — Posts Instagram et avis Google pour artisans",
@@ -61,7 +61,10 @@ export const metadata: Metadata = {
     title: "Estime — Posts Instagram et avis Google pour artisans",
     description:
       "Estime génère vos posts Instagram et vos demandes d'avis Google en 30 secondes depuis vos photos de chantier. Essai gratuit 14 jours.",
-    images: ["/og-image.svg"],
+    images: ["/og-image.png"],
+  },
+  alternates: {
+    canonical: "/",
   },
 };
 

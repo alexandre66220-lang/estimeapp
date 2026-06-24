@@ -5,6 +5,9 @@ import PageShell from "@/components/PageShell";
 export const metadata: Metadata = {
   title: "Contact - Estime",
   description: "Contactez l'équipe Estime pour toute question sur le service.",
+  alternates: {
+    canonical: "/contact",
+  },
 };
 
 export default function Contact() {

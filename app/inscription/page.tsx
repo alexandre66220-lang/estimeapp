@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: "Inscription gratuite — Estime",
   description:
     "Créez votre compte Estime gratuitement. 14 jours d'essai sans carte bancaire.",
+  alternates: {
+    canonical: "/inscription",
+  },
 };
 
 export default function Inscription() {
