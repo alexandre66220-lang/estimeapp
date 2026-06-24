@@ -61,11 +61,12 @@ export async function updateSession(request: NextRequest) {
   }
 
   const isOnboardingRoute = path === "/espace/onboarding";
+  const isAbonnementRoute = path === "/espace/abonnement";
 
   if (isProtectedRoute && user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("onboarding_complete")
+      .select("onboarding_complete, is_subscribed, trial_end")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -82,6 +83,18 @@ export async function updateSession(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = "/espace/tableau-de-bord";
       url.search = "";
+      return NextResponse.redirect(url);
+    }
+
+    const isSubscribed = profile?.is_subscribed ?? false;
+    const trialEnd = profile?.trial_end ? new Date(profile.trial_end) : null;
+    const trialExpired = !isSubscribed && (!trialEnd || trialEnd.getTime() < Date.now());
+
+    if (trialExpired && !isAbonnementRoute && !isOnboardingRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/espace/abonnement";
+      url.search = "";
+      url.searchParams.set("error", "Votre essai gratuit est terminé");
       return NextResponse.redirect(url);
     }
   }
