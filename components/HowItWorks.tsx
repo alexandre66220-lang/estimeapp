@@ -1,44 +1,33 @@
-import { Camera, Sparkle, Star } from "@phosphor-icons/react/dist/ssr";
 import { AnimateIn } from "./AnimateIn";
 
 const STEPS = [
   {
     number: "01",
-    icon: Camera,
-    title: "Photo du chantier",
-    body: "Avant, après, ou les deux. Prenez la photo directement depuis votre téléphone. Trente secondes grand maximum.",
+    title: "📸 Prenez une photo",
+    body: "Avant, après, ou les deux. Depuis votre téléphone directement sur le chantier.",
   },
   {
     number: "02",
-    icon: Sparkle,
-    title: "L'IA génère votre post",
-    body: "Description du travail, hashtags, ton professionnel. Votre post Instagram ou Facebook est prêt à publier. Vous validez ou ajustez en un tap.",
+    title: "✨ Estime génère",
+    body: "Post Instagram avec légende et hashtags. Email de demande d'avis pour votre client.",
   },
   {
     number: "03",
-    icon: Star,
-    title: "Relance auto pour l'avis",
-    body: "48h après la fin du chantier, votre client reçoit un email avec un lien direct vers votre fiche Google. Simple pour lui, précieux pour vous.",
+    title: "🚀 Vous publiez",
+    body: "Copiez le post, publiez sur Instagram. L'email part automatiquement à votre client.",
   },
 ];
 
 export default function HowItWorks() {
   return (
-    <section className="bg-dust py-24 lg:py-32" id="comment-ca-marche">
+    <section className="bg-dusk py-24 lg:py-32" id="comment-ca-marche">
       <div className="max-w-6xl mx-auto px-6">
-
         <AnimateIn>
-          <div className="mb-16 lg:mb-20">
-            <h2 className="font-display text-4xl lg:text-5xl font-bold text-dusk leading-tight mb-4">
-              Trois étapes. Zéro effort.
-            </h2>
-            <p className="text-dusk/55 text-lg max-w-[44ch]">
-              De la photo au post publié et à l'avis Google, tout est automatique.
-            </p>
-          </div>
+          <h2 className="font-landing-display text-4xl lg:text-5xl font-semibold text-dust leading-tight mb-16 lg:mb-20">
+            Simple comme bonjour
+          </h2>
         </AnimateIn>
 
-        {/* Fil de lumière reliant les trois étapes, de l'ambre au crépuscule */}
         <div className="relative max-w-3xl">
           <div
             className="absolute left-7 lg:left-9 top-3 bottom-3 w-px"
@@ -47,32 +36,26 @@ export default function HowItWorks() {
           />
 
           <div className="space-y-14 lg:space-y-16">
-            {STEPS.map((step, i) => {
-              const Icon = step.icon;
-              return (
-                <AnimateIn key={step.number} delay={i * 0.12}>
-                  <div className="relative flex gap-6 lg:gap-9 items-start">
-                    <div
-                      className="relative z-10 shrink-0 w-14 lg:w-[4.5rem] h-14 lg:h-[4.5rem] rounded-full bg-white border border-dusk/12 flex items-center justify-center font-display text-lg lg:text-xl font-bold text-dusk"
-                      aria-hidden="true"
-                    >
-                      {step.number}
-                    </div>
-                    <div className="pt-1 lg:pt-2.5 max-w-[46ch]">
-                      <div className="inline-flex w-9 h-9 rounded-lg bg-ambre/10 items-center justify-center mb-3.5">
-                        <Icon size={18} weight="fill" className="text-ambre" aria-hidden="true" />
-                      </div>
-                      <h3 className="font-display text-xl lg:text-2xl font-semibold text-dusk mb-2.5 leading-snug">
-                        {step.title}
-                      </h3>
-                      <p className="text-dusk/60 text-base leading-relaxed">
-                        {step.body}
-                      </p>
-                    </div>
+            {STEPS.map((step, i) => (
+              <AnimateIn key={step.number} delay={i * 0.12}>
+                <div className="relative flex gap-6 lg:gap-9 items-start">
+                  <div
+                    className="relative z-10 shrink-0 w-14 lg:w-[4.5rem] h-14 lg:h-[4.5rem] rounded-full bg-noir border border-dust/12 flex items-center justify-center font-landing-display text-lg lg:text-xl font-semibold text-dust"
+                    aria-hidden="true"
+                  >
+                    {step.number}
                   </div>
-                </AnimateIn>
-              );
-            })}
+                  <div className="pt-1 lg:pt-2.5 max-w-[46ch]">
+                    <h3 className="font-landing-display text-xl lg:text-2xl font-semibold text-dust mb-2.5 leading-snug">
+                      {step.title}
+                    </h3>
+                    <p className="font-landing-sans text-dust/60 text-base leading-relaxed">
+                      {step.body}
+                    </p>
+                  </div>
+                </div>
+              </AnimateIn>
+            ))}
           </div>
         </div>
       </div>
