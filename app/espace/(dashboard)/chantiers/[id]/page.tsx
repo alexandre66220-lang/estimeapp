@@ -9,9 +9,12 @@ import {
   ClipboardText,
   ClockCounterClockwise,
 } from "@phosphor-icons/react/dist/ssr";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/server";
 import { updateClientInfo } from "@/app/actions/chantier";
+import { addClientFromChantier } from "@/app/actions/clients";
 import RelanceAction from "@/components/espace/RelanceAction";
+import { MarquerAvisRecu } from "@/components/espace/MarquerAvisRecu";
+import { EtoilesNote } from "@/components/espace/EtoilesNote";
 
 export const metadata: Metadata = {
   title: "Chantier - Estime",
@@ -38,10 +41,7 @@ export default async function FicheChantier({
   const { id } = await params;
   const { message, error } = await searchParams;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getCurrentUser();
 
   const { data: chantier } = await supabase
     .from("chantiers")
@@ -56,27 +56,41 @@ export default async function FicheChantier({
     notFound();
   }
 
-  const [{ data: profile }, { data: posts }, { data: relances }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("lien_avis_google")
-      .eq("id", user!.id)
-      .maybeSingle(),
-    supabase
-      .from("posts")
-      .select("id, contenu, image_url, plateforme, created_at")
-      .eq("chantier_id", id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("relances")
-      .select("id, type, statut, envoyee_at, created_at")
-      .eq("chantier_id", id)
-      .order("created_at", { ascending: false }),
-  ]);
+  const [{ data: profile }, { data: posts }, { data: relances }, { data: carnetClients }, { data: avis }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("lien_avis_google")
+        .eq("id", user!.id)
+        .maybeSingle(),
+      supabase
+        .from("posts")
+        .select("id, contenu, image_url, plateforme, created_at")
+        .eq("chantier_id", id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("relances")
+        .select("id, type, statut, envoyee_at, created_at")
+        .eq("chantier_id", id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("clients")
+        .select("prenom, nom, email")
+        .eq("user_id", user!.id),
+      supabase
+        .from("avis")
+        .select("id, note_google, date_avis")
+        .eq("chantier_id", id)
+        .maybeSingle(),
+    ]);
 
   const isTermine = chantier.statut === "termine";
   const hasLienAvisGoogle = Boolean(profile?.lien_avis_google);
   const hasClientEmail = Boolean(chantier.client_email);
+  const estDejaDansLeCarnet = (carnetClients ?? []).some(
+    (client) => client.email.toLowerCase() === chantier.client_email?.toLowerCase()
+  );
+  const proposerAjoutCarnet = hasClientEmail && !estDejaDansLeCarnet;
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-12 lg:py-16">
@@ -207,10 +221,18 @@ export default async function FicheChantier({
                 type="email"
                 id="clientEmail"
                 name="clientEmail"
+                list="carnet-clients-emails"
                 defaultValue={chantier.client_email ?? ""}
                 placeholder="jean@exemple.fr"
                 className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200"
               />
+              <datalist id="carnet-clients-emails">
+                {(carnetClients ?? []).map((client) => (
+                  <option key={client.email} value={client.email}>
+                    {client.prenom} {client.nom}
+                  </option>
+                ))}
+              </datalist>
             </div>
           </div>
           <button
@@ -220,6 +242,26 @@ export default async function FicheChantier({
             Enregistrer
           </button>
         </form>
+
+        {proposerAjoutCarnet && (
+          <form
+            action={addClientFromChantier}
+            className="mt-4 flex items-center justify-between gap-4 rounded-xl bg-dust px-4 py-3.5"
+          >
+            <input type="hidden" name="chantierId" value={chantier.id} />
+            <input type="hidden" name="nomComplet" value={chantier.client_nom ?? ""} />
+            <input type="hidden" name="email" value={chantier.client_email ?? ""} />
+            <p className="text-xs text-dusk/60">
+              Ce client n&apos;est pas encore dans votre carnet d&apos;adresses.
+            </p>
+            <button
+              type="submit"
+              className="shrink-0 text-xs font-semibold text-ambre hover:underline"
+            >
+              Ajouter au carnet
+            </button>
+          </form>
+        )}
       </div>
 
       <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 mb-6">
@@ -251,6 +293,33 @@ export default async function FicheChantier({
             chantierId={chantier.id}
             isTermine={isTermine}
             termineAt={chantier.termine_at}
+          />
+        )}
+      </div>
+
+      <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 mb-6">
+        <h2 className="font-display text-lg font-bold text-dusk mb-1">Avis Google</h2>
+        <p className="text-dusk/50 text-sm mb-5">
+          Renseignez manuellement l&apos;avis Google laissé par ce client.
+        </p>
+
+        {avis ? (
+          <div className="flex items-center gap-3">
+            <EtoilesNote note={avis.note_google} />
+            <p className="text-dusk/50 text-sm">
+              Reçu le{" "}
+              {new Date(avis.date_avis).toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+          </div>
+        ) : (
+          <MarquerAvisRecu
+            chantierId={chantier.id}
+            clientPrenom={chantier.client_nom}
+            clientEmail={chantier.client_email}
           />
         )}
       </div>

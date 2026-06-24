@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowLeft,
   ImageSquare,
   X,
-  ClipboardText,
   Check,
   CircleNotch,
   WarningCircle,
@@ -15,12 +14,15 @@ import {
   Plus,
 } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
+import { ShareActions } from "@/components/espace/ShareActions";
+import { NotationChantier } from "@/components/espace/NotationChantier";
+import { HashtagsEditor } from "@/components/espace/HashtagsEditor";
 
 type Photo = { file: File; preview: string };
 
 type Status = "idle" | "uploading" | "generating" | "success" | "error";
 
-type GeneratedPost = { contenu: string; image_url: string };
+type GeneratedPost = { contenu: string; image_url: string; hashtags: string[] };
 
 function PhotoField({
   inputId,
@@ -96,10 +98,42 @@ export default function NouveauChantier() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [post, setPost] = useState<GeneratedPost | null>(null);
   const [caption, setCaption] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [hashtags, setHashtags] = useState<string[]>([]);
+  const [favoris, setFavoris] = useState<string[]>([]);
 
   const [chantierId, setChantierId] = useState<string | null>(null);
   const isBusy = status === "uploading" || status === "generating";
+
+  useEffect(() => {
+    async function loadFavoris() {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("hashtags_favoris")
+        .eq("id", user.id)
+        .maybeSingle();
+      setFavoris(data?.hashtags_favoris ?? []);
+    }
+    loadFavoris();
+  }, []);
+
+  async function handleToggleFavori(tag: string) {
+    const next = favoris.includes(tag)
+      ? favoris.filter((t) => t !== tag)
+      : [...favoris, tag];
+    setFavoris(next);
+
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("profiles").update({ hashtags_favoris: next }).eq("id", user.id);
+  }
 
   function setPhoto(slot: "avant" | "apres", file: File) {
     const preview = URL.createObjectURL(file);
@@ -129,6 +163,7 @@ export default function NouveauChantier() {
     }
     setPost(json.post);
     setCaption(json.post.contenu);
+    setHashtags(json.post.hashtags ?? []);
     setStatus("success");
   }
 
@@ -202,12 +237,6 @@ export default function NouveauChantier() {
     }
   }
 
-  async function handleCopy() {
-    await navigator.clipboard.writeText(caption);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
   function handleReset() {
     if (avant) URL.revokeObjectURL(avant.preview);
     if (apres) URL.revokeObjectURL(apres.preview);
@@ -218,6 +247,7 @@ export default function NouveauChantier() {
     setErrorMessage(null);
     setPost(null);
     setCaption("");
+    setHashtags([]);
     setChantierId(null);
   }
 
@@ -239,6 +269,7 @@ export default function NouveauChantier() {
       </div>
 
       {status === "success" && post ? (
+        <>
         <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
           <div className="flex items-center gap-2 text-braise mb-5">
             <Check size={18} weight="bold" aria-hidden="true" />
@@ -269,19 +300,20 @@ export default function NouveauChantier() {
             Ajustez le texte si besoin, puis publiez-le manuellement avec la photo sur vos réseaux.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="inline-flex items-center justify-center gap-2 bg-braise text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-ambre active:scale-[0.97] transition-all duration-200"
-            >
-              {copied ? (
-                <Check size={18} weight="bold" aria-hidden="true" />
-              ) : (
-                <ClipboardText size={18} weight="bold" aria-hidden="true" />
-              )}
-              {copied ? "Copié" : "Copier le texte"}
-            </button>
+          <div className="mb-6 pt-6 border-t border-dusk/8">
+            <HashtagsEditor
+              hashtags={hashtags}
+              onChange={setHashtags}
+              favoris={favoris}
+              onToggleFavori={handleToggleFavori}
+            />
+          </div>
+
+          <div className="mb-6 pt-6 border-t border-dusk/8">
+            <ShareActions caption={caption} imageUrl={post.image_url} />
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-dusk/8">
             {chantierId && (
               <Link
                 href={`/espace/chantiers/${chantierId}`}
@@ -300,6 +332,9 @@ export default function NouveauChantier() {
             </button>
           </div>
         </div>
+
+        {chantierId && <NotationChantier chantierId={chantierId} />}
+        </>
       ) : (
         <form
           onSubmit={handleSubmit}

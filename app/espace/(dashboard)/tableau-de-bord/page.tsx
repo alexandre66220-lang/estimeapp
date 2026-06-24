@@ -1,27 +1,32 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import {
   HardHat,
   Plus,
   Star,
-  Megaphone,
-  PaperPlaneTilt,
   Camera,
   Sparkle,
+  PaperPlaneTilt,
+  Megaphone,
 } from "@phosphor-icons/react/dist/ssr";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/server";
 import ChantierCard from "@/components/espace/ChantierCard";
+import { EtoilesNote } from "@/components/espace/EtoilesNote";
+import {
+  getDashboardStats,
+  getActiviteRecente,
+} from "@/lib/supabase/dashboard-stats";
+import {
+  DashboardStatsCards,
+  DashboardStatsSkeleton,
+} from "@/components/espace/DashboardStats";
+import { computeReputationScore, enregistrerHistoriqueScore } from "@/lib/score/reputation";
+import { ReputationCard } from "@/components/espace/ReputationCard";
 
 export const metadata: Metadata = {
   title: "Tableau de bord - Estime",
 };
-
-const STATS = [
-  { label: "Chantiers ce mois", value: 0, icon: HardHat },
-  { label: "Avis reçus", value: 0, icon: Star },
-  { label: "Posts générés", value: 0, icon: Megaphone },
-  { label: "Recommandations envoyées", value: 0, icon: PaperPlaneTilt },
-];
 
 const ONBOARDING_STEPS = [
   { icon: Camera, label: "Photo du chantier" },
@@ -31,23 +36,7 @@ const ONBOARDING_STEPS = [
 
 const CHANTIERS_RECENTS_LIMIT = 5;
 
-export default async function TableauDeBord() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { data: chantiers, count } = await supabase
-    .from("chantiers")
-    .select("id, titre, statut, photo_avant_url, photo_apres_url, created_at", {
-      count: "exact",
-    })
-    .eq("user_id", user!.id)
-    .order("created_at", { ascending: false })
-    .limit(CHANTIERS_RECENTS_LIMIT);
-
-  const hasChantiers = Boolean(chantiers && chantiers.length > 0);
-
+export default function TableauDeBord() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-12 lg:py-16">
       <div className="flex items-center justify-between gap-4 mb-8">
@@ -68,23 +57,142 @@ export default async function TableauDeBord() {
         </Link>
       </div>
 
-      <div className="flex flex-wrap items-stretch gap-x-10 gap-y-6 py-7 border-y border-dusk/10 mb-10">
-        {STATS.map(({ label, value, icon: Icon }, i) => (
-          <div
-            key={label}
-            className={`flex items-center gap-3.5 pr-10 ${
-              i < STATS.length - 1 ? "sm:border-r border-dusk/10" : ""
-            }`}
-          >
-            <Icon size={22} className="text-ambre shrink-0" aria-hidden="true" />
-            <div>
-              <p className="font-display text-2xl font-bold text-dusk leading-none">{value}</p>
-              <p className="text-dusk/45 text-xs mt-1.5">{label}</p>
-            </div>
-          </div>
+      <Suspense fallback={<ReputationCardSkeleton />}>
+        <ReputationCardSection />
+      </Suspense>
+
+      <Suspense fallback={<DashboardStatsSkeleton />}>
+        <DashboardStatsSection />
+      </Suspense>
+
+      <Suspense fallback={<ChantiersRecentsSkeleton />}>
+        <ChantiersRecents />
+      </Suspense>
+
+      <Suspense fallback={<ActiviteRecenteSkeleton />}>
+        <ActiviteRecente />
+      </Suspense>
+    </div>
+  );
+}
+
+async function DashboardStatsSection() {
+  const { supabase, user } = await getCurrentUser();
+
+  const stats = await getDashboardStats(supabase, user!.id);
+
+  return <DashboardStatsCards stats={stats} />;
+}
+
+async function ReputationCardSection() {
+  const { supabase, user } = await getCurrentUser();
+
+  const score = await computeReputationScore(supabase, user!.id);
+  await enregistrerHistoriqueScore(supabase, user!.id, score.total);
+
+  return <ReputationCard score={score} />;
+}
+
+function ReputationCardSkeleton() {
+  return (
+    <div className="bg-dusk rounded-2xl p-6 lg:p-7 mb-10 animate-pulse">
+      <div className="h-4 w-40 bg-dust/10 rounded mb-4" />
+      <div className="h-10 w-24 bg-dust/10 rounded mb-4" />
+      <div className="h-2.5 w-full bg-dust/10 rounded-full mb-4" />
+      <div className="h-4 w-3/4 bg-dust/10 rounded" />
+    </div>
+  );
+}
+
+async function ActiviteRecente() {
+  const { supabase, user } = await getCurrentUser();
+
+  const activite = await getActiviteRecente(supabase, user!.id, 5);
+
+  if (activite.length === 0) return null;
+
+  return (
+    <div className="mt-10">
+      <h2 className="font-display text-lg font-bold text-dusk mb-4">
+        Activité récente
+      </h2>
+      <div className="bg-white rounded-2xl border border-dusk/8 divide-y divide-dusk/8">
+        {activite.map((chantier) => {
+          const label = chantier.aPost && chantier.aEmail
+            ? "Post généré · Email envoyé"
+            : chantier.aPost
+              ? "Post généré"
+              : chantier.aEmail
+                ? "Email envoyé"
+                : "En attente";
+
+          return (
+            <Link
+              key={chantier.id}
+              href={`/espace/chantiers/${chantier.id}`}
+              className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-dust/40 transition-colors duration-200"
+            >
+              <div className="min-w-0">
+                <p className="font-medium text-dusk truncate">{chantier.titre}</p>
+                <p className="text-dusk/45 text-xs mt-0.5">
+                  {new Date(chantier.created_at).toLocaleDateString("fr-FR", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
+              </div>
+              <div className="flex items-center gap-3 shrink-0">
+                {Boolean(chantier.note) && <EtoilesNote note={chantier.note!} />}
+                {(chantier.aPost || chantier.aEmail) && (
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-dusk/55">
+                    {chantier.aPost && (
+                      <Megaphone size={14} className="text-ambre" aria-hidden="true" />
+                    )}
+                    {chantier.aEmail && (
+                      <PaperPlaneTilt size={14} className="text-ambre" aria-hidden="true" />
+                    )}
+                    {label}
+                  </span>
+                )}
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ActiviteRecenteSkeleton() {
+  return (
+    <div className="mt-10 animate-pulse">
+      <div className="h-6 w-40 bg-dusk/8 rounded mb-4" />
+      <div className="bg-white rounded-2xl border border-dusk/8 divide-y divide-dusk/8">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="h-16 px-5 py-4" />
         ))}
       </div>
+    </div>
+  );
+}
 
+async function ChantiersRecents() {
+  const { supabase, user } = await getCurrentUser();
+
+  const { data: chantiers, count } = await supabase
+    .from("chantiers")
+    .select("id, titre, statut, photo_avant_url, photo_apres_url, created_at, note", {
+      count: "exact",
+    })
+    .eq("user_id", user!.id)
+    .order("created_at", { ascending: false })
+    .limit(CHANTIERS_RECENTS_LIMIT);
+
+  const hasChantiers = Boolean(chantiers && chantiers.length > 0);
+
+  return (
+    <>
       {!hasChantiers && (
         <div className="relative overflow-hidden bg-dusk rounded-2xl p-8 lg:p-10 mb-10">
           <div
@@ -150,6 +258,17 @@ export default async function TableauDeBord() {
           </Link>
         </div>
       )}
+    </>
+  );
+}
+
+function ChantiersRecentsSkeleton() {
+  return (
+    <div className="flex flex-col gap-3 animate-pulse">
+      <div className="h-6 w-40 bg-dusk/8 rounded mb-4" />
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="h-20 bg-white border border-dusk/8 rounded-2xl" />
+      ))}
     </div>
   );
 }

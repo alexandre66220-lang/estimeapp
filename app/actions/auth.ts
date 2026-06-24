@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ensureProfile } from "@/lib/supabase/profile";
 import { translateAuthError } from "@/lib/supabase/auth-errors";
+import { registerFilleulParrainage } from "@/lib/supabase/parrainage";
 
 export async function login(formData: FormData) {
   const email = (formData.get("email") as string)?.trim();
@@ -34,6 +35,7 @@ export async function signup(formData: FormData) {
   const email = (formData.get("email") as string)?.trim();
   const password = formData.get("password") as string;
   const companyName = (formData.get("companyName") as string)?.trim();
+  const ref = (formData.get("ref") as string)?.trim();
 
   if (!email || !password || !companyName) {
     redirect(
@@ -58,6 +60,9 @@ export async function signup(formData: FormData) {
 
   if (data.user && data.session) {
     await ensureProfile(supabase, data.user);
+    if (ref) {
+      await registerFilleulParrainage(supabase, ref, data.user.id, data.user.email ?? "");
+    }
     redirect("/espace/tableau-de-bord");
   }
 

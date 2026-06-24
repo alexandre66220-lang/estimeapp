@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { CaretRight, HardHat } from "@phosphor-icons/react/dist/ssr";
+import { EtoilesNote } from "@/components/espace/EtoilesNote";
 
 type Chantier = {
   id: string;
@@ -9,6 +10,7 @@ type Chantier = {
   photo_avant_url: string | null;
   photo_apres_url: string | null;
   created_at: string;
+  note?: number | null;
 };
 
 export default function ChantierCard({ chantier }: { chantier: Chantier }) {
@@ -39,6 +41,7 @@ export default function ChantierCard({ chantier }: { chantier: Chantier }) {
           })}
         </p>
       </div>
+      {Boolean(chantier.note) && <EtoilesNote note={chantier.note!} />}
       <span
         className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full ${
           isTermine ? "bg-dusk/5 text-dusk/60" : "bg-ambre/10 text-braise"

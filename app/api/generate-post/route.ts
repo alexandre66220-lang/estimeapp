@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateInstagramCaption } from "@/lib/anthropic/generate-caption";
 
+export const runtime = "edge";
+
 export async function POST(request: Request) {
   let chantierId: string | undefined;
   try {
@@ -27,12 +29,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
   }
 
-  const { data: chantier, error: chantierError } = await supabase
-    .from("chantiers")
-    .select("id, titre, photo_avant_url, photo_apres_url, user_id")
-    .eq("id", chantierId)
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const [
+    { data: chantier, error: chantierError },
+    { data: profile },
+  ] = await Promise.all([
+    supabase
+      .from("chantiers")
+      .select("id, titre, photo_avant_url, photo_apres_url, user_id")
+      .eq("id", chantierId)
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("profiles")
+      .select("prenom, nom, metier, ville, ton_post, hashtags_favoris")
+      .eq("id", user.id)
+      .maybeSingle(),
+  ]);
 
   if (chantierError || !chantier) {
     return NextResponse.json({ error: "Chantier introuvable." }, { status: 404 });
@@ -54,9 +66,18 @@ export async function POST(request: Request) {
     );
   }
 
-  let contenu: string;
+  let generated: { legende: string; hashtags: string[] };
   try {
-    contenu = await generateInstagramCaption({ titre: chantier.titre, images });
+    generated = await generateInstagramCaption({
+      titre: chantier.titre,
+      images,
+      prenom: profile?.prenom,
+      nom: profile?.nom,
+      metier: profile?.metier,
+      ville: profile?.ville,
+      tonPost: profile?.ton_post,
+      hashtagsFavoris: profile?.hashtags_favoris,
+    });
   } catch (error) {
     console.error("generate-post: échec de l'appel à Claude", error);
     return NextResponse.json(
@@ -65,6 +86,11 @@ export async function POST(request: Request) {
     );
   }
 
+  const favoris = (profile?.hashtags_favoris ?? []).filter(
+    (tag: string) => typeof tag === "string" && tag.trim().length > 0
+  );
+  const hashtags = Array.from(new Set([...favoris, ...generated.hashtags]));
+
   const imageUrl = chantier.photo_apres_url ?? chantier.photo_avant_url;
 
   const { data: post, error: insertError } = await supabase
@@ -72,11 +98,12 @@ export async function POST(request: Request) {
     .insert({
       chantier_id: chantier.id,
       user_id: user.id,
-      contenu,
+      contenu: generated.legende,
+      hashtags,
       image_url: imageUrl,
       plateforme: "instagram",
     })
-    .select("id, contenu, image_url, plateforme, created_at")
+    .select("id, contenu, hashtags, image_url, plateforme, created_at")
     .single();
 
   if (insertError || !post) {

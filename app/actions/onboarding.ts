@@ -1,7 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { updateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { profileCacheTag } from "@/lib/supabase/profile";
 
 export const METIERS = [
   "Peintre",
@@ -10,9 +12,6 @@ export const METIERS = [
   "Maçon",
   "Carreleur",
   "Menuisier",
-  "Plaquiste",
-  "Couvreur",
-  "Paysagiste",
   "Autre",
 ];
 
@@ -68,6 +67,8 @@ export async function completeOnboarding(formData: FormData) {
     );
   }
 
+  updateTag(profileCacheTag(user.id));
+
   redirect(
     `/espace/tableau-de-bord?message=${encodeURIComponent(
       "Bienvenue sur Estime !"
@@ -89,6 +90,8 @@ export async function skipOnboarding() {
     .from("profiles")
     .update({ onboarding_complete: true })
     .eq("id", user.id);
+
+  updateTag(profileCacheTag(user.id));
 
   redirect("/espace/tableau-de-bord");
 }
