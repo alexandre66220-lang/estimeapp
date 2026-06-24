@@ -1,7 +1,22 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+function hasSupabaseAuthCookie(request: NextRequest) {
+  return request.cookies.getAll().some((cookie) => cookie.name.startsWith("sb-"));
+}
+
 export async function updateSession(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  const isAuthRoute = path === "/connexion" || path === "/inscription";
+
+  // Sur les routes publiques de connexion/inscription, on évite l'appel
+  // réseau à Supabase quand aucun cookie de session n'est présent : c'est
+  // le cas le plus fréquent (visiteur non connecté) et ça évite de
+  // ralentir le rendu de ces pages pour rien.
+  if (isAuthRoute && !hasSupabaseAuthCookie(request)) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -29,9 +44,7 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const path = request.nextUrl.pathname;
   const isProtectedRoute = path.startsWith("/espace");
-  const isAuthRoute = path === "/connexion" || path === "/inscription";
 
   if (isProtectedRoute && !user) {
     const url = request.nextUrl.clone();
