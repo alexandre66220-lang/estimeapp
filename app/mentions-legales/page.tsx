@@ -1,127 +1,51 @@
 import type { Metadata } from "next";
-import PageShell from "@/components/PageShell";
-import ManageCookiesLink from "@/components/ManageCookiesLink";
+import LegalPageShell from "@/components/LegalPageShell";
+
+export const dynamic = "force-static";
 
 export const metadata: Metadata = {
   title: "Mentions légales - Estime",
-  description: "Mentions légales du site Estime, édité par AlcalSpark.",
+  description: "Mentions légales du site Estime, édité par Alexandre Lenique.",
 };
-
-const SECTIONS = [
-  {
-    title: "1. Éditeur du site",
-    content: [
-      ["Raison sociale", "AlcalSpark"],
-      ["Statut juridique", "Micro-entrepreneur"],
-      ["Responsable de publication", "Alexandre"],
-      ["Adresse", "90 avenue Georges Guynemer, 81200 Mazamet, France"],
-      ["Email", "contact@alcalspark.com"],
-      ["SIRET", "104 516 547 00015"],
-    ],
-  },
-  {
-    title: "2. Hébergement",
-    content: [
-      ["Société", "Netlify, Inc."],
-      ["Adresse", "512 2nd Street, Suite 200, San Francisco, CA 94107, États-Unis"],
-      ["Site", "netlify.com"],
-    ],
-  },
-];
 
 export default function MentionsLegales() {
   return (
-    <PageShell
-      title="Mentions légales"
-      subtitle="Informations légales relatives au site Estime."
-    >
-      <div className="space-y-12 text-dusk">
-
-        {SECTIONS.map((section) => (
-          <section key={section.title}>
-            <h2 className="font-display text-xl font-bold text-dusk mb-5 pb-3 border-b border-dusk/10">
-              {section.title}
-            </h2>
-            <dl className="space-y-3">
-              {(section.content as [string, string][]).map(([label, value]) => (
-                <div key={label} className="grid grid-cols-[180px_1fr] gap-4">
-                  <dt className="text-sm text-dusk/50 font-medium">{label}</dt>
-                  <dd className="text-sm text-dusk/80">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-        ))}
-
-        <section>
-          <h2 className="font-display text-xl font-bold text-dusk mb-5 pb-3 border-b border-dusk/10">
-            3. Propriété intellectuelle
-          </h2>
-          <p className="text-sm text-dusk/70 leading-relaxed">
-            L'ensemble du contenu du site Estime (textes, visuels, logo, structure) est la propriété exclusive
-            d'AlcalSpark, sauf mention contraire. Toute reproduction, représentation ou diffusion, totale ou
-            partielle, sans autorisation écrite préalable est interdite.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="font-display text-xl font-bold text-dusk mb-5 pb-3 border-b border-dusk/10">
-            4. Données personnelles
-          </h2>
-          <div className="space-y-3 text-sm text-dusk/70 leading-relaxed">
-            <p>
-              Dans le cadre de l'utilisation d'Estime, nous collectons les données nécessaires à la création de
-              votre compte et à la fourniture du service (email, profil, contenus liés à vos chantiers). Ces
-              données ne sont pas transmises à des tiers.
-            </p>
-            <p>
-              Conformément au Règlement Général sur la Protection des Données (RGPD) et à la loi Informatique
-              et Libertés, vous disposez d'un droit d'accès, de rectification et de suppression de vos données.
-              Pour exercer ce droit, contactez-nous à{" "}
-              <a
-                href="mailto:contact@alcalspark.com"
-                className="text-ambre hover:underline"
-              >
-                contact@alcalspark.com
-              </a>
-              .
-            </p>
-          </div>
-        </section>
-
-        <section>
-          <h2 className="font-display text-xl font-bold text-dusk mb-5 pb-3 border-b border-dusk/10">
-            5. Cookies
-          </h2>
-          <div className="space-y-3 text-sm text-dusk/70 leading-relaxed">
-            <p>
-              Le site Estime utilise des cookies essentiels à son fonctionnement (notamment le maintien de
-              votre session de connexion à l&apos;espace client). Ces cookies ne sont pas soumis à votre
-              consentement et restent toujours actifs.
-            </p>
-            <p>
-              Le site pourra à l&apos;avenir utiliser des cookies de mesure d&apos;audience. Lors de votre
-              première visite, une bannière vous permet d&apos;accepter ou de refuser le dépôt de ces
-              cookies. Vous pouvez modifier ce choix à tout moment via le lien{" "}
-              <ManageCookiesLink className="text-ambre hover:underline" /> situé en bas de chaque page.
-            </p>
-          </div>
-        </section>
-
-        <section>
-          <h2 className="font-display text-xl font-bold text-dusk mb-5 pb-3 border-b border-dusk/10">
-            6. Liens hypertextes
-          </h2>
-          <p className="text-sm text-dusk/70 leading-relaxed">
-            AlcalSpark ne peut être tenu responsable du contenu des sites externes auxquels le site Estime
-            renvoie.
-          </p>
-        </section>
-
-        <p className="text-xs text-dusk/35 pt-4 border-t border-dusk/10">
-          Dernière mise à jour : juin 2026
+    <LegalPageShell title="Mentions légales">
+      <section>
+        <h2 className="font-landing-display text-xl font-semibold text-dust mb-4">
+          Éditeur du site
+        </h2>
+        <p className="font-landing-sans text-dust/70 text-base leading-relaxed">
+          Le site Estime est édité par Alexandre Lenique, micro-entrepreneur
+          (EI), domicilié 90 avenue Georges Guynemer, 81200 Mazamet, France.
+          <br />
+          SIRET : 10451654700015
+          <br />
+          Email :{" "}
+          <a href="mailto:spark@alcalspark.com" className="text-ambre hover:underline">
+            spark@alcalspark.com
+          </a>
         </p>
-      </div>
-    </PageShell>
+      </section>
+
+      <section>
+        <h2 className="font-landing-display text-xl font-semibold text-dust mb-4">
+          Hébergement
+        </h2>
+        <p className="font-landing-sans text-dust/70 text-base leading-relaxed">
+          Le site est hébergé par Netlify, Inc., 512 2nd Street, Suite 200,
+          San Francisco, CA 94107, États-Unis.
+        </p>
+      </section>
+
+      <section>
+        <h2 className="font-landing-display text-xl font-semibold text-dust mb-4">
+          Directeur de publication
+        </h2>
+        <p className="font-landing-sans text-dust/70 text-base leading-relaxed">
+          Alexandre Lenique.
+        </p>
+      </section>
+    </LegalPageShell>
   );
 }
