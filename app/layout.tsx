@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Public_Sans } from "next/font/google";
+import { Bricolage_Grotesque, Public_Sans, Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import CookieConsent from "@/components/CookieConsent";
 import "./globals.css";
 
@@ -12,6 +12,20 @@ const bricolage = Bricolage_Grotesque({
 
 const publicSans = Public_Sans({
   variable: "--font-public-sans",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["500", "600", "700"],
+});
+
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
   subsets: ["latin"],
   display: "swap",
   weight: ["400", "500", "600", "700"],
@@ -47,7 +61,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${bricolage.variable} ${publicSans.variable} antialiased`}
+      className={`${bricolage.variable} ${publicSans.variable} ${fraunces.variable} ${jakarta.variable} antialiased`}
     >
       <body className="min-h-screen flex flex-col">
         {children}

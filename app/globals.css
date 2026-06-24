@@ -7,9 +7,12 @@
   --color-dust: #F2EDE4;
   --color-dust-dark: #E8E0D2;
   --color-mauve: #6B6470;
+  --color-noir: #1A1410;
 
   --font-display: var(--font-bricolage);
   --font-sans: var(--font-public-sans);
+  --font-landing-display: var(--font-fraunces);
+  --font-landing-sans: var(--font-jakarta);
 }
 
 *, *::before, *::after {
