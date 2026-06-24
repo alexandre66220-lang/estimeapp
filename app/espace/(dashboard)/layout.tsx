@@ -1,10 +1,20 @@
 import Sidebar from "@/components/espace/Sidebar";
+import TrialBanner from "@/components/espace/TrialBanner";
+import { getCurrentUser } from "@/lib/supabase/server";
+import { getCachedProfile } from "@/lib/supabase/profile";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { supabase, user } = await getCurrentUser();
+
+  const profile = await getCachedProfile<{
+    trial_end: string | null;
+    is_subscribed: boolean;
+  }>(supabase, user!.id, "trial_end, is_subscribed");
+
   return (
     <div className="min-h-screen bg-dust">
       <Sidebar />
@@ -17,8 +27,12 @@ export default function DashboardLayout({
         <div className="absolute bottom-0 left-1/4 w-[26rem] h-[26rem] bg-mauve/[0.06] rounded-full blur-3xl" />
       </div>
 
-      <div className="lg:pl-64">
-        <main className="pt-16 lg:pt-0">{children}</main>
+      <div className="lg:pl-64 pt-16 lg:pt-0">
+        <TrialBanner
+          trialEnd={profile?.trial_end ?? null}
+          isSubscribed={profile?.is_subscribed ?? false}
+        />
+        <main>{children}</main>
       </div>
     </div>
   );
