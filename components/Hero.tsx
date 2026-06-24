@@ -14,8 +14,16 @@ export default function Hero() {
   }
 
   return (
-    <section className="bg-noir min-h-[100dvh] flex items-center pt-28 pb-20">
-      <div className="max-w-4xl mx-auto px-6 w-full text-center">
+    <section className="bg-noir min-h-[100dvh] flex items-center pt-28 pb-20 relative overflow-hidden">
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 40%, #C75D3B08 0%, transparent 70%)",
+        }}
+        aria-hidden="true"
+      />
+      <div className="max-w-4xl mx-auto px-6 w-full text-center relative z-10">
         <m.h1
           {...fadeUp(0)}
           className="font-landing-display text-4xl sm:text-5xl lg:text-6xl font-semibold text-dust leading-[1.1] mb-6"
@@ -52,6 +60,45 @@ export default function Hero() {
         <m.p {...fadeUp(0.3)} className="text-sm text-dust/45 mt-6">
           Sans carte bancaire. Sans engagement.
         </m.p>
+
+        <m.div
+          {...fadeUp(0.4)}
+          className="flex flex-col sm:flex-row gap-5 justify-center items-center sm:items-stretch mt-14"
+        >
+          <div
+            className="w-full sm:w-72 rounded-2xl border border-[rgba(199,93,59,0.18)] p-5 text-left"
+            style={{ backgroundColor: "#221A16", transform: "rotate(-1deg)" }}
+          >
+            <span className="inline-flex items-center gap-1.5 bg-green-500/15 text-green-400 text-xs font-semibold px-2.5 py-1 rounded-full mb-3">
+              ✓ Post généré
+            </span>
+            <p className="font-landing-sans text-dust text-sm leading-relaxed mb-3">
+              Peinture intérieure terminée à Castres 🎨 Un résultat soigné pour
+              ce salon...
+            </p>
+            <p className="font-landing-sans text-ambre text-sm">
+              #peintre #castres #artisan
+            </p>
+          </div>
+
+          <div
+            className="w-full sm:w-72 rounded-2xl border border-[rgba(199,93,59,0.18)] p-5 text-left"
+            style={{ backgroundColor: "#221A16", transform: "rotate(1deg)" }}
+          >
+            <span className="inline-flex items-center gap-1.5 bg-green-500/15 text-green-400 text-xs font-semibold px-2.5 py-1 rounded-full mb-3">
+              ✓ Email envoyé
+            </span>
+            <div className="text-3xl mb-3" aria-hidden="true">
+              ⭐
+            </div>
+            <p className="font-landing-sans text-dust text-sm leading-relaxed mb-1">
+              Demande d&apos;avis envoyée à Martin D.
+            </p>
+            <p className="font-landing-sans text-dust/45 text-xs">
+              Il y a 2 minutes
+            </p>
+          </div>
+        </m.div>
       </div>
     </section>
   );
