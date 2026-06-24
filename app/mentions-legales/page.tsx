@@ -4,7 +4,7 @@ import LegalPageShell from "@/components/LegalPageShell";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Mentions légales - Estime",
+  title: "Mentions légales — Estime",
   description: "Mentions légales du site Estime, édité par AlcalSpark.",
 };
 

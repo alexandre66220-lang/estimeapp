@@ -4,7 +4,7 @@ import LegalPageShell from "@/components/LegalPageShell";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Conditions générales d'utilisation - Estime",
+  title: "CGU — Estime",
   description: "Conditions générales d'utilisation du service Estime.",
 };
 
@@ -45,7 +45,7 @@ const ARTICLES = [
 
 export default function CGU() {
   return (
-    <LegalPageShell title="Conditions générales d'utilisation">
+    <LegalPageShell title="Conditions Générales d'Utilisation">
       {ARTICLES.map((article) => (
         <section key={article.title}>
           <h2 className="font-landing-display text-xl font-semibold text-dust mb-4">

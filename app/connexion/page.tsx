@@ -6,14 +6,16 @@ import { ConnexionForm } from "@/components/ConnexionForm";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Connexion - Estime",
-  description: "Connectez-vous à votre espace Estime.",
+  title: "Connexion — Estime",
+  description:
+    "Connectez-vous à votre espace artisan Estime pour gérer vos chantiers et votre réputation en ligne.",
 };
 
 export default function Connexion() {
   return (
     <main className="min-h-screen bg-dust flex items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm">
+        <h1 className="sr-only">Connexion à votre espace Estime</h1>
         <div className="text-center mb-8">
           <Link
             href="/"

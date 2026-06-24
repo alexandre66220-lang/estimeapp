@@ -6,14 +6,16 @@ import { InscriptionForm } from "@/components/InscriptionForm";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Inscription - Estime",
-  description: "Créez votre compte Estime.",
+  title: "Inscription gratuite — Estime",
+  description:
+    "Créez votre compte Estime gratuitement. 14 jours d'essai sans carte bancaire.",
 };
 
 export default function Inscription() {
   return (
     <main className="min-h-screen bg-dust flex items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm">
+        <h1 className="sr-only">Créer votre compte Estime gratuit</h1>
         <div className="text-center mb-8">
           <Link
             href="/"

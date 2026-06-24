@@ -4,7 +4,7 @@ import LegalPageShell from "@/components/LegalPageShell";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Politique de confidentialité - Estime",
+  title: "Politique de confidentialité — Estime",
   description: "Politique de confidentialité et de protection des données du service Estime.",
 };
 
@@ -45,7 +45,7 @@ const SECTIONS = [
 
 export default function PolitiqueConfidentialite() {
   return (
-    <LegalPageShell title="Politique de confidentialité">
+    <LegalPageShell title="Politique de Confidentialité">
       {SECTIONS.map((section) => (
         <section key={section.title}>
           <h2 className="font-landing-display text-xl font-semibold text-dust mb-4">
