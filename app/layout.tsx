@@ -32,24 +32,36 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://estime-app.netlify.app"),
-  title: "Estime - L'assistant post-chantier pour artisans",
+  metadataBase: new URL("https://estime-app.com"),
+  title: "Estime — Posts Instagram et avis Google pour artisans",
   description:
-    "Transformez chaque chantier en vitrine. Photo avant/après, post réseaux prêt en 30 secondes, relance automatique pour vos avis Google. 24,99€/mois.",
+    "Estime génère vos posts Instagram et vos demandes d'avis Google en 30 secondes depuis vos photos de chantier. Essai gratuit 14 jours.",
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/apple-touch-icon.svg",
+  },
   openGraph: {
-    title: "Estime - L'assistant post-chantier pour artisans",
+    title: "Estime — Posts Instagram et avis Google pour artisans",
     description:
-      "Photo avant/après + IA = post réseaux prêt en 30 secondes. Relance auto pour vos avis Google.",
+      "Estime génère vos posts Instagram et vos demandes d'avis Google en 30 secondes depuis vos photos de chantier. Essai gratuit 14 jours.",
+    url: "https://estime-app.com",
     locale: "fr_FR",
     type: "website",
     images: [
       {
-        url: "/images/hero-peintre.jpg",
+        url: "/og-image.svg",
         width: 1200,
-        height: 900,
-        alt: "Artisan peintre en train de travailler sur un chantier",
+        height: 630,
+        alt: "Estime — Posts Instagram et avis Google pour artisans",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Estime — Posts Instagram et avis Google pour artisans",
+    description:
+      "Estime génère vos posts Instagram et vos demandes d'avis Google en 30 secondes depuis vos photos de chantier. Essai gratuit 14 jours.",
+    images: ["/og-image.svg"],
   },
 };
 
