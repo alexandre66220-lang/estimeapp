@@ -201,7 +201,7 @@ export default function NouveauChantier() {
         if (error) {
           throw new Error(`L'envoi de la photo ${name} a échoué. Réessayez.`);
         }
-        return supabase.storage.from("chantiers").getPublicUrl(path).data.publicUrl;
+        return path;
       }
 
       const photoAvantUrl = avant ? await uploadPhoto(avant, "avant") : null;

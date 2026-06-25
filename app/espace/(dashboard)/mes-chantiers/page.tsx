@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { HardHat, Plus, Star } from "@phosphor-icons/react/dist/ssr";
 import { getCurrentUser } from "@/lib/supabase/server";
+import { getSignedChantierPhotoUrls } from "@/lib/supabase/storage";
 import ChantierCard from "@/components/espace/ChantierCard";
 
 export const metadata: Metadata = {
@@ -95,7 +96,10 @@ async function ChantiersList({
     query = query.eq("note", Number(note));
   }
 
-  const { data: chantiers } = await query;
+  const { data: rawChantiers } = await query;
+  const chantiers = rawChantiers
+    ? await getSignedChantierPhotoUrls(supabase, rawChantiers)
+    : rawChantiers;
 
   return chantiers && chantiers.length > 0 ? (
     <div className="flex flex-col gap-3">

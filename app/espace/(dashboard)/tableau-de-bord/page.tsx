@@ -11,6 +11,7 @@ import {
   Megaphone,
 } from "@phosphor-icons/react/dist/ssr";
 import { getCurrentUser } from "@/lib/supabase/server";
+import { getSignedChantierPhotoUrls } from "@/lib/supabase/storage";
 import ChantierCard from "@/components/espace/ChantierCard";
 import { EtoilesNote } from "@/components/espace/EtoilesNote";
 import {
@@ -180,7 +181,7 @@ function ActiviteRecenteSkeleton() {
 async function ChantiersRecents() {
   const { supabase, user } = await getCurrentUser();
 
-  const { data: chantiers, count } = await supabase
+  const { data: rawChantiers, count } = await supabase
     .from("chantiers")
     .select("id, titre, statut, photo_avant_url, photo_apres_url, created_at, note", {
       count: "exact",
@@ -188,6 +189,10 @@ async function ChantiersRecents() {
     .eq("user_id", user!.id)
     .order("created_at", { ascending: false })
     .limit(CHANTIERS_RECENTS_LIMIT);
+
+  const chantiers = rawChantiers
+    ? await getSignedChantierPhotoUrls(supabase, rawChantiers)
+    : rawChantiers;
 
   const hasChantiers = Boolean(chantiers && chantiers.length > 0);
 

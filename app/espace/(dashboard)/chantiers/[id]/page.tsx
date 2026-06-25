@@ -10,6 +10,7 @@ import {
   ClockCounterClockwise,
 } from "@phosphor-icons/react/dist/ssr";
 import { getCurrentUser } from "@/lib/supabase/server";
+import { getSignedChantierPhotoUrl } from "@/lib/supabase/storage";
 import { updateClientInfo } from "@/app/actions/chantier";
 import { addClientFromChantier } from "@/app/actions/clients";
 import RelanceAction from "@/components/espace/RelanceAction";
@@ -55,6 +56,11 @@ export default async function FicheChantier({
   if (!chantier) {
     notFound();
   }
+
+  const [photoAvantUrl, photoApresUrl] = await Promise.all([
+    getSignedChantierPhotoUrl(supabase, chantier.photo_avant_url),
+    getSignedChantierPhotoUrl(supabase, chantier.photo_apres_url),
+  ]);
 
   const [{ data: profile }, { data: posts }, { data: relances }, { data: carnetClients }, { data: avis }] =
     await Promise.all([
@@ -125,14 +131,14 @@ export default async function FicheChantier({
         </span>
       </div>
 
-      {(chantier.photo_avant_url || chantier.photo_apres_url) && (
+      {(photoAvantUrl || photoApresUrl) && (
         <div className="grid grid-cols-2 gap-4 mb-8">
-          {chantier.photo_avant_url && (
+          {photoAvantUrl && (
             <div>
               <p className="text-xs font-medium text-dusk/45 mb-1.5">Avant</p>
               <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-dust-dark">
                 <Image
-                  src={chantier.photo_avant_url}
+                  src={photoAvantUrl}
                   alt={`Photo avant du chantier ${chantier.titre}`}
                   fill
                   className="object-cover"
@@ -141,12 +147,12 @@ export default async function FicheChantier({
               </div>
             </div>
           )}
-          {chantier.photo_apres_url && (
+          {photoApresUrl && (
             <div>
               <p className="text-xs font-medium text-dusk/45 mb-1.5">Après</p>
               <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-dust-dark">
                 <Image
-                  src={chantier.photo_apres_url}
+                  src={photoApresUrl}
                   alt={`Photo après du chantier ${chantier.titre}`}
                   fill
                   className="object-cover"

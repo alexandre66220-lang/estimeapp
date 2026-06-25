@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateInstagramCaption } from "@/lib/anthropic/generate-caption";
+import { getSignedChantierPhotoUrl } from "@/lib/supabase/storage";
 
 export const runtime = "edge";
 
@@ -50,13 +51,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Chantier introuvable." }, { status: 404 });
   }
 
+  const [signedAvantUrl, signedApresUrl] = await Promise.all([
+    getSignedChantierPhotoUrl(supabase, chantier.photo_avant_url),
+    getSignedChantierPhotoUrl(supabase, chantier.photo_apres_url),
+  ]);
+
   const images = [
-    chantier.photo_avant_url
-      ? { url: chantier.photo_avant_url as string, label: "avant" as const }
-      : null,
-    chantier.photo_apres_url
-      ? { url: chantier.photo_apres_url as string, label: "après" as const }
-      : null,
+    signedAvantUrl ? { url: signedAvantUrl, label: "avant" as const } : null,
+    signedApresUrl ? { url: signedApresUrl, label: "après" as const } : null,
   ].filter((image): image is { url: string; label: "avant" | "après" } => image !== null);
 
   if (images.length === 0) {
@@ -91,7 +93,7 @@ export async function POST(request: Request) {
   );
   const hashtags = Array.from(new Set([...favoris, ...generated.hashtags]));
 
-  const imageUrl = chantier.photo_apres_url ?? chantier.photo_avant_url;
+  const imageUrl = signedApresUrl ?? signedAvantUrl;
 
   const { data: post, error: insertError } = await supabase
     .from("posts")
