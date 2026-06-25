@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendRelanceAvis } from "@/lib/resend/send-relance";
+import { devError } from "@/lib/log";
 
 export const runtime = "edge";
 
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
       templateEmail: profile.template_email,
     });
   } catch (error) {
-    console.error("envoyer-relance: échec de l'envoi", error);
+    devError("envoyer-relance: échec de l'envoi", error);
     await supabase.from("relances").insert({
       chantier_id: chantier.id,
       user_id: user.id,
@@ -105,7 +106,7 @@ export async function POST(request: Request) {
     .single();
 
   if (insertError || !relance) {
-    console.error("envoyer-relance: échec de l'enregistrement", insertError);
+    devError("envoyer-relance: échec de l'enregistrement", insertError);
     return NextResponse.json(
       { error: "L'email a été envoyé mais l'historique n'a pas pu être enregistré." },
       { status: 500 }

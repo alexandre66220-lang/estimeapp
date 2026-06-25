@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateInstagramCaption } from "@/lib/anthropic/generate-caption";
 import { getSignedChantierPhotoUrl } from "@/lib/supabase/storage";
+import { devError } from "@/lib/log";
 
 export const runtime = "edge";
 
@@ -98,7 +99,7 @@ export async function POST(request: Request) {
       hashtagsFavoris: profile?.hashtags_favoris,
     });
   } catch (error) {
-    console.error("generate-post: échec de l'appel à Claude", error);
+    devError("generate-post: échec de l'appel à Claude", error);
     return NextResponse.json(
       { error: "La génération du post a échoué. Réessayez dans quelques instants." },
       { status: 502 }
@@ -126,7 +127,7 @@ export async function POST(request: Request) {
     .single();
 
   if (insertError || !post) {
-    console.error("generate-post: échec de l'enregistrement du post", insertError);
+    devError("generate-post: échec de l'enregistrement du post", insertError);
     return NextResponse.json(
       { error: "Le post a été généré mais n'a pas pu être enregistré." },
       { status: 500 }
