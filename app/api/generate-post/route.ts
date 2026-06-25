@@ -30,6 +30,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
   }
 
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const { count: generationsLastHour } = await supabase
+    .from("posts")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .gte("created_at", oneHourAgo);
+
+  if ((generationsLastHour ?? 0) >= 10) {
+    return NextResponse.json(
+      {
+        error:
+          "Vous avez atteint la limite de 10 générations par heure. Réessayez plus tard.",
+      },
+      { status: 429 }
+    );
+  }
+
   const [
     { data: chantier, error: chantierError },
     { data: profile },
