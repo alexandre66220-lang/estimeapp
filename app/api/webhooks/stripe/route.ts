@@ -2,11 +2,15 @@ import { NextResponse, type NextRequest } from "next/server";
 import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+// LOGS TEMPORAIRES — à retirer une fois le webhook de prod validé.
 export async function POST(request: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
   const signature = request.headers.get("stripe-signature");
 
+  console.log("[stripe-webhook] requête reçue, signature présente :", !!signature);
+
   if (!signature) {
+    console.error("[stripe-webhook] en-tête stripe-signature manquant");
     return NextResponse.json({ error: "Signature manquante" }, { status: 400 });
   }
 
@@ -19,29 +23,67 @@ export async function POST(request: NextRequest) {
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
-  } catch {
+  } catch (error) {
+    console.error(
+      "[stripe-webhook] vérification de signature échouée :",
+      error instanceof Error ? error.message : error
+    );
     return NextResponse.json({ error: "Signature invalide" }, { status: 400 });
   }
 
-  if (event.type === "customer.subscription.created") {
-    const subscription = event.data.object as Stripe.Subscription;
-    const customerId =
-      typeof subscription.customer === "string"
-        ? subscription.customer
-        : subscription.customer.id;
+  console.log("[stripe-webhook] événement reçu :", event.type, event.id);
 
-    const customer = await stripe.customers.retrieve(customerId);
+  try {
+    if (event.type === "customer.subscription.created") {
+      const subscription = event.data.object as Stripe.Subscription;
+      const customerId =
+        typeof subscription.customer === "string"
+          ? subscription.customer
+          : subscription.customer.id;
 
-    if (!customer.deleted && customer.email) {
-      const supabase = createAdminClient();
-      await supabase
-        .from("profiles")
-        .update({
-          is_subscribed: true,
-          subscription_id: subscription.id,
-        })
-        .eq("email", customer.email);
+      const customer = await stripe.customers.retrieve(customerId);
+      console.log(
+        "[stripe-webhook] customer.subscription.created — customerId:",
+        customerId,
+        "email:",
+        !customer.deleted ? customer.email : "(customer supprimé)"
+      );
+
+      if (!customer.deleted && customer.email) {
+        const supabase = createAdminClient();
+        const { data, error } = await supabase
+          .from("profiles")
+          .update({
+            is_subscribed: true,
+            subscription_id: subscription.id,
+          })
+          .ilike("email", customer.email)
+          .select("id");
+
+        if (error) {
+          console.error("[stripe-webhook] échec de la mise à jour Supabase :", error);
+        } else {
+          console.log(
+            "[stripe-webhook] profils mis à jour :",
+            data?.length ?? 0,
+            data?.map((p) => p.id)
+          );
+          if (!data || data.length === 0) {
+            console.error(
+              "[stripe-webhook] aucun profil ne correspond à l'email du customer Stripe :",
+              customer.email
+            );
+          }
+        }
+      } else {
+        console.error(
+          "[stripe-webhook] customer sans email exploitable, impossible de matcher un profil"
+        );
+      }
     }
+  } catch (error) {
+    console.error("[stripe-webhook] erreur inattendue lors du traitement :", error);
+    return NextResponse.json({ error: "Erreur de traitement" }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });
