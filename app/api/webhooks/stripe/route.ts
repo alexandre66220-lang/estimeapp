@@ -3,6 +3,8 @@ import { revalidatePath } from "next/cache";
 import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+// Reste en Node.js runtime (Serverless) : stripe.webhooks.constructEvent est
+// synchrone et dépend du module crypto de Node, indisponible sur Edge.
 // LOGS TEMPORAIRES — à retirer une fois le webhook de prod validé.
 export async function POST(request: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
