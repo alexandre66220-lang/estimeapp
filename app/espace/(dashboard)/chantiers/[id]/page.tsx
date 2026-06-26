@@ -141,6 +141,7 @@ export default async function FicheChantier({
                   src={photoAvantUrl}
                   alt={`Photo avant du chantier ${chantier.titre}`}
                   fill
+                  priority
                   className="object-cover"
                   sizes="(max-width: 768px) 50vw, 384px"
                 />
@@ -155,6 +156,7 @@ export default async function FicheChantier({
                   src={photoApresUrl}
                   alt={`Photo après du chantier ${chantier.titre}`}
                   fill
+                  priority
                   className="object-cover"
                   sizes="(max-width: 768px) 50vw, 384px"
                 />
