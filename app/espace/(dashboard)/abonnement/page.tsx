@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Stripe from "stripe";
 import { CreditCard, CheckCircle, WarningCircle } from "@phosphor-icons/react/dist/ssr";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getCachedProfile } from "@/lib/supabase/profile";
+import { devError } from "@/lib/log";
 
 export const metadata: Metadata = {
   title: "Abonnement - Estime",
@@ -9,6 +11,20 @@ export const metadata: Metadata = {
 
 const PAYMENT_LINK_URL = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK_URL;
 const CUSTOMER_PORTAL_URL = process.env.NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_URL;
+
+async function getRenewalDate(subscriptionId: string | null) {
+  if (!subscriptionId) return null;
+
+  try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const periodEnd = subscription.items.data[0]?.current_period_end;
+    return periodEnd ? new Date(periodEnd * 1000) : null;
+  } catch (error) {
+    devError("abonnement: échec de la récupération de la date de renouvellement", error);
+    return null;
+  }
+}
 
 export default async function Abonnement({
   searchParams,
@@ -21,7 +37,8 @@ export default async function Abonnement({
   const profile = await getCachedProfile<{
     trial_end: string | null;
     is_subscribed: boolean;
-  }>(supabase, user!.id, "trial_end, is_subscribed");
+    subscription_id: string | null;
+  }>(supabase, user!.id, "trial_end, is_subscribed, subscription_id");
 
   const isSubscribed = profile?.is_subscribed ?? false;
   const trialEnd = profile?.trial_end ? new Date(profile.trial_end) : null;
@@ -29,6 +46,9 @@ export default async function Abonnement({
     ? Math.ceil((trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
     : 0;
   const trialExpired = !isSubscribed && daysLeft <= 0;
+  const renewalDate = isSubscribed
+    ? await getRenewalDate(profile?.subscription_id ?? null)
+    : null;
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-12 lg:py-16">
@@ -56,11 +76,22 @@ export default async function Abonnement({
             <h2 className="font-display text-xl font-bold text-dusk mb-2">
               Abonnement actif
             </h2>
-            <p className="text-dusk/50 text-sm max-w-[40ch] mb-6">
-              Votre abonnement Estime à 24,99€/mois est actif. Gérez vos
-              informations de facturation et la date de renouvellement depuis
-              votre espace client Stripe.
+            <p className="text-dusk/50 text-sm max-w-[40ch] mb-2">
+              Votre abonnement Estime à 24,99€/mois est actif.
             </p>
+            {renewalDate && (
+              <p className="text-dusk/50 text-sm max-w-[40ch] mb-6">
+                Prochain renouvellement le{" "}
+                <span className="font-semibold text-dusk">
+                  {renewalDate.toLocaleDateString("fr-FR", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </span>
+                .
+              </p>
+            )}
             <a
               href={CUSTOMER_PORTAL_URL}
               className="inline-flex items-center justify-center bg-dusk text-white font-semibold text-base px-7 py-3.5 rounded-full hover:bg-dusk/90 active:scale-[0.98] transition-all duration-200"

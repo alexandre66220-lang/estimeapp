@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { revalidatePath } from "next/cache";
 import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -73,6 +74,9 @@ export async function POST(request: NextRequest) {
               "[stripe-webhook] aucun profil ne correspond à l'email du customer Stripe :",
               customer.email
             );
+          } else {
+            revalidatePath("/espace", "layout");
+            console.log("[stripe-webhook] cache /espace invalidé après mise à jour de l'abonnement");
           }
         }
       } else {

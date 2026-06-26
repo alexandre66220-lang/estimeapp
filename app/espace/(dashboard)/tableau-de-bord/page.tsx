@@ -24,6 +24,7 @@ import {
 } from "@/components/espace/DashboardStats";
 import { computeReputationScore, enregistrerHistoriqueScore } from "@/lib/score/reputation";
 import { ReputationCard } from "@/components/espace/ReputationCard";
+import PaymentSuccessToast from "@/components/espace/PaymentSuccessToast";
 
 export const metadata: Metadata = {
   title: "Tableau de bord - Estime",
@@ -37,9 +38,17 @@ const ONBOARDING_STEPS = [
 
 const CHANTIERS_RECENTS_LIMIT = 5;
 
-export default function TableauDeBord() {
+export default async function TableauDeBord({
+  searchParams,
+}: {
+  searchParams: Promise<{ payment?: string }>;
+}) {
+  const { payment } = await searchParams;
+
   return (
     <div className="max-w-5xl mx-auto px-6 py-12 lg:py-16">
+      {payment === "success" && <PaymentSuccessToast />}
+
       <div className="flex items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="font-display text-3xl font-bold text-dusk">
