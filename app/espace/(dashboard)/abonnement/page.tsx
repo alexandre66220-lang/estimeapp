@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Stripe from "stripe";
 import { CreditCard, CheckCircle, WarningCircle } from "@phosphor-icons/react/dist/ssr";
 import { getCurrentUser } from "@/lib/supabase/server";
-import { getCachedProfile } from "@/lib/supabase/profile";
+import { getBillingStatus } from "@/lib/supabase/profile";
 import { devError } from "@/lib/log";
 
 export const metadata: Metadata = {
@@ -34,11 +34,7 @@ export default async function Abonnement({
   const { error } = await searchParams;
   const { supabase, user } = await getCurrentUser();
 
-  const profile = await getCachedProfile<{
-    trial_end: string | null;
-    is_subscribed: boolean;
-    subscription_id: string | null;
-  }>(supabase, user!.id, "trial_end, is_subscribed, subscription_id");
+  const profile = await getBillingStatus(supabase, user!.id);
 
   const isSubscribed = profile?.is_subscribed ?? false;
   const trialEnd = profile?.trial_end ? new Date(profile.trial_end) : null;

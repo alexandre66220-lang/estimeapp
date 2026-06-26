@@ -22,8 +22,20 @@ export function getCachedProfile<T = { id: string }>(
       return data as T | null;
     },
     ["profile", userId, columns],
-    { revalidate: 3600, tags: [profileCacheTag(userId)] }
+    { revalidate: 300, tags: [profileCacheTag(userId)] }
   )();
+}
+
+export async function getBillingStatus(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<{ trial_end: string | null; is_subscribed: boolean; subscription_id: string | null } | null> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("trial_end, is_subscribed, subscription_id")
+    .eq("id", userId)
+    .maybeSingle();
+  return data;
 }
 
 export async function ensureProfile(supabase: SupabaseClient, user: User) {

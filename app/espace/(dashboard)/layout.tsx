@@ -1,7 +1,7 @@
 import Sidebar from "@/components/espace/Sidebar";
 import TrialBanner from "@/components/espace/TrialBanner";
 import { getCurrentUser } from "@/lib/supabase/server";
-import { getCachedProfile } from "@/lib/supabase/profile";
+import { getBillingStatus } from "@/lib/supabase/profile";
 
 export default async function DashboardLayout({
   children,
@@ -10,10 +10,7 @@ export default async function DashboardLayout({
 }) {
   const { supabase, user } = await getCurrentUser();
 
-  const profile = await getCachedProfile<{
-    trial_end: string | null;
-    is_subscribed: boolean;
-  }>(supabase, user!.id, "trial_end, is_subscribed");
+  const profile = await getBillingStatus(supabase, user!.id);
 
   return (
     <div className="min-h-screen bg-dust">

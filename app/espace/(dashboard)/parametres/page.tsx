@@ -26,15 +26,9 @@ export default async function Parametres({
         </p>
       </div>
 
-      <Suspense fallback={<FicheGoogleSkeleton />}>
-        <FicheGoogle message={message} error={error} />
+      <Suspense fallback={<ParametresSkeleton />}>
+        <ParametresSections message={message} error={error} />
       </Suspense>
-
-      <div className="mt-6">
-        <Suspense fallback={<TemplateEmailSkeleton />}>
-          <TemplateEmailSection message={message} error={error} />
-        </Suspense>
-      </div>
 
       <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 max-w-2xl mt-6 flex items-center gap-4 text-dusk/40">
         <div className="w-11 h-11 bg-dusk/5 rounded-xl flex items-center justify-center shrink-0">
@@ -49,7 +43,7 @@ export default async function Parametres({
   );
 }
 
-async function FicheGoogle({
+async function ParametresSections({
   message,
   error,
 }: {
@@ -58,12 +52,30 @@ async function FicheGoogle({
 }) {
   const { supabase, user } = await getCurrentUser();
 
-  const profile = await getCachedProfile<{ lien_avis_google: string | null }>(
-    supabase,
-    user!.id,
-    "lien_avis_google"
-  );
+  const profile = await getCachedProfile<{
+    lien_avis_google: string | null;
+    template_email: string | null;
+  }>(supabase, user!.id, "lien_avis_google, template_email");
 
+  return (
+    <>
+      <FicheGoogle profile={profile} message={message} error={error} />
+      <div className="mt-6">
+        <TemplateEmailSection profile={profile} message={message} error={error} />
+      </div>
+    </>
+  );
+}
+
+function FicheGoogle({
+  profile,
+  message,
+  error,
+}: {
+  profile: { lien_avis_google: string | null } | null;
+  message?: string;
+  error?: string;
+}) {
   return (
     <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 max-w-2xl">
       <div className="w-11 h-11 bg-ambre/10 rounded-xl flex items-center justify-center mb-5">
@@ -133,21 +145,15 @@ async function FicheGoogle({
   );
 }
 
-async function TemplateEmailSection({
+function TemplateEmailSection({
+  profile,
   message,
   error,
 }: {
+  profile: { template_email: string | null } | null;
   message?: string;
   error?: string;
 }) {
-  const { supabase, user } = await getCurrentUser();
-
-  const profile = await getCachedProfile<{ template_email: string | null }>(
-    supabase,
-    user!.id,
-    "template_email"
-  );
-
   return (
     <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 max-w-2xl">
       <div className="w-11 h-11 bg-ambre/10 rounded-xl flex items-center justify-center mb-5">
@@ -179,24 +185,21 @@ async function TemplateEmailSection({
   );
 }
 
-function TemplateEmailSkeleton() {
+function ParametresSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 max-w-2xl animate-pulse">
-      <div className="w-11 h-11 bg-ambre/10 rounded-xl mb-5" />
-      <div className="h-6 w-56 bg-dusk/8 rounded mb-2" />
-      <div className="h-4 w-full bg-dusk/8 rounded mb-6" />
-      <div className="h-48 w-full bg-dust rounded-xl" />
-    </div>
-  );
-}
-
-function FicheGoogleSkeleton() {
-  return (
-    <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 max-w-2xl animate-pulse">
-      <div className="w-11 h-11 bg-ambre/10 rounded-xl mb-5" />
-      <div className="h-6 w-48 bg-dusk/8 rounded mb-2" />
-      <div className="h-4 w-full bg-dusk/8 rounded mb-6" />
-      <div className="h-12 w-full bg-dust rounded-xl" />
-    </div>
+    <>
+      <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 max-w-2xl animate-pulse">
+        <div className="w-11 h-11 bg-ambre/10 rounded-xl mb-5" />
+        <div className="h-6 w-48 bg-dusk/8 rounded mb-2" />
+        <div className="h-4 w-full bg-dusk/8 rounded mb-6" />
+        <div className="h-12 w-full bg-dust rounded-xl" />
+      </div>
+      <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 max-w-2xl mt-6 animate-pulse">
+        <div className="w-11 h-11 bg-ambre/10 rounded-xl mb-5" />
+        <div className="h-6 w-56 bg-dusk/8 rounded mb-2" />
+        <div className="h-4 w-full bg-dusk/8 rounded mb-6" />
+        <div className="h-48 w-full bg-dust rounded-xl" />
+      </div>
+    </>
   );
 }
