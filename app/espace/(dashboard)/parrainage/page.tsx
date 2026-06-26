@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import dynamic from "next/dynamic";
 import { Gift, Users, CalendarCheck, Check, Clock } from "@phosphor-icons/react/dist/ssr";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getParrainageStats } from "@/lib/supabase/parrainage";
-import { CopierParrainage } from "@/components/espace/CopierParrainage";
+
+const CopierParrainage = dynamic(() =>
+  import("@/components/espace/CopierParrainage").then((mod) => mod.CopierParrainage)
+);
 
 export const metadata: Metadata = {
   title: "Parrainage - Estime",

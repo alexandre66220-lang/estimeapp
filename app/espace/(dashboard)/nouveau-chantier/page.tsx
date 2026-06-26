@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import {
   ArrowLeft,
   ImageSquare,
@@ -15,8 +16,12 @@ import {
 } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
 import { ShareActions } from "@/components/espace/ShareActions";
-import { NotationChantier } from "@/components/espace/NotationChantier";
 import { HashtagsEditor } from "@/components/espace/HashtagsEditor";
+
+const NotationChantier = dynamic(
+  () => import("@/components/espace/NotationChantier").then((mod) => mod.NotationChantier),
+  { ssr: false }
+);
 
 type Photo = { file: File; preview: string };
 
