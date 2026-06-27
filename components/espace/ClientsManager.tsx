@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
+import { useFormStatus } from "react-dom";
 import {
   Plus,
   Trash,
@@ -9,6 +10,7 @@ import {
   Check,
   WarningCircle,
   AddressBook,
+  CircleNotch,
 } from "@phosphor-icons/react";
 import { deleteClient } from "@/app/actions/clients";
 
@@ -16,6 +18,25 @@ const AjouterClientModal = dynamic(
   () => import("./AjouterClientModal").then((mod) => mod.AjouterClientModal),
   { ssr: false }
 );
+
+function DeleteButton({ label }: { label: string }) {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      aria-label={label}
+      className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full text-dusk/40 hover:bg-red-50 hover:text-red-700 transition-colors duration-200 disabled:opacity-50"
+    >
+      {pending ? (
+        <CircleNotch size={16} weight="bold" className="animate-spin" aria-hidden="true" />
+      ) : (
+        <Trash size={16} weight="bold" aria-hidden="true" />
+      )}
+    </button>
+  );
+}
 
 export type Client = {
   id: string;
@@ -115,13 +136,7 @@ export function ClientsManager({
               </div>
               <form action={deleteClient}>
                 <input type="hidden" name="clientId" value={client.id} />
-                <button
-                  type="submit"
-                  aria-label={`Supprimer ${client.prenom} ${client.nom}`}
-                  className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full text-dusk/40 hover:bg-red-50 hover:text-red-700 transition-colors duration-200"
-                >
-                  <Trash size={16} weight="bold" aria-hidden="true" />
-                </button>
+                <DeleteButton label={`Supprimer ${client.prenom} ${client.nom}`} />
               </form>
             </div>
           ))}

@@ -1,7 +1,25 @@
 "use client";
 
-import { X } from "@phosphor-icons/react";
+import { useFormStatus } from "react-dom";
+import { CircleNotch, X } from "@phosphor-icons/react";
 import { addClient } from "@/app/actions/clients";
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="w-full inline-flex items-center justify-center gap-2 bg-braise text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-ambre active:scale-[0.97] transition-all duration-200 disabled:opacity-50"
+    >
+      {pending && (
+        <CircleNotch size={16} weight="bold" className="animate-spin" aria-hidden="true" />
+      )}
+      Ajouter
+    </button>
+  );
+}
 
 export function AjouterClientModal({ onClose }: { onClose: () => void }) {
   return (
@@ -81,12 +99,7 @@ export function AjouterClientModal({ onClose }: { onClose: () => void }) {
               placeholder="06 12 34 56 78"
             />
           </div>
-          <button
-            type="submit"
-            className="w-full inline-flex items-center justify-center bg-braise text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-ambre active:scale-[0.97] transition-all duration-200"
-          >
-            Ajouter
-          </button>
+          <SubmitButton />
         </form>
       </div>
     </div>
