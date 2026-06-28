@@ -4,12 +4,12 @@ import { CreditCard, CheckCircle, WarningCircle } from "@phosphor-icons/react/di
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getBillingStatus } from "@/lib/supabase/profile";
 import { devError } from "@/lib/log";
+import SubscribeButton from "@/components/espace/SubscribeButton";
 
 export const metadata: Metadata = {
   title: "Abonnement - Estime",
 };
 
-const PAYMENT_LINK_URL = process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK_URL;
 const CUSTOMER_PORTAL_URL = process.env.NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_URL;
 
 async function getRenewalDate(subscriptionId: string | null) {
@@ -105,12 +105,10 @@ export default async function Abonnement({
               retrouver l&apos;accès complet à Estime.
             </p>
             <PricingCard />
-            <a
-              href={PAYMENT_LINK_URL}
-              className="mt-6 inline-flex items-center justify-center bg-braise text-white font-semibold text-base px-8 py-4 rounded-full hover:bg-ambre active:scale-[0.98] transition-all duration-200 animate-pulse"
-            >
-              Réactiver mon accès maintenant
-            </a>
+            <SubscribeButton
+              label="Réactiver mon accès maintenant"
+              className="mt-6 inline-flex items-center justify-center gap-2 bg-braise text-white font-semibold text-base px-8 py-4 rounded-full hover:bg-ambre active:scale-[0.98] transition-all duration-200 animate-pulse"
+            />
           </>
         ) : (
           <>
@@ -122,12 +120,10 @@ export default async function Abonnement({
               de votre période d&apos;essai.
             </p>
             <PricingCard />
-            <a
-              href={PAYMENT_LINK_URL}
-              className="mt-6 inline-flex items-center justify-center bg-braise text-white font-semibold text-base px-8 py-4 rounded-full hover:bg-ambre active:scale-[0.98] transition-all duration-200"
-            >
-              S&apos;abonner maintenant
-            </a>
+            <SubscribeButton
+              label="S'abonner maintenant"
+              className="mt-6 inline-flex items-center justify-center gap-2 bg-braise text-white font-semibold text-base px-8 py-4 rounded-full hover:bg-ambre active:scale-[0.98] transition-all duration-200"
+            />
           </>
         )}
       </div>
