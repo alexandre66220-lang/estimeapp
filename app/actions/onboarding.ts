@@ -1,9 +1,35 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { updateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { profileCacheTag } from "@/lib/supabase/profile";
+import {
+  SESSION_STATUS_COOKIE,
+  SESSION_STATUS_COOKIE_OPTIONS,
+  signSessionStatus,
+} from "@/lib/supabase/session-status-cookie";
+
+async function setSessionStatusCookie(
+  userId: string,
+  supabase: Awaited<ReturnType<typeof createClient>>
+) {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_subscribed, trial_end")
+    .eq("id", userId)
+    .maybeSingle();
+
+  const signedValue = await signSessionStatus({
+    onboardingComplete: true,
+    isSubscribed: profile?.is_subscribed ?? false,
+    trialEnd: profile?.trial_end ?? null,
+  });
+  if (signedValue) {
+    (await cookies()).set(SESSION_STATUS_COOKIE, signedValue, SESSION_STATUS_COOKIE_OPTIONS);
+  }
+}
 
 export async function completeOnboarding(formData: FormData) {
   const prenom = (formData.get("prenom") as string)?.trim();
@@ -52,6 +78,7 @@ export async function completeOnboarding(formData: FormData) {
   }
 
   updateTag(profileCacheTag(user.id));
+  await setSessionStatusCookie(user.id, supabase);
 
   redirect(
     `/espace/tableau-de-bord?message=${encodeURIComponent(
@@ -76,6 +103,7 @@ export async function skipOnboarding() {
     .eq("id", user.id);
 
   updateTag(profileCacheTag(user.id));
+  await setSessionStatusCookie(user.id, supabase);
 
   redirect("/espace/tableau-de-bord");
 }

@@ -1,10 +1,16 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { translateAuthError } from "@/lib/supabase/auth-errors";
 import { devError } from "@/lib/log";
+import {
+  SESSION_STATUS_COOKIE,
+  SESSION_STATUS_COOKIE_OPTIONS,
+  signSessionStatus,
+} from "@/lib/supabase/session-status-cookie";
 
 export async function login(formData: FormData) {
   const email = (formData.get("email") as string)?.trim();
@@ -17,7 +23,7 @@ export async function login(formData: FormData) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -26,6 +32,23 @@ export async function login(formData: FormData) {
     redirect(
       `/connexion?error=${encodeURIComponent(translateAuthError(error.message))}`
     );
+  }
+
+  if (data.user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("onboarding_complete, is_subscribed, trial_end")
+      .eq("id", data.user.id)
+      .maybeSingle();
+
+    const signedValue = await signSessionStatus({
+      onboardingComplete: profile?.onboarding_complete ?? false,
+      isSubscribed: profile?.is_subscribed ?? false,
+      trialEnd: profile?.trial_end ?? null,
+    });
+    if (signedValue) {
+      (await cookies()).set(SESSION_STATUS_COOKIE, signedValue, SESSION_STATUS_COOKIE_OPTIONS);
+    }
   }
 
   redirect("/espace/tableau-de-bord");
@@ -89,5 +112,6 @@ export async function signup(formData: FormData) {
 export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
+  (await cookies()).delete(SESSION_STATUS_COOKIE);
   redirect("/connexion");
 }
