@@ -1,17 +1,14 @@
+import { Suspense } from "react";
 import Sidebar from "@/components/espace/Sidebar";
 import TrialBanner from "@/components/espace/TrialBanner";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getBillingStatus } from "@/lib/supabase/profile";
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { supabase, user } = await getCurrentUser();
-
-  const profile = await getBillingStatus(supabase, user!.id);
-
   return (
     <div className="min-h-screen bg-dust">
       <Sidebar />
@@ -25,12 +22,26 @@ export default async function DashboardLayout({
       </div>
 
       <div className="lg:pl-64 pt-16 lg:pt-0">
-        <TrialBanner
-          trialEnd={profile?.trial_end ?? null}
-          isSubscribed={profile?.is_subscribed ?? false}
-        />
+        {/* Le shell (Sidebar + contenu) s'affiche sans attendre le statut de
+            facturation : la bannière d'essai apparaît dès que la requête
+            profile résout, sans bloquer le premier rendu. */}
+        <Suspense fallback={null}>
+          <TrialBannerSection />
+        </Suspense>
         <main>{children}</main>
       </div>
     </div>
+  );
+}
+
+async function TrialBannerSection() {
+  const { supabase, user } = await getCurrentUser();
+  const profile = await getBillingStatus(supabase, user!.id);
+
+  return (
+    <TrialBanner
+      trialEnd={profile?.trial_end ?? null}
+      isSubscribed={profile?.is_subscribed ?? false}
+    />
   );
 }
