@@ -17,6 +17,7 @@
 
 [functions]
   node_bundler = "esbuild"
+  region = "eu-west-1"
 
 [[headers]]
   for = "/images/*"
