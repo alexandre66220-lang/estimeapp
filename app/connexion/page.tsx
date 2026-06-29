@@ -32,6 +32,18 @@ export default function Connexion() {
           <ConnexionForm />
         </Suspense>
 
+        {/* Invisible : précharge le bundle du tableau de bord pendant que
+            l'utilisateur saisit ses identifiants. */}
+        <Link
+          href="/espace/tableau-de-bord"
+          prefetch={true}
+          className="hidden"
+          aria-hidden="true"
+          tabIndex={-1}
+        >
+          Tableau de bord
+        </Link>
+
         <p className="text-center text-dusk/50 text-sm mt-6">
           Pas encore de compte ?{" "}
           <Link
