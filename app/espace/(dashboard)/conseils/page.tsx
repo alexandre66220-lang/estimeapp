@@ -26,11 +26,11 @@ const METIERS: { value: ConseilMetier | "general"; label: string }[] = [
 ];
 
 const TAG_COLORS: Record<string, string> = {
-  Technique: "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
-  Marketing: "bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
-  Gestion: "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300",
-  Réputation: "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
-  Sécurité: "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+  Technique: "bg-blue-50 text-blue-700",
+  Marketing: "bg-purple-50 text-purple-700",
+  Gestion: "bg-green-50 text-green-700",
+  Réputation: "bg-yellow-50 text-yellow-700",
+  Sécurité: "bg-red-50 text-red-700",
 };
 
 export default async function ConseilsPage({
@@ -53,14 +53,16 @@ async function ConseilsContent({ metierParam }: { metierParam?: string }) {
   const profile = await getCachedProfile<{ metier: string | null }>(supabase, user!.id, "metier");
 
   const rawMetier = profile?.metier ?? null;
-  const profileMetier = (!rawMetier || rawMetier === "Autre") ? null : rawMetier.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const profileMetier = (!rawMetier || rawMetier === "Autre")
+    ? null
+    : rawMetier.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
   const activeMetier = (metierParam ?? profileMetier ?? "general") as ConseilMetier | "general";
   const metierQuery = activeMetier === "general" ? null : activeMetier;
 
   const [conseilSemaine, conseils] = await Promise.all([
     getConseilSemaine(metierQuery),
-    getConseils(metierQuery, 6),
+    getConseils(metierQuery),
   ]);
 
   return (
@@ -84,7 +86,9 @@ async function ConseilsContent({ metierParam }: { metierParam?: string }) {
       {conseils.length > 0 ? (
         <section>
           <p className="text-xs font-semibold uppercase tracking-wider text-dusk/40 mb-4">
-            {activeMetier === "general" ? "Tous les articles" : `Articles pour ${METIERS.find(m => m.value === activeMetier)?.label ?? activeMetier}`}
+            {activeMetier === "general"
+              ? "Tous les articles"
+              : `Articles pour ${METIERS.find(m => m.value === activeMetier)?.label ?? activeMetier}`}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {conseils.map((article) => (
@@ -105,9 +109,10 @@ async function ConseilsContent({ metierParam }: { metierParam?: string }) {
 }
 
 function ConseilSemaineCard({ article }: { article: ArticleConseil }) {
+  const slug = article.slug.current;
   return (
     <Link
-      href={`/espace/conseils/${article.slug}`}
+      href={`/espace/conseils/${slug}`}
       className="block bg-dusk rounded-2xl overflow-hidden hover:opacity-90 transition-opacity"
     >
       {article.image_principale?.url && (
@@ -134,9 +139,10 @@ function ConseilSemaineCard({ article }: { article: ArticleConseil }) {
 }
 
 function ArticleCard({ article, tagColors }: { article: ArticleConseil; tagColors: Record<string, string> }) {
+  const slug = article.slug.current;
   return (
     <Link
-      href={`/espace/conseils/${article.slug}`}
+      href={`/espace/conseils/${slug}`}
       className="block bg-white border border-dusk/8 rounded-2xl p-5 hover:shadow-sm hover:border-dusk/15 transition-all group"
     >
       <div className="flex items-center justify-between mb-3">

@@ -26,7 +26,11 @@ export default async function ConseilDetailPage({ params }: { params: Promise<{ 
   const article = await getConseil(slug);
   if (!article) notFound();
 
-  const similaires = await getConseillsSimilaires(slug, article.metier, article.categorie, 3);
+  const similaires = await getConseillsSimilaires(
+    article.slug.current,
+    article.metier,
+    article.categorie
+  );
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-12 lg:py-16">
@@ -55,7 +59,11 @@ export default async function ConseilDetailPage({ params }: { params: Promise<{ 
           <span className="text-xs text-dusk/40">{article.temps_lecture} min de lecture</span>
           {article.published_at && (
             <span className="text-xs text-dusk/40">
-              {new Date(article.published_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+              {new Date(article.published_at).toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
             </span>
           )}
         </div>
@@ -68,7 +76,7 @@ export default async function ConseilDetailPage({ params }: { params: Promise<{ 
           </p>
         )}
 
-        <div className="prose prose-sm max-w-none text-dusk/80 [&_p]:mb-4 [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-dusk [&_h2]:mt-8 [&_h2]:mb-3 [&_h3]:font-semibold [&_h3]:text-dusk [&_h3]:mt-6 [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1 [&_strong]:font-semibold [&_strong]:text-dusk">
+        <div className="[&_p]:mb-4 [&_p]:text-dusk/80 [&_p]:leading-relaxed [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-dusk [&_h2]:mt-8 [&_h2]:mb-3 [&_h3]:font-semibold [&_h3]:text-dusk [&_h3]:mt-6 [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_ul]:mb-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1 [&_ol]:mb-4 [&_li]:text-dusk/80 [&_strong]:font-semibold [&_strong]:text-dusk">
           {article.contenu && <PortableText value={article.contenu} />}
         </div>
       </article>
@@ -86,9 +94,10 @@ export default async function ConseilDetailPage({ params }: { params: Promise<{ 
 }
 
 function SimilaireCard({ article }: { article: ArticleConseil }) {
+  const slug = article.slug.current;
   return (
     <Link
-      href={`/espace/conseils/${article.slug}`}
+      href={`/espace/conseils/${slug}`}
       className="block bg-white border border-dusk/8 rounded-xl p-4 hover:border-dusk/20 hover:shadow-sm transition-all group"
     >
       <span className="text-xs text-dusk/40 mb-1.5 block">{article.categorie} · {article.temps_lecture} min</span>
