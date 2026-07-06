@@ -21,7 +21,7 @@ export function ObjectifAnnuelForm({ objectif }: { objectif: number | null }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2 mt-3">
+    <form onSubmit={handleSubmit} className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:flex-wrap">
       <input
         ref={inputRef}
         type="number"
@@ -29,12 +29,12 @@ export function ObjectifAnnuelForm({ objectif }: { objectif: number | null }) {
         step="1000"
         defaultValue={objectif ?? ""}
         placeholder="Ex : 80 000"
-        className="w-36 px-3 py-2 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all"
+        className="w-full sm:w-44 px-3 py-2 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all"
       />
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex items-center gap-1.5 px-4 py-2 bg-braise text-white text-sm font-semibold rounded-full hover:bg-ambre transition-colors duration-200 disabled:opacity-60"
+        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-braise text-white text-sm font-semibold rounded-full hover:bg-ambre transition-colors duration-200 disabled:opacity-60 shrink-0"
       >
         {pending ? <CircleNotch size={14} className="animate-spin" /> : null}
         {pending ? "…" : "Enregistrer"}
