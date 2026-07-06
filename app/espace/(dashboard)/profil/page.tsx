@@ -5,6 +5,7 @@ import { getCachedProfile } from "@/lib/supabase/profile";
 import { getSignedChantierPhotoUrl } from "@/lib/supabase/storage";
 import { ProfilForm, type ProfilData } from "@/components/espace/ProfilForm";
 import { LogoUpload } from "@/components/espace/LogoUpload";
+import { VitrineSection } from "@/components/artisan/VitrineSection";
 
 export const metadata: Metadata = {
   title: "Mon profil - Estime",
@@ -33,6 +34,10 @@ export default async function Profil({
 
         <Suspense fallback={<LogoSkeleton />}>
           <LogoSection />
+        </Suspense>
+
+        <Suspense fallback={<VitrineSkeleton />}>
+          <VitrineSectionWrapper />
         </Suspense>
       </div>
     </div>
@@ -71,6 +76,30 @@ async function LogoSection() {
   return <LogoUpload currentLogoUrl={logoUrl} />;
 }
 
+async function VitrineSectionWrapper() {
+  const { supabase, user } = await getCurrentUser();
+
+  const profile = await getCachedProfile<{ slug: string | null }>(
+    supabase,
+    user!.id,
+    "slug"
+  );
+
+  if (!profile?.slug) {
+    return (
+      <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 max-w-2xl">
+        <h2 className="font-display text-lg font-bold text-dusk mb-1">Ma page vitrine</h2>
+        <p className="text-dusk/50 text-sm">
+          Renseignez votre prénom et nom dans le formulaire ci-dessus pour générer votre
+          page vitrine publique.
+        </p>
+      </div>
+    );
+  }
+
+  return <VitrineSection slug={profile.slug} />;
+}
+
 function ProfilFormSkeleton() {
   return (
     <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 max-w-2xl animate-pulse">
@@ -93,6 +122,21 @@ function LogoSkeleton() {
         <div className="w-24 h-24 rounded-xl bg-dust shrink-0" />
         <div className="flex-1 h-12 bg-dust rounded-xl" />
       </div>
+    </div>
+  );
+}
+
+function VitrineSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 max-w-2xl animate-pulse">
+      <div className="h-5 w-36 bg-dust rounded mb-2" />
+      <div className="h-4 w-72 bg-dust rounded mb-5" />
+      <div className="h-10 w-full bg-dust rounded-xl mb-5" />
+      <div className="flex gap-3 mb-6">
+        <div className="h-9 w-32 bg-dust rounded-full" />
+        <div className="h-9 w-40 bg-dust rounded-full" />
+      </div>
+      <div className="h-28 w-28 bg-dust rounded-xl" />
     </div>
   );
 }

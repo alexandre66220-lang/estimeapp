@@ -5,6 +5,7 @@ import { updateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { profileCacheTag } from "@/lib/supabase/profile";
+import { buildSlugBase, ensureUniqueSlug } from "@/lib/slug";
 
 export type UploadLogoResult = { error?: string; success?: true };
 
@@ -141,6 +142,20 @@ export async function updateProfil(formData: FormData) {
     redirect("/connexion");
   }
 
+  // Générer le slug si ce profil n'en a pas encore un
+  const admin = createAdminClient();
+  const { data: existing } = await admin
+    .from("profiles")
+    .select("slug")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  let slug: string | undefined;
+  if (!existing?.slug && (prenom || nom)) {
+    const base = buildSlugBase(prenom, nom, metier);
+    slug = await ensureUniqueSlug(admin, base);
+  }
+
   const { error } = await supabase.from("profiles").upsert({
     id: user.id,
     prenom,
@@ -149,6 +164,7 @@ export async function updateProfil(formData: FormData) {
     ville,
     ton_post: tonPost,
     lien_avis_google: lienAvisGoogle,
+    ...(slug ? { slug } : {}),
   });
 
   if (error) {
