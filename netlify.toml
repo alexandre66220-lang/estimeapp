@@ -19,6 +19,9 @@
   node_bundler = "esbuild"
   region = "eu-west-1"
 
+[functions."rapport-mensuel"]
+  schedule = "0 8 1 * *"
+
 [[headers]]
   for = "/images/*"
   [headers.values]
