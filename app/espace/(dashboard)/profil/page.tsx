@@ -6,6 +6,8 @@ import { getSignedChantierPhotoUrl } from "@/lib/supabase/storage";
 import { ProfilForm, type ProfilData } from "@/components/espace/ProfilForm";
 import { LogoUpload } from "@/components/espace/LogoUpload";
 import { VitrineSection } from "@/components/artisan/VitrineSection";
+import { ProfilEnrichi, type ProfilEnrichiData } from "@/components/espace/ProfilEnrichi";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const metadata: Metadata = {
   title: "Mon profil - Estime",
@@ -38,6 +40,10 @@ export default async function Profil({
 
         <Suspense fallback={<VitrineSkeleton />}>
           <VitrineSectionWrapper />
+        </Suspense>
+
+        <Suspense fallback={<EnrichiSkeleton />}>
+          <ProfilEnrichiSection />
         </Suspense>
       </div>
     </div>
@@ -98,6 +104,77 @@ async function VitrineSectionWrapper() {
   }
 
   return <VitrineSection slug={profile.slug} />;
+}
+
+async function ProfilEnrichiSection() {
+  const { supabase, user } = await getCurrentUser();
+
+  const profile = await getCachedProfile<{
+    photo_profil: string | null;
+    presentation: string | null;
+    certifications: string[];
+    annees_experience: number | null;
+    statut_disponibilite: string;
+    statut_jusqu_au: string | null;
+    liens_sociaux: { instagram?: string; facebook?: string; tiktok?: string } | null;
+    numero_siret: string | null;
+    slug: string | null;
+    slug_personnalise: string | null;
+    theme_couleur: string;
+    langue_interface: string;
+    metier: string | null;
+    ville: string | null;
+    prenom: string | null;
+    nom: string | null;
+  }>(
+    supabase,
+    user!.id,
+    "photo_profil, presentation, certifications, annees_experience, statut_disponibilite, statut_jusqu_au, liens_sociaux, numero_siret, slug, slug_personnalise, theme_couleur, langue_interface, metier, ville, prenom, nom"
+  );
+
+  let photoUrl: string | null = null;
+  if (profile?.photo_profil) {
+    const admin = createAdminClient();
+    const { data } = await admin.storage
+      .from("profiles")
+      .createSignedUrl(profile.photo_profil, 3600);
+    photoUrl = data?.signedUrl ?? null;
+  }
+
+  const enrichiData: ProfilEnrichiData = {
+    photo_profil: profile?.photo_profil ?? null,
+    photoUrl,
+    presentation: profile?.presentation ?? null,
+    certifications: profile?.certifications ?? [],
+    annees_experience: profile?.annees_experience ?? null,
+    statut_disponibilite: profile?.statut_disponibilite ?? "disponible",
+    statut_jusqu_au: profile?.statut_jusqu_au ?? null,
+    liens_sociaux: profile?.liens_sociaux ?? {},
+    numero_siret: profile?.numero_siret ?? null,
+    slug: profile?.slug ?? null,
+    slug_personnalise: profile?.slug_personnalise ?? null,
+    theme_couleur: profile?.theme_couleur ?? "#C75D3B",
+    langue_interface: profile?.langue_interface ?? "fr",
+    metier: profile?.metier ?? null,
+    ville: profile?.ville ?? null,
+    prenom: profile?.prenom ?? null,
+    nom: profile?.nom ?? null,
+  };
+
+  return <ProfilEnrichi data={enrichiData} />;
+}
+
+function EnrichiSkeleton() {
+  return (
+    <div className="space-y-6 max-w-2xl">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 animate-pulse">
+          <div className="h-5 w-36 bg-dust rounded mb-5" />
+          <div className="h-24 w-full bg-dust rounded-xl" />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function ProfilFormSkeleton() {

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Star, MapPin, Medal, InstagramLogo } from "@phosphor-icons/react/dist/ssr";
+import { Star, MapPin, Medal, InstagramLogo, FacebookLogo, TiktokLogo, ShieldCheck, Briefcase } from "@phosphor-icons/react/dist/ssr";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { niveauPourScore, NIVEAUX } from "@/lib/score/reputation";
 import { ContactModal } from "@/components/artisan/ContactModal";
@@ -80,7 +80,7 @@ export default async function VitrineArtisan({
   // Toutes les requêtes en parallèle
   const { data: profile } = await admin
     .from("profiles")
-    .select("id, prenom, nom, metier, ville, logo_url, company_name, email")
+    .select("id, prenom, nom, metier, ville, logo_url, company_name, email, photo_profil, presentation, certifications, annees_experience, liens_sociaux, statut_disponibilite, numero_siret, theme_couleur")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -123,6 +123,12 @@ export default async function VitrineArtisan({
 
   // Signed URLs pour les photos
   const logoUrl = await signUrl(admin, profile.logo_url);
+  const photoProfilUrl = profile.photo_profil
+    ? await (async () => {
+        const { data } = await admin.storage.from("profiles").createSignedUrl(profile.photo_profil!, 3600);
+        return data?.signedUrl ?? null;
+      })()
+    : null;
 
   const chantiersWithUrls = await Promise.all(
     (chantiers ?? []).map(async (c) => {
@@ -149,6 +155,19 @@ export default async function VitrineArtisan({
 
   const allAvisCount: number = badgeData?.[0]?.totalAvis ?? (avis?.length ?? 0);
 
+  const VALID_THEME_COLORS = ["#C75D3B", "#385144", "#2D4A6B", "#7B2D3E", "#C8922A", "#3D3D3D"];
+  const themeColor = VALID_THEME_COLORS.includes(profile.theme_couleur ?? "") ? profile.theme_couleur! : "#C75D3B";
+  const liens = (profile.liens_sociaux ?? {}) as { instagram?: string; facebook?: string; tiktok?: string };
+  const certifs = (profile.certifications ?? []) as string[];
+  const currentYear = new Date().getFullYear();
+  const expYears = profile.annees_experience ? currentYear - profile.annees_experience : null;
+
+  const statutInfo = profile.statut_disponibilite === "en_chantier"
+    ? { label: "Chantier en cours", color: "#F59E0B" }
+    : profile.statut_disponibilite === "complet"
+    ? { label: "Complet", color: "#EF4444" }
+    : { label: "Disponible", color: "#22C55E" };
+
   return (
     <>
       <style>{`
@@ -168,8 +187,20 @@ export default async function VitrineArtisan({
         <header className="relative bg-white border-b border-[#2B2521]/6">
           <div className="max-w-2xl mx-auto px-5 py-10 sm:py-14 flex flex-col items-center text-center gap-5">
 
-            {/* Logo / initiales */}
-            {logoUrl ? (
+            {/* Photo profil / Logo / initiales */}
+            {photoProfilUrl ? (
+              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#2B2521]/8 shadow-sm">
+                <Image
+                  src={photoProfilUrl}
+                  alt={`Photo de ${artisanNom}`}
+                  width={96}
+                  height={96}
+                  className="object-cover w-full h-full"
+                  unoptimized
+                  priority
+                />
+              </div>
+            ) : logoUrl ? (
               <div className="w-20 h-20 rounded-2xl overflow-hidden bg-[#F8F5F2] border border-[#2B2521]/8 flex items-center justify-center shadow-sm">
                 <Image
                   src={logoUrl}
@@ -182,7 +213,7 @@ export default async function VitrineArtisan({
                 />
               </div>
             ) : (
-              <div className="w-20 h-20 rounded-2xl bg-[#C75D3B] flex items-center justify-center shadow-sm">
+              <div className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-sm" style={{ backgroundColor: themeColor }}>
                 <span className="text-white text-2xl font-bold tracking-tight">
                   {initiales(profile.prenom, profile.nom, profile.company_name)}
                 </span>
@@ -208,14 +239,82 @@ export default async function VitrineArtisan({
               )}
             </div>
 
+            {/* Statut + expérience */}
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-white" style={{ backgroundColor: statutInfo.color }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
+                {statutInfo.label}
+              </span>
+              {expYears !== null && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#2B2521]/6 text-[#2B2521]/70">
+                  <Briefcase size={11} aria-hidden="true" />
+                  {expYears} an{expYears > 1 ? "s" : ""} d&apos;expérience
+                </span>
+              )}
+            </div>
+
+            {/* Présentation */}
+            {profile.presentation && (
+              <p className="text-sm text-[#2B2521]/65 max-w-md leading-relaxed">{profile.presentation}</p>
+            )}
+
+            {/* Certifications */}
+            {certifs.length > 0 && (
+              <div className="flex flex-wrap items-center justify-center gap-1.5">
+                {certifs.slice(0, 6).map((c) => (
+                  <span key={c} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#2B2521]/5 text-[#2B2521]/70 border border-[#2B2521]/8">
+                    <ShieldCheck size={10} aria-hidden="true" />
+                    {c}
+                  </span>
+                ))}
+              </div>
+            )}
+
             {/* Badge Estime */}
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#C75D3B]/8 border border-[#C75D3B]/15">
-              <Medal size={16} className="text-[#C75D3B]" weight="fill" aria-hidden="true" />
-              <span className="text-sm font-semibold text-[#C75D3B]">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full border" style={{ backgroundColor: `${themeColor}14`, borderColor: `${themeColor}25` }}>
+              <Medal size={16} weight="fill" aria-hidden="true" style={{ color: themeColor }} />
+              <span className="text-sm font-semibold" style={{ color: themeColor }}>
                 {niveauInfo.label} Estime
               </span>
-              <span className="text-xs text-[#C75D3B]/60">· {scoreTotal} pts</span>
+              <span className="text-xs" style={{ color: `${themeColor}99` }}>· {scoreTotal} pts</span>
             </div>
+
+            {/* Réseaux sociaux */}
+            {(liens.instagram || liens.facebook || liens.tiktok) && (
+              <div className="flex items-center gap-3">
+                {liens.instagram && (
+                  <a href={liens.instagram} target="_blank" rel="noopener noreferrer" className="text-[#2B2521]/40 hover:text-[#E1306C] transition-colors">
+                    <InstagramLogo size={20} weight="duotone" />
+                  </a>
+                )}
+                {liens.facebook && (
+                  <a href={liens.facebook} target="_blank" rel="noopener noreferrer" className="text-[#2B2521]/40 hover:text-[#1877F2] transition-colors">
+                    <FacebookLogo size={20} weight="duotone" />
+                  </a>
+                )}
+                {liens.tiktok && (
+                  <a href={liens.tiktok} target="_blank" rel="noopener noreferrer" className="text-[#2B2521]/40 hover:text-[#2B2521] transition-colors">
+                    <TiktokLogo size={20} weight="duotone" />
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* SIRET */}
+            {profile.numero_siret && (
+              <a
+                href={`https://annuaire-entreprises.data.gouv.fr/entreprise/${profile.numero_siret}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs text-[#2B2521]/40 hover:text-[#2B2521]/70"
+              >
+                <ShieldCheck size={12} />
+                SIRET {profile.numero_siret}
+              </a>
+            )}
+
+            {/* CTA contact */}
+            <ContactModal slug={slug} artisanNom={artisanNom} />
 
             {/* Note globale */}
             {avgNote !== null && (

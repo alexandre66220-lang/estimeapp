@@ -4,7 +4,22 @@ import TrialBanner from "@/components/espace/TrialBanner";
 import { FAB } from "@/components/espace/FAB";
 import { PointsToastProvider } from "@/components/espace/PointsToastProvider";
 import { getCurrentUser } from "@/lib/supabase/server";
-import { getBillingStatus } from "@/lib/supabase/profile";
+import { getBillingStatus, getCachedProfile } from "@/lib/supabase/profile";
+
+const VALID_THEME_COLORS = ["#C75D3B", "#385144", "#2D4A6B", "#7B2D3E", "#C8922A", "#3D3D3D"];
+
+async function ThemeInjector() {
+  const { supabase, user } = await getCurrentUser();
+  if (!user) return null;
+  const profile = await getCachedProfile<{ theme_couleur: string | null }>(
+    supabase,
+    user.id,
+    "theme_couleur"
+  );
+  const color = profile?.theme_couleur ?? "#C75D3B";
+  const safe = VALID_THEME_COLORS.includes(color) ? color : "#C75D3B";
+  return <style>{`:root { --color-accent: ${safe}; }`}</style>;
+}
 
 export default function DashboardLayout({
   children,
@@ -13,6 +28,9 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="min-h-screen bg-dust">
+      <Suspense fallback={null}>
+        <ThemeInjector />
+      </Suspense>
       <Sidebar />
 
       <div
