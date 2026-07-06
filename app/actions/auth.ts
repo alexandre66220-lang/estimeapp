@@ -2,49 +2,11 @@
 
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { translateAuthError } from "@/lib/supabase/auth-errors";
 import { devError } from "@/lib/log";
-import {
-  SESSION_STATUS_COOKIE,
-  SESSION_STATUS_COOKIE_OPTIONS,
-  signSessionStatus,
-} from "@/lib/supabase/session-status-cookie";
-
-type LoginProfile = {
-  onboarding_complete: boolean | null;
-  is_subscribed: boolean | null;
-  trial_end: string | null;
-} | null;
-
-/**
- * Le premier appel Supabase juste après signInWithPassword échoue parfois
- * silencieusement (connexion réseau pas encore chaude) : on retente 3 fois
- * avant d'abandonner et de poser un cookie avec des valeurs par défaut.
- */
-async function fetchProfileWithRetry(
-  supabase: SupabaseClient,
-  userId: string
-): Promise<LoginProfile> {
-  for (let attempt = 1; attempt <= 3; attempt += 1) {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("onboarding_complete, is_subscribed, trial_end")
-      .eq("id", userId)
-      .maybeSingle();
-
-    if (!error) return data;
-
-    devError(`login: échec de la récupération du profil (tentative ${attempt}/3)`, error);
-    if (attempt < 3) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-    }
-  }
-
-  return null;
-}
+import { SESSION_STATUS_COOKIE } from "@/lib/supabase/session-status-cookie";
 
 export async function login(formData: FormData) {
   const email = (formData.get("email") as string)?.trim();
@@ -57,7 +19,7 @@ export async function login(formData: FormData) {
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signInWithPassword({
+  const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -68,19 +30,10 @@ export async function login(formData: FormData) {
     );
   }
 
-  if (data.user) {
-    const profile = await fetchProfileWithRetry(supabase, data.user.id);
-
-    const signedValue = await signSessionStatus({
-      onboardingComplete: profile?.onboarding_complete ?? false,
-      isSubscribed: profile?.is_subscribed ?? false,
-      trialEnd: profile?.trial_end ?? null,
-    });
-    if (signedValue) {
-      (await cookies()).set(SESSION_STATUS_COOKIE, signedValue, SESSION_STATUS_COOKIE_OPTIONS);
-    }
-  }
-
+  // Le profil (onboarding, abonnement) n'est volontairement pas chargé ici :
+  // le middleware s'en charge au premier accès à /espace/* et pose lui-même
+  // le cookie de cache. signInWithPassword() est le seul appel bloquant
+  // avant la redirection pour rendre la connexion quasi instantanée.
   redirect("/espace/tableau-de-bord");
 }
 
