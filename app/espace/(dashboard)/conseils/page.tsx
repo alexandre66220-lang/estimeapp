@@ -68,11 +68,21 @@ async function ConseilsContent({ metierParam }: { metierParam?: string }) {
 
   return (
     <>
-      <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold text-dusk">Conseils et astuces</h1>
-        <p className="text-dusk/50 text-sm mt-1">
-          Des conseils pratiques rédigés par des experts du BTP.
-        </p>
+      <div className="flex items-start justify-between gap-4 mb-8 flex-wrap">
+        <div>
+          <h1 className="font-display text-3xl font-bold text-dusk">Conseils et astuces</h1>
+          <p className="text-dusk/50 text-sm mt-1">
+            Des conseils pratiques rédigés par des experts du BTP.
+          </p>
+        </div>
+        <Link
+          href="/blog"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm font-medium text-dusk/50 hover:text-dusk transition-colors"
+        >
+          Voir tous les articles →
+        </Link>
       </div>
 
       <ConseilsMetierFilter metiers={METIERS} active={activeMetier} />

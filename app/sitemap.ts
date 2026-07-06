@@ -37,19 +37,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
   } catch { /* env vars absentes au build */ }
 
-  // Articles conseils (Sanity)
+  // Articles conseils (Sanity) — blog public + espace
   try {
     const { sanityClient } = await import("@/lib/sanity/client");
     const articles = await sanityClient.fetch<{ slug: string; published_at: string | null }[]>(
       `*[_type == "article_conseil" && actif == true] { "slug": slug.current, published_at }`
     );
-    conseilRoutes = (articles ?? []).map((a) => ({
-      url: `${BASE}/espace/conseils/${a.slug}`,
-      lastModified: a.published_at ? new Date(a.published_at) : new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    }));
+    conseilRoutes = (articles ?? []).flatMap((a) => [
+      {
+        url: `${BASE}/blog/${a.slug}`,
+        lastModified: a.published_at ? new Date(a.published_at) : new Date(),
+        changeFrequency: "monthly" as const,
+        priority: 0.8,
+      },
+      {
+        url: `${BASE}/espace/conseils/${a.slug}`,
+        lastModified: a.published_at ? new Date(a.published_at) : new Date(),
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+      },
+    ]);
   } catch { /* Sanity indisponible */ }
 
-  return [...staticRoutes, ...vitrineRoutes, ...conseilRoutes];
+  const blogIndex: MetadataRoute.Sitemap = [
+    { url: `${BASE}/blog`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
+  ];
+
+  return [...staticRoutes, ...blogIndex, ...vitrineRoutes, ...conseilRoutes];
 }

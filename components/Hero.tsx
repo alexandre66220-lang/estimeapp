@@ -27,6 +27,12 @@ export default function Hero() {
           </Link>
           <div className="flex items-center gap-5">
             <Link
+              href="/blog"
+              className="font-landing-sans text-sm text-[#F8F5F2]/60 hover:text-dust/90 transition-colors duration-200 hidden sm:block"
+            >
+              Blog
+            </Link>
+            <Link
               href="/annuaire"
               className="font-landing-sans text-sm text-[#F8F5F2]/60 hover:text-dust/90 transition-colors duration-200 hidden sm:block"
             >

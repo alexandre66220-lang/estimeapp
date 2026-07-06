@@ -121,6 +121,18 @@ body {
   color: #2B3138;
 }
 
+/* ── Prose styles pour les articles du blog ──────────────────────────────── */
+.prose-blog h2 { font-family: var(--font-fraunces); font-size: 1.5rem; font-weight: 600; color: #2B2521; margin-top: 2rem; margin-bottom: 0.75rem; line-height: 1.25; }
+.prose-blog h3 { font-family: var(--font-fraunces); font-size: 1.2rem; font-weight: 600; color: #2B2521; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+.prose-blog p  { color: rgba(43,37,33,0.75); line-height: 1.75; margin-bottom: 1.25rem; }
+.prose-blog ul, .prose-blog ol { padding-left: 1.5rem; margin-bottom: 1.25rem; }
+.prose-blog li { color: rgba(43,37,33,0.75); line-height: 1.7; margin-bottom: 0.35rem; }
+.prose-blog ul li { list-style-type: disc; }
+.prose-blog ol li { list-style-type: decimal; }
+.prose-blog strong { color: #2B2521; font-weight: 600; }
+.prose-blog a { color: #C75D3B; text-decoration: underline; }
+.prose-blog blockquote { border-left: 3px solid #C75D3B; padding-left: 1rem; margin: 1.5rem 0; color: rgba(43,37,33,0.6); font-style: italic; }
+
 /* Signature : lumiere de fin de chantier - degrade ambre vers crepuscule */
 .lumiere-fin-chantier {
   background: linear-gradient(
