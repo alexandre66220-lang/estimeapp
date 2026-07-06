@@ -19,6 +19,7 @@ import {
   CurrencyEur,
   FilePdf,
   Trophy,
+  Globe,
   type Icon as PhosphorIcon,
 } from "@phosphor-icons/react";
 import { logout } from "@/app/actions/auth";
@@ -34,6 +35,7 @@ const NAV_ITEMS: { href: string; label: string; icon: PhosphorIcon }[] = [
   { href: "/espace/avis", label: "Mes Avis", icon: Star },
   { href: "/espace/badge", label: "Mon Badge", icon: SealCheck },
   { href: "/espace/profil", label: "Mon profil", icon: User },
+  { href: "/annuaire", label: "Annuaire public", icon: Globe },
   { href: "/espace/parametres", label: "Paramètres", icon: GearSix },
   { href: "/espace/abonnement", label: "Abonnement", icon: CreditCard },
 ];

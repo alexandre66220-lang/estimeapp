@@ -25,12 +25,20 @@ export default function Hero() {
           >
             Estime
           </Link>
-          <Link
-            href="/connexion"
-            className="font-landing-sans text-sm text-[#F8F5F2] hover:text-dust/70 transition-colors duration-200"
-          >
-            Se connecter
-          </Link>
+          <div className="flex items-center gap-5">
+            <Link
+              href="/annuaire"
+              className="font-landing-sans text-sm text-[#F8F5F2]/60 hover:text-dust/90 transition-colors duration-200 hidden sm:block"
+            >
+              Trouver un artisan
+            </Link>
+            <Link
+              href="/connexion"
+              className="font-landing-sans text-sm text-[#F8F5F2] hover:text-dust/70 transition-colors duration-200"
+            >
+              Se connecter
+            </Link>
+          </div>
         </div>
       </header>
       <div

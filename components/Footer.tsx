@@ -33,6 +33,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/annuaire" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
+                  Annuaire artisans
+                </Link>
+              </li>
+              <li>
                 <Link href="/contact" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
                   Contact
                 </Link>

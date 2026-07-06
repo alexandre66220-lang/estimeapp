@@ -8,6 +8,7 @@ import { LogoUpload } from "@/components/espace/LogoUpload";
 import { VitrineSection } from "@/components/artisan/VitrineSection";
 import { ProfilEnrichi, type ProfilEnrichiData } from "@/components/espace/ProfilEnrichi";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { VisibleAnnuaireToggle } from "@/components/espace/VisibleAnnuaireToggle";
 
 export const metadata: Metadata = {
   title: "Mon profil - Estime",
@@ -44,6 +45,10 @@ export default async function Profil({
 
         <Suspense fallback={<EnrichiSkeleton />}>
           <ProfilEnrichiSection />
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <AnnuaireSection />
         </Suspense>
       </div>
     </div>
@@ -162,6 +167,21 @@ async function ProfilEnrichiSection() {
   };
 
   return <ProfilEnrichi data={enrichiData} />;
+}
+
+async function AnnuaireSection() {
+  const { supabase, user } = await getCurrentUser();
+  const profile = await getCachedProfile<{ visible_annuaire: boolean; slug: string | null }>(
+    supabase,
+    user!.id,
+    "visible_annuaire, slug"
+  );
+  return (
+    <VisibleAnnuaireToggle
+      defaultValue={profile?.visible_annuaire ?? true}
+      slug={profile?.slug ?? null}
+    />
+  );
 }
 
 function EnrichiSkeleton() {
