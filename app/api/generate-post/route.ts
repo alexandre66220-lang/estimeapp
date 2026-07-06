@@ -8,9 +8,13 @@ export const runtime = "edge";
 
 export async function POST(request: Request) {
   let chantierId: string | undefined;
+  let tonPost: string | undefined;
+  let longueurPost: string | undefined;
   try {
     const body = await request.json();
     chantierId = body.chantierId;
+    tonPost = body.tonPost;
+    longueurPost = body.longueurPost;
   } catch {
     return NextResponse.json({ error: "Requête invalide." }, { status: 400 });
   }
@@ -95,7 +99,8 @@ export async function POST(request: Request) {
       nom: profile?.nom,
       metier: profile?.metier,
       ville: profile?.ville,
-      tonPost: profile?.ton_post,
+      tonPost: tonPost ?? profile?.ton_post,
+      longueurPost: longueurPost,
       hashtagsFavoris: profile?.hashtags_favoris,
     });
   } catch (error) {

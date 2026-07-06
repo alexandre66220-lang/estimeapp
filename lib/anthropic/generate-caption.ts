@@ -47,6 +47,13 @@ const TON_INSTRUCTIONS: Record<string, string> = {
   professionnel: "Ton sobre et direct, orienté résultat, sans familiarité.",
   decontracte: "Ton chaleureux et convivial, comme si tu parlais à un voisin.",
   technique: "Ton précis qui emploie le vocabulaire métier approprié.",
+  chaleureux: "Ton chaleureux et humain, mets en valeur la relation client et la fierté du travail bien fait.",
+};
+
+const LONGUEUR_INSTRUCTIONS: Record<string, { instruction: string; maxTokens: number }> = {
+  court: { instruction: "Légende courte : 1 à 2 phrases maximum, environ 150 caractères.", maxTokens: 300 },
+  moyen: { instruction: "Légende de longueur moyenne : 3 à 4 phrases, environ 300 caractères.", maxTokens: 600 },
+  long: { instruction: "Légende détaillée : 5 à 7 phrases, environ 600 caractères, décris le chantier avec précision.", maxTokens: 1000 },
 };
 
 export type GeneratedCaption = {
@@ -62,6 +69,7 @@ export async function generateInstagramCaption(params: {
   metier?: string | null;
   ville?: string | null;
   tonPost?: string | null;
+  longueurPost?: string | null;
   hashtagsFavoris?: string[] | null;
 }): Promise<GeneratedCaption> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -95,11 +103,14 @@ export async function generateInstagramCaption(params: {
   const tonInstruction = params.tonPost
     ? TON_INSTRUCTIONS[params.tonPost]
     : undefined;
+  const longueurConfig = params.longueurPost
+    ? LONGUEUR_INSTRUCTIONS[params.longueurPost]
+    : LONGUEUR_INSTRUCTIONS.moyen;
   const favoris = (params.hashtagsFavoris ?? []).filter(Boolean);
 
   const message = await anthropic.messages.create({
     model: MODEL,
-    max_tokens: 800,
+    max_tokens: longueurConfig.maxTokens,
     messages: [
       {
         role: "user",
@@ -122,7 +133,8 @@ Consignes pour la légende :
 - Ton engageant et professionnel, à la première personne (l'artisan qui parle de son travail), sans emphase excessive ni superlatifs creux.${
               tonInstruction ? `\n- ${tonInstruction}` : ""
             }
-- 2 à 4 phrases courtes maximum, qui décrivent concrètement la transformation visible sur les photos.
+- ${longueurConfig.instruction}
+- Décris concrètement la transformation visible sur les photos.
 - N'utilise pas de tiret cadratin (—) ni d'emoji.
 - Ne mets aucun hashtag dans la légende, ils seront générés séparément.
 

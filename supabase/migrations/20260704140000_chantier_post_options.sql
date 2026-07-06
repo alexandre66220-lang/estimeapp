@@ -1,0 +1,4 @@
+ALTER TABLE chantiers
+  ADD COLUMN IF NOT EXISTS ton_post TEXT,
+  ADD COLUMN IF NOT EXISTS longueur_post TEXT,
+  ADD COLUMN IF NOT EXISTS post_modifie TEXT;

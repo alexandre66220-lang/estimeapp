@@ -14,9 +14,11 @@ import {
   WarningCircle,
   ArrowsClockwise,
   Plus,
+  ChatTeardrop,
+  TextAlignLeft,
 } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
-import { HashtagsEditor } from "@/components/espace/HashtagsEditor";
+import { PostEditor } from "@/components/espace/PostEditor";
 import { usePointsToast } from "@/components/espace/PointsToastProvider";
 import { addPointsFidelite } from "@/app/actions/fidelite";
 
@@ -25,10 +27,21 @@ const NotationChantier = dynamic<React.ComponentProps<typeof import("@/component
   { ssr: false }
 );
 
-const ShareActions = dynamic<React.ComponentProps<typeof import("@/components/espace/ShareActions").ShareActions>>(
-  () => import("@/components/espace/ShareActions").then((mod) => mod.ShareActions),
-  { ssr: false }
-);
+type TonPost = "professionnel" | "decontracte" | "technique" | "chaleureux";
+type LongueurPost = "court" | "moyen" | "long";
+
+const TON_OPTIONS: { value: TonPost; label: string; emoji: string }[] = [
+  { value: "professionnel", label: "Professionnel", emoji: "💼" },
+  { value: "decontracte", label: "Décontracté", emoji: "😊" },
+  { value: "technique", label: "Technique", emoji: "🔧" },
+  { value: "chaleureux", label: "Chaleureux", emoji: "🤝" },
+];
+
+const LONGUEUR_OPTIONS: { value: LongueurPost; label: string; sub: string }[] = [
+  { value: "court", label: "Court", sub: "~150 car." },
+  { value: "moyen", label: "Moyen", sub: "~300 car." },
+  { value: "long", label: "Long", sub: "~600 car." },
+];
 
 type Photo = { file: File; preview: string };
 
@@ -114,8 +127,11 @@ export default function NouveauChantier() {
   const [caption, setCaption] = useState("");
   const [hashtags, setHashtags] = useState<string[]>([]);
   const [favoris, setFavoris] = useState<string[]>([]);
+  const [ton, setTon] = useState<TonPost>("professionnel");
+  const [longueur, setLongueur] = useState<LongueurPost>("moyen");
 
   const [chantierId, setChantierId] = useState<string | null>(null);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   const isBusy = status === "uploading" || status === "generating";
 
   useEffect(() => {
@@ -164,12 +180,12 @@ export default function NouveauChantier() {
     else setApres(null);
   }
 
-  async function generatePost(chantierId: string) {
-    setStatus("generating");
+  async function generatePost(chantierId: string, tonOverride?: TonPost, longueurOverride?: LongueurPost, silent = false) {
+    if (!silent) setStatus("generating");
     const response = await fetch("/api/generate-post", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chantierId }),
+      body: JSON.stringify({ chantierId, tonPost: tonOverride ?? ton, longueurPost: longueurOverride ?? longueur }),
     });
     const json = await response.json();
     if (!response.ok) {
@@ -255,11 +271,14 @@ export default function NouveauChantier() {
   async function handleRetryGenerate() {
     if (!chantierId) return;
     setErrorMessage(null);
+    setIsRegenerating(true);
     try {
-      await generatePost(chantierId);
+      await generatePost(chantierId, undefined, undefined, true);
     } catch (error) {
       setStatus("error");
       setErrorMessage(error instanceof Error ? error.message : "Une erreur est survenue.");
+    } finally {
+      setIsRegenerating(false);
     }
   }
 
@@ -276,6 +295,8 @@ export default function NouveauChantier() {
     setCaption("");
     setHashtags([]);
     setChantierId(null);
+    setTon("professionnel");
+    setLongueur("moyen");
   }
 
   return (
@@ -303,44 +324,16 @@ export default function NouveauChantier() {
             <span className="text-sm font-semibold">Post Instagram généré</span>
           </div>
 
-          <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-5 bg-dust-dark">
-            <Image
-              src={post.image_url}
-              alt="Photo du chantier utilisée pour le post"
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 640px"
-            />
-          </div>
-
-          <label htmlFor="caption" className="block text-sm font-medium text-dusk/70 mb-1.5">
-            Légende
-          </label>
-          <textarea
-            id="caption"
-            value={caption}
-            onChange={(event) => setCaption(event.target.value)}
-            rows={7}
-            className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200 resize-none"
+          <PostEditor
+            chantierId={chantierId!}
+            initialCaption={caption}
+            initialHashtags={hashtags}
+            imageUrl={post.image_url}
+            onRegenerate={handleRetryGenerate}
+            isRegenerating={isRegenerating}
           />
-          <p className="text-dusk/45 text-xs mt-1.5 mb-6">
-            Ajustez le texte si besoin, puis publiez-le manuellement avec la photo sur vos réseaux.
-          </p>
 
-          <div className="mb-6 pt-6 border-t border-dusk/8">
-            <HashtagsEditor
-              hashtags={hashtags}
-              onChange={setHashtags}
-              favoris={favoris}
-              onToggleFavori={handleToggleFavori}
-            />
-          </div>
-
-          <div className="mb-6 pt-6 border-t border-dusk/8">
-            <ShareActions caption={caption} imageUrl={post.image_url} />
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-dusk/8">
+          <div className="flex flex-col sm:flex-row gap-3 pt-6 mt-6 border-t border-dusk/8">
             {chantierId && (
               <Link
                 href={`/espace/chantiers/${chantierId}`}
@@ -423,6 +416,59 @@ export default function NouveauChantier() {
           <p className="text-dusk/45 text-xs">
             Au moins une des deux photos est nécessaire.
           </p>
+
+          {/* Ton de communication */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <ChatTeardrop size={14} className="text-dusk/40" aria-hidden="true" />
+              <span className="text-sm font-medium text-dusk/70">Ton de communication</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {TON_OPTIONS.map(({ value, label, emoji }) => (
+                <button
+                  key={value}
+                  type="button"
+                  disabled={isBusy}
+                  onClick={() => setTon(value)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors disabled:opacity-50 ${
+                    ton === value
+                      ? "bg-braise text-white border-braise"
+                      : "border-dusk/15 text-dusk/60 hover:bg-dust/60"
+                  }`}
+                >
+                  {emoji} {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Longueur du post */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <TextAlignLeft size={14} className="text-dusk/40" aria-hidden="true" />
+              <span className="text-sm font-medium text-dusk/70">Longueur du post</span>
+            </div>
+            <div className="flex gap-2">
+              {LONGUEUR_OPTIONS.map(({ value, label, sub }) => (
+                <button
+                  key={value}
+                  type="button"
+                  disabled={isBusy}
+                  onClick={() => setLongueur(value)}
+                  className={`flex-1 flex flex-col items-center py-2.5 rounded-xl border text-sm font-medium transition-colors disabled:opacity-50 ${
+                    longueur === value
+                      ? "bg-braise text-white border-braise"
+                      : "border-dusk/15 text-dusk/60 hover:bg-dust/60"
+                  }`}
+                >
+                  {label}
+                  <span className={`text-xs mt-0.5 ${longueur === value ? "text-white/70" : "text-dusk/40"}`}>
+                    {sub}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
 
           {errorMessage && (
             <div className="flex items-start gap-2.5 rounded-xl bg-red-50 text-red-700 text-sm px-4 py-3">
