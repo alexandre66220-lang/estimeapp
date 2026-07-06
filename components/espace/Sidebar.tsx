@@ -22,11 +22,12 @@ import {
   Globe,
   Lightbulb,
   DeviceMobile,
+  Ruler,
+  CalendarBlank as CalendarBlankIcon,
   type Icon as PhosphorIcon,
 } from "@phosphor-icons/react";
 import { logout } from "@/app/actions/auth";
 import { PresentationModeButton } from "@/components/espace/PresentationModeProvider";
-import { CalendarBlank } from "@phosphor-icons/react";
 
 const NAV_ITEMS: { href: string; label: string; icon: PhosphorIcon }[] = [
   { href: "/espace/tableau-de-bord", label: "Tableau de bord", icon: SquaresFour },
@@ -36,7 +37,8 @@ const NAV_ITEMS: { href: string; label: string; icon: PhosphorIcon }[] = [
   { href: "/espace/rapports", label: "Mes rapports", icon: FilePdf },
   { href: "/espace/parrainage", label: "Parrainage", icon: Gift },
   { href: "/espace/fidelite", label: "Fidélité", icon: Trophy },
-  { href: "/espace/agenda", label: "Agenda", icon: CalendarBlank },
+  { href: "/espace/agenda", label: "Agenda", icon: CalendarBlankIcon },
+  { href: "/espace/calculateur", label: "Calculateur m²", icon: Ruler },
   { href: "/espace/conseils", label: "Conseils", icon: Lightbulb },
   { href: "/espace/avis", label: "Mes Avis", icon: Star },
   { href: "/espace/badge", label: "Mon Badge", icon: SealCheck },

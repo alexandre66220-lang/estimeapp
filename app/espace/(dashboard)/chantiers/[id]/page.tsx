@@ -18,6 +18,8 @@ import { MarquerAvisRecu } from "@/components/espace/MarquerAvisRecu";
 import { EtoilesNote } from "@/components/espace/EtoilesNote";
 import { AvantApresGenerateur } from "@/components/espace/AvantApresGenerateur";
 import { StoryGenerateur } from "@/components/espace/StoryGenerateur";
+import { NotesChantier } from "@/components/espace/NotesChantier";
+import { RentabiliteChantier } from "@/components/espace/RentabiliteChantier";
 
 export const metadata: Metadata = {
   title: "Chantier - Estime",
@@ -56,11 +58,12 @@ export default async function FicheChantier({
     { data: relances },
     { data: carnetClients },
     { data: avis },
+    { data: notes },
   ] = await Promise.all([
     supabase
       .from("chantiers")
       .select(
-        "id, titre, photo_avant_url, photo_apres_url, avant_apres_url, statut, client_nom, client_email, termine_at, created_at"
+        "id, titre, photo_avant_url, photo_apres_url, avant_apres_url, statut, client_nom, client_email, termine_at, created_at, montant, depenses, heures_passees, sous_traitance, frais_deplacement"
       )
       .eq("id", id)
       .eq("user_id", user!.id)
@@ -89,6 +92,12 @@ export default async function FicheChantier({
       .select("id, note_google, date_avis")
       .eq("chantier_id", id)
       .maybeSingle(),
+    supabase
+      .from("notes_chantier")
+      .select("id, contenu, created_at")
+      .eq("chantier_id", id)
+      .eq("user_id", user!.id)
+      .order("created_at", { ascending: false }),
   ]);
 
   if (!chantier) {
@@ -305,6 +314,28 @@ export default async function FicheChantier({
           </form>
         )}
       </div>
+
+      <RentabiliteChantier
+        chantierId={id}
+        initial={{
+          montant: chantier.montant ?? null,
+          depenses: chantier.depenses ?? null,
+          heures_passees: chantier.heures_passees ?? null,
+          sous_traitance: chantier.sous_traitance ?? null,
+          frais_deplacement: chantier.frais_deplacement ?? null,
+        }}
+      />
+
+      <NotesChantier
+        chantierId={id}
+        initialNotes={
+          (notes ?? []).map((n) => ({
+            id: n.id,
+            contenu: n.contenu,
+            created_at: n.created_at,
+          }))
+        }
+      />
 
       <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 mb-6">
         <h2 className="font-display text-lg font-bold text-dusk mb-4">
