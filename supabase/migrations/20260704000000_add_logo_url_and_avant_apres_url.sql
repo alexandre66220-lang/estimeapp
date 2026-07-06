@@ -1,0 +1,2 @@
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS logo_url TEXT;
+ALTER TABLE chantiers ADD COLUMN IF NOT EXISTS avant_apres_url TEXT;

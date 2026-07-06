@@ -16,6 +16,7 @@ import { addClientFromChantier } from "@/app/actions/clients";
 import RelanceAction from "@/components/espace/RelanceAction";
 import { MarquerAvisRecu } from "@/components/espace/MarquerAvisRecu";
 import { EtoilesNote } from "@/components/espace/EtoilesNote";
+import { AvantApresGenerateur } from "@/components/espace/AvantApresGenerateur";
 
 export const metadata: Metadata = {
   title: "Chantier - Estime",
@@ -58,7 +59,7 @@ export default async function FicheChantier({
     supabase
       .from("chantiers")
       .select(
-        "id, titre, photo_avant_url, photo_apres_url, statut, client_nom, client_email, termine_at, created_at"
+        "id, titre, photo_avant_url, photo_apres_url, avant_apres_url, statut, client_nom, client_email, termine_at, created_at"
       )
       .eq("id", id)
       .eq("user_id", user!.id)
@@ -93,9 +94,12 @@ export default async function FicheChantier({
     notFound();
   }
 
-  const [photoAvantUrl, photoApresUrl] = await Promise.all([
+  const hasPhoto = Boolean(chantier.photo_avant_url || chantier.photo_apres_url);
+
+  const [photoAvantUrl, photoApresUrl, avantApresSignedUrl] = await Promise.all([
     getSignedChantierPhotoUrl(supabase, chantier.photo_avant_url),
     getSignedChantierPhotoUrl(supabase, chantier.photo_apres_url),
+    getSignedChantierPhotoUrl(supabase, chantier.avant_apres_url ?? null),
   ]);
 
   const isTermine = chantier.statut === "termine";
@@ -171,6 +175,16 @@ export default async function FicheChantier({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Visuel avant/après — visible seulement si au moins une photo */}
+      {hasPhoto && (
+        <div className="mb-6">
+          <AvantApresGenerateur
+            chantierId={chantier.id}
+            existingUrl={avantApresSignedUrl}
+          />
         </div>
       )}
 

@@ -3,7 +3,54 @@
 import { redirect } from "next/navigation";
 import { updateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { profileCacheTag } from "@/lib/supabase/profile";
+
+export type UploadLogoResult = { error?: string; success?: true };
+
+export async function uploadLogo(formData: FormData): Promise<UploadLogoResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Non autorisé" };
+
+  const file = formData.get("logo");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Aucun fichier sélectionné." };
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    return { error: "Le logo ne doit pas dépasser 2 Mo." };
+  }
+  if (!file.type.startsWith("image/")) {
+    return { error: "Format de fichier non supporté." };
+  }
+
+  const admin = createAdminClient();
+  const path = `logos/${user.id}.png`;
+  const bytes = await file.arrayBuffer();
+
+  const { error: uploadError } = await admin.storage
+    .from("chantiers")
+    .upload(path, Buffer.from(bytes), { contentType: file.type, upsert: true });
+
+  if (uploadError) {
+    return { error: "Erreur lors de l'upload du logo." };
+  }
+
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .update({ logo_url: path })
+    .eq("id", user.id);
+
+  if (updateError) {
+    return { error: "Erreur lors de la mise à jour du profil." };
+  }
+
+  updateTag(profileCacheTag(user.id));
+  return { success: true };
+}
 
 export async function updateLienAvisGoogle(formData: FormData) {
   const lienAvisGoogle = (formData.get("lienAvisGoogle") as string)?.trim();
