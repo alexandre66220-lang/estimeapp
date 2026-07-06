@@ -1,0 +1,95 @@
+export default {
+  name: "article_conseil",
+  title: "Article Conseil",
+  type: "document",
+  fields: [
+    {
+      name: "titre",
+      title: "Titre",
+      type: "string",
+      validation: (Rule: { required: () => unknown }) => Rule.required(),
+    },
+    {
+      name: "slug",
+      title: "Slug",
+      type: "slug",
+      options: { source: "titre" },
+      validation: (Rule: { required: () => unknown }) => Rule.required(),
+    },
+    {
+      name: "metier",
+      title: "Métier(s) concerné(s)",
+      type: "array",
+      of: [{ type: "string" }],
+      options: {
+        list: [
+          { title: "Général (tous)", value: "general" },
+          { title: "Peintre", value: "peintre" },
+          { title: "Plombier", value: "plombier" },
+          { title: "Électricien", value: "electricien" },
+          { title: "Maçon", value: "macon" },
+          { title: "Carreleur", value: "carreleur" },
+          { title: "Couvreur", value: "couvreur" },
+          { title: "Menuisier", value: "menuisier" },
+          { title: "Plaquiste", value: "plaquiste" },
+          { title: "Chauffagiste", value: "chauffagiste" },
+          { title: "Façadier", value: "facadier" },
+        ],
+      },
+    },
+    {
+      name: "categorie",
+      title: "Catégorie",
+      type: "string",
+      options: {
+        list: ["Technique", "Marketing", "Gestion", "Réputation", "Sécurité"],
+      },
+      validation: (Rule: { required: () => unknown }) => Rule.required(),
+    },
+    {
+      name: "resume",
+      title: "Résumé (2 phrases)",
+      type: "text",
+      rows: 3,
+    },
+    {
+      name: "contenu",
+      title: "Contenu",
+      type: "array",
+      of: [{ type: "block" }],
+    },
+    {
+      name: "temps_lecture",
+      title: "Temps de lecture (minutes)",
+      type: "number",
+      initialValue: 3,
+    },
+    {
+      name: "image_principale",
+      title: "Image principale",
+      type: "image",
+      options: { hotspot: true },
+      fields: [{ name: "alt", title: "Texte alternatif", type: "string" }],
+    },
+    {
+      name: "est_conseil_semaine",
+      title: "Conseil de la semaine ?",
+      type: "boolean",
+      initialValue: false,
+    },
+    {
+      name: "published_at",
+      title: "Date de publication",
+      type: "datetime",
+    },
+    {
+      name: "actif",
+      title: "Actif",
+      type: "boolean",
+      initialValue: true,
+    },
+  ],
+  preview: {
+    select: { title: "titre", subtitle: "categorie" },
+  },
+};
