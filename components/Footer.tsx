@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import ManageCookiesLink from "./ManageCookiesLink";
 
 export default function Footer() {
@@ -57,13 +58,11 @@ export default function Footer() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               alt="Estime - Reputation on autopilot for tradespeople | Product Hunt"
               width={250}
               height={54}
               src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1189422&theme=light&t=1783348237784"
-              style={{ display: "block" }}
             />
           </a>
         </div>
