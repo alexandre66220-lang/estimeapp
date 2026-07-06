@@ -29,6 +29,7 @@ import { ReputationCard } from "@/components/espace/ReputationCard";
 import { RangLocalCard } from "@/components/espace/RangLocalCard";
 import PaymentSuccessToast from "@/components/espace/PaymentSuccessToast";
 import { InstallBanner } from "@/components/espace/InstallBanner";
+import { PresentationModeButton } from "@/components/espace/PresentationModeProvider";
 
 export const metadata: Metadata = {
   title: "Tableau de bord - Estime",
@@ -64,13 +65,16 @@ export default async function TableauDeBord({
             Vue d&apos;ensemble de votre activité.
           </p>
         </div>
-        <Link
-          href="/espace/nouveau-chantier"
-          className="hidden sm:inline-flex items-center gap-2 bg-braise text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-ambre active:scale-[0.97] transition-all duration-200"
-        >
-          <Plus size={18} weight="bold" aria-hidden="true" />
-          Nouveau chantier
-        </Link>
+        <div className="flex items-center gap-2">
+          <PresentationModeButton className="hidden sm:flex items-center gap-2 border border-dusk/15 text-dusk/60 font-medium text-sm px-4 py-2.5 rounded-full hover:bg-dust/60 transition-colors" />
+          <Link
+            href="/espace/nouveau-chantier"
+            className="hidden sm:inline-flex items-center gap-2 bg-braise text-white font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-ambre active:scale-[0.97] transition-all duration-200"
+          >
+            <Plus size={18} weight="bold" aria-hidden="true" />
+            Nouveau chantier
+          </Link>
+        </div>
       </div>
 
       <Suspense fallback={<ReputationCardSkeleton />}>

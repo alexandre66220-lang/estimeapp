@@ -25,6 +25,8 @@ import {
   type Icon as PhosphorIcon,
 } from "@phosphor-icons/react";
 import { logout } from "@/app/actions/auth";
+import { PresentationModeButton } from "@/components/espace/PresentationModeProvider";
+import { CalendarBlank } from "@phosphor-icons/react";
 
 const NAV_ITEMS: { href: string; label: string; icon: PhosphorIcon }[] = [
   { href: "/espace/tableau-de-bord", label: "Tableau de bord", icon: SquaresFour },
@@ -34,6 +36,7 @@ const NAV_ITEMS: { href: string; label: string; icon: PhosphorIcon }[] = [
   { href: "/espace/rapports", label: "Mes rapports", icon: FilePdf },
   { href: "/espace/parrainage", label: "Parrainage", icon: Gift },
   { href: "/espace/fidelite", label: "Fidélité", icon: Trophy },
+  { href: "/espace/agenda", label: "Agenda", icon: CalendarBlank },
   { href: "/espace/conseils", label: "Conseils", icon: Lightbulb },
   { href: "/espace/avis", label: "Mes Avis", icon: Star },
   { href: "/espace/badge", label: "Mon Badge", icon: SealCheck },
@@ -155,6 +158,7 @@ export default function Sidebar() {
           ))}
         </nav>
         <div className="border-t border-white/8 pt-4 mt-4">
+          <PresentationModeButton className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-dust/55 hover:bg-white/5 hover:text-dust transition-colors duration-200 mb-1" />
           <LogoutButton />
           <p className="text-white/20 text-xs mt-4 px-1">
             <a
@@ -191,6 +195,7 @@ export default function Sidebar() {
           ))}
         </nav>
         <div className="border-t border-white/8 mx-5 pt-4">
+          <PresentationModeButton className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-dust/55 hover:bg-white/5 hover:text-dust transition-colors duration-200 mb-1" />
           <LogoutButton />
         </div>
       </div>

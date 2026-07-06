@@ -3,6 +3,8 @@ import Sidebar from "@/components/espace/Sidebar";
 import TrialBanner from "@/components/espace/TrialBanner";
 import { FAB } from "@/components/espace/FAB";
 import { PointsToastProvider } from "@/components/espace/PointsToastProvider";
+import { QuickDock } from "@/components/espace/QuickDock";
+import { PresentationModeProvider } from "@/components/espace/PresentationModeProvider";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getBillingStatus, getCachedProfile } from "@/lib/supabase/profile";
 
@@ -41,18 +43,21 @@ export default function DashboardLayout({
         <div className="absolute bottom-0 left-1/4 w-[26rem] h-[26rem] bg-mauve/[0.06] rounded-full blur-3xl" />
       </div>
 
-      <PointsToastProvider>
-        <div className="lg:pl-64 pt-16 lg:pt-0">
-          {/* Le shell (Sidebar + contenu) s'affiche sans attendre le statut de
-              facturation : la bannière d'essai apparaît dès que la requête
-              profile résout, sans bloquer le premier rendu. */}
-          <Suspense fallback={null}>
-            <TrialBannerSection />
-          </Suspense>
-          <main>{children}</main>
-        </div>
-        <FAB />
-      </PointsToastProvider>
+      <PresentationModeProvider>
+        <PointsToastProvider>
+          <div className="lg:pl-64 pt-16 lg:pt-0">
+            {/* Le shell (Sidebar + contenu) s'affiche sans attendre le statut de
+                facturation : la bannière d'essai apparaît dès que la requête
+                profile résout, sans bloquer le premier rendu. */}
+            <Suspense fallback={null}>
+              <TrialBannerSection />
+            </Suspense>
+            <main>{children}</main>
+          </div>
+          <FAB />
+          <QuickDock />
+        </PointsToastProvider>
+      </PresentationModeProvider>
     </div>
   );
 }

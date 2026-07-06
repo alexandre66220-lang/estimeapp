@@ -9,6 +9,8 @@ import { VitrineSection } from "@/components/artisan/VitrineSection";
 import { ProfilEnrichi, type ProfilEnrichiData } from "@/components/espace/ProfilEnrichi";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { VisibleAnnuaireToggle } from "@/components/espace/VisibleAnnuaireToggle";
+import { SecuritySection } from "@/components/espace/SecuritySection";
+import { WidgetCopyUrl } from "@/components/espace/WidgetCopyUrl";
 
 export const metadata: Metadata = {
   title: "Mon profil - Estime",
@@ -49,6 +51,14 @@ export default async function Profil({
 
         <Suspense fallback={null}>
           <AnnuaireSection />
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <WidgetSection />
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <SecuritySectionWrapper />
         </Suspense>
       </div>
     </div>
@@ -169,6 +179,38 @@ async function ProfilEnrichiSection() {
   };
 
   return <ProfilEnrichi data={enrichiData} />;
+}
+
+async function WidgetSection() {
+  const { user } = await getCurrentUser();
+  if (!user) return null;
+  return (
+    <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 max-w-2xl">
+      <h2 className="font-display text-lg font-bold text-dusk mb-1">Widget iOS</h2>
+      <p className="text-dusk/50 text-sm">
+        Affichez votre score de réputation sur votre écran d&apos;accueil via Scriptable.
+      </p>
+      <WidgetCopyUrl userId={user.id} />
+    </div>
+  );
+}
+
+async function SecuritySectionWrapper() {
+  const { supabase, user } = await getCurrentUser();
+  if (!user) return null;
+
+  const { data } = await supabase.auth.getSession();
+  const expiresAt = data?.session?.expires_at;
+  let sessionExpiry: string | null = null;
+  if (expiresAt) {
+    sessionExpiry = new Date(expiresAt * 1000).toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  }
+
+  return <SecuritySection sessionExpiry={sessionExpiry} />;
 }
 
 async function AnnuaireSection() {

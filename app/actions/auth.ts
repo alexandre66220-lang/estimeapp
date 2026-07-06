@@ -99,3 +99,16 @@ export async function logout() {
   (await cookies()).delete(SESSION_STATUS_COOKIE);
   redirect("/connexion");
 }
+
+export async function logoutAllDevices(): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non autorisé" };
+
+  // Sign out globally revokes all refresh tokens for this user
+  const { error } = await supabase.auth.signOut({ scope: "global" });
+  if (error) return { error: "Impossible de déconnecter tous les appareils." };
+
+  (await cookies()).delete(SESSION_STATUS_COOKIE);
+  redirect("/connexion");
+}
