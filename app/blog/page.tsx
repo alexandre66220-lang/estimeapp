@@ -21,12 +21,13 @@ export const metadata: Metadata = {
   },
 };
 
-export const TAG_COLORS: Record<string, string> = {
-  Technique: "bg-blue-100 text-blue-700",
-  Marketing: "bg-green-100 text-green-700",
-  Gestion: "bg-violet-100 text-violet-700",
-  Réputation: "bg-[#C75D3B]/10 text-[#C75D3B]",
-  Sécurité: "bg-red-100 text-red-700",
+// Badge colors for similar articles card in FeaturedCard (dark bg — keep light)
+export const BADGE_COLORS_LIGHT: Record<string, { bg: string; text: string }> = {
+  Technique:  { bg: "#2D6A8F", text: "#ffffff" },
+  Marketing:  { bg: "#2D7A4F", text: "#ffffff" },
+  Gestion:    { bg: "#6B4F9E", text: "#ffffff" },
+  Réputation: { bg: "#C75D3B", text: "#ffffff" },
+  Sécurité:   { bg: "#B03A2E", text: "#ffffff" },
 };
 
 export default async function BlogPage() {
@@ -70,7 +71,7 @@ export default async function BlogPage() {
         {conseilSemaine && <FeaturedCard article={conseilSemaine} />}
 
         {/* Filtres + grille (client component) */}
-        <BlogFilters articles={articles} tagColors={TAG_COLORS} />
+        <BlogFilters articles={articles} />
       </main>
 
       {/* Footer CTA */}
