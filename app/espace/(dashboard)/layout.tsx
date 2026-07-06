@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Sidebar from "@/components/espace/Sidebar";
 import TrialBanner from "@/components/espace/TrialBanner";
+import { FAB } from "@/components/espace/FAB";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getBillingStatus } from "@/lib/supabase/profile";
 
@@ -30,6 +31,7 @@ export default function DashboardLayout({
         </Suspense>
         <main>{children}</main>
       </div>
+      <FAB />
     </div>
   );
 }
