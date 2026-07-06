@@ -36,7 +36,8 @@ async function ConseilsContent() {
     .eq("user_id", user!.id)
     .maybeSingle();
 
-  const metier = profile?.metier ?? null;
+  const rawMetier = profile?.metier ?? null;
+  const metier = (!rawMetier || rawMetier === "Autre") ? null : rawMetier;
   const ville = profile?.ville ?? null;
   const contenu = (cache?.contenu ?? null) as ConseilsContenu | null;
 

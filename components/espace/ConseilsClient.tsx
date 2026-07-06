@@ -126,6 +126,7 @@ export function ConseilsView({ initialContenu, metier, ville }: {
 }) {
   const [contenu, setContenu] = useState<ConseilsContenu | null>(initialContenu);
   const [loading, setLoading] = useState(!initialContenu);
+  const [hasError, setHasError] = useState(false);
   const [activeTag, setActiveTag] = useState<ConseilTag | "Tous">("Tous");
   const [openConseil, setOpenConseil] = useState<Conseil | null>(null);
   const [, startTransition] = useTransition();
@@ -143,12 +144,21 @@ export function ConseilsView({ initialContenu, metier, ville }: {
 
   async function generate() {
     setLoading(true);
+    setHasError(false);
     try {
       const res = await fetch("/api/conseils/generer", { method: "POST" });
       if (res.ok) {
-        const { contenu: c } = await res.json();
-        setContenu(c);
+        const json = await res.json();
+        if (json.contenu) {
+          setContenu(json.contenu);
+        } else {
+          setHasError(true);
+        }
+      } else {
+        setHasError(true);
       }
+    } catch {
+      setHasError(true);
     } finally {
       setLoading(false);
     }
@@ -160,11 +170,35 @@ export function ConseilsView({ initialContenu, metier, ville }: {
 
   if (loading && !contenu) {
     return (
-      <div className="space-y-4 animate-pulse">
-        <div className="h-48 bg-dusk/8 rounded-2xl" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[1,2,3,4,5,6].map(i => <div key={i} className="h-36 bg-white rounded-2xl border border-dusk/8" />)}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-dusk/50 text-sm mb-2">
+          <svg className="animate-spin w-4 h-4 text-[#C75D3B]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+          </svg>
+          Génération de vos conseils personnalisés…
         </div>
+        <div className="space-y-4 animate-pulse">
+          <div className="h-48 bg-dusk/8 rounded-2xl" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1,2,3,4,5,6].map(i => <div key={i} className="h-36 bg-white rounded-2xl border border-dusk/8" />)}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (hasError && !contenu) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-4xl mb-3">⚠️</p>
+        <p className="text-dusk/50 text-sm mb-4">Impossible de charger les conseils. Réessayez.</p>
+        <button
+          onClick={generate}
+          className="px-5 py-2.5 rounded-full bg-[#C75D3B] text-white text-sm font-semibold hover:bg-[#B8552E] transition-colors"
+        >
+          Réessayer
+        </button>
       </div>
     );
   }
@@ -173,13 +207,7 @@ export function ConseilsView({ initialContenu, metier, ville }: {
     return (
       <div className="text-center py-16">
         <p className="text-4xl mb-3">✨</p>
-        <p className="text-dusk/50 text-sm mb-4">Impossible de charger les conseils. Réessayez.</p>
-        <button
-          onClick={generate}
-          className="px-5 py-2.5 rounded-full bg-[#C75D3B] text-white text-sm font-semibold hover:bg-[#B8552E] transition-colors"
-        >
-          Réessayer
-        </button>
+        <p className="text-dusk/50 text-sm">Aucun conseil disponible pour le moment.</p>
       </div>
     );
   }

@@ -103,26 +103,26 @@ export function AgendaCalendar({ chantiers }: { chantiers: AgendaChantier[] }) {
     : "/espace/nouveau-chantier";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-full">
       {/* Header navigation */}
-      <div className="bg-white rounded-2xl border border-dusk/8 p-4 lg:p-6">
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
+      <div className="bg-white rounded-2xl border border-dusk/8 p-4 lg:p-6 overflow-hidden">
+        <div className="flex items-center justify-between gap-2 mb-5 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
             <button
               type="button"
               onClick={prevMonth}
-              className="w-9 h-9 flex items-center justify-center rounded-xl border border-dusk/10 hover:bg-dust/60 transition-colors"
+              className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-xl border border-dusk/10 hover:bg-dust/60 transition-colors"
               aria-label="Mois précédent"
             >
               <CaretLeft size={16} className="text-dusk/60" />
             </button>
-            <h2 className="font-display text-lg font-bold text-dusk min-w-[180px] text-center">
+            <h2 className="font-display text-base sm:text-lg font-bold text-dusk text-center truncate min-w-0 px-1">
               {MONTHS_FR[month]} {year}
             </h2>
             <button
               type="button"
               onClick={nextMonth}
-              className="w-9 h-9 flex items-center justify-center rounded-xl border border-dusk/10 hover:bg-dust/60 transition-colors"
+              className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-xl border border-dusk/10 hover:bg-dust/60 transition-colors"
               aria-label="Mois suivant"
             >
               <CaretRight size={16} className="text-dusk/60" />
@@ -131,7 +131,7 @@ export function AgendaCalendar({ chantiers }: { chantiers: AgendaChantier[] }) {
           <button
             type="button"
             onClick={goToday}
-            className="text-sm font-medium px-4 py-1.5 rounded-full border border-dusk/15 text-dusk/70 hover:bg-dust/60 transition-colors"
+            className="flex-shrink-0 text-sm font-medium px-4 py-1.5 rounded-full border border-dusk/15 text-dusk/70 hover:bg-dust/60 transition-colors"
           >
             Aujourd&apos;hui
           </button>

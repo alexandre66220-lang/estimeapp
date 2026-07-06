@@ -35,8 +35,9 @@
   --bg-input:    #252320;
   --bg-sidebar:  #141210;
   --text-main:   #F8F5F2;
-  --text-muted:  #9C9489;
-  --text-subtle: #6B6460;
+  --text-muted:  #C4BDB5;
+  --text-label:  #D4CEC8;
+  --text-subtle: #B8B0A8;
   --border:      #2E2B27;
   --border-med:  #3A3733;
   --dust-bg:     #1C1A17;
@@ -85,6 +86,11 @@ body {
 .dark .text-dusk\/50,
 .dark .text-dusk\/55,
 .dark .text-dusk\/60 { color: var(--text-muted) !important; }
+.dark .text-dusk\/65,
+.dark .text-dusk\/70,
+.dark .text-dusk\/75 { color: var(--text-label) !important; }
+.dark .text-dusk\/25,
+.dark .text-dusk\/30,
 .dark .text-dusk\/35,
 .dark .text-dusk\/40,
 .dark .text-dusk\/45 { color: var(--text-subtle) !important; }

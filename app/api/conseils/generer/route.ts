@@ -45,7 +45,8 @@ export async function POST() {
     .eq("id", user.id)
     .maybeSingle();
 
-  const metier = profile?.metier ?? "artisan du bâtiment";
+  const rawMetier = profile?.metier ?? null;
+  const metier = (!rawMetier || rawMetier === "Autre") ? "artisan BTP" : rawMetier;
   const ville = profile?.ville ?? null;
 
   // Vérifier cache
@@ -104,12 +105,22 @@ Génère exactement 6 conseils dans le tableau "conseils". Varie les tags entre 
   });
 
   const rawText = msg.content.find((b) => b.type === "text")?.text ?? "{}";
+  // Strip potential markdown code fences before parsing
+  const jsonText = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "").trim();
 
   let contenuParse: Omit<ConseilsContenu, "metier" | "ville" | "generated_at">;
   try {
-    contenuParse = JSON.parse(rawText);
+    const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("no json object found");
+    contenuParse = JSON.parse(jsonMatch[0]);
   } catch {
+    console.error("conseils/generer: JSON parse failed. rawText=", rawText.slice(0, 200));
     return NextResponse.json({ error: "Erreur de génération." }, { status: 500 });
+  }
+
+  if (!contenuParse.vedette || !Array.isArray(contenuParse.conseils)) {
+    console.error("conseils/generer: structure invalide", JSON.stringify(contenuParse).slice(0, 200));
+    return NextResponse.json({ error: "Contenu généré invalide." }, { status: 500 });
   }
 
   const contenu: ConseilsContenu = {
