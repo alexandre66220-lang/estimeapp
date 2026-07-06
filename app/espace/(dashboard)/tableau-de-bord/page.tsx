@@ -28,6 +28,7 @@ import { updateStreak } from "@/app/actions/fidelite";
 import { ReputationCard } from "@/components/espace/ReputationCard";
 import { RangLocalCard } from "@/components/espace/RangLocalCard";
 import PaymentSuccessToast from "@/components/espace/PaymentSuccessToast";
+import { InstallBanner } from "@/components/espace/InstallBanner";
 
 export const metadata: Metadata = {
   title: "Tableau de bord - Estime",
@@ -51,6 +52,8 @@ export default async function TableauDeBord({
   return (
     <div className="max-w-5xl mx-auto px-6 py-12 lg:py-16">
       {payment === "success" && <PaymentSuccessToast />}
+
+      <InstallBanner />
 
       <div className="flex items-center justify-between gap-4 mb-8">
         <div>

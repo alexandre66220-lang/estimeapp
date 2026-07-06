@@ -40,6 +40,12 @@ export const metadata: Metadata = {
     icon: "/favicon.svg",
     apple: "/apple-touch-icon.svg",
   },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "Estime",
+    statusBarStyle: "black-translucent",
+  },
   openGraph: {
     title: "Estime — Posts Instagram et avis Google pour artisans",
     description:

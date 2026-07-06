@@ -1,0 +1,25 @@
+{
+  "name": "Estime",
+  "short_name": "Estime",
+  "description": "Posts Instagram et avis Google pour artisans",
+  "start_url": "/espace/tableau-de-bord",
+  "display": "standalone",
+  "background_color": "#F2EDE4",
+  "theme_color": "#C75D3B",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "fr"
+}
