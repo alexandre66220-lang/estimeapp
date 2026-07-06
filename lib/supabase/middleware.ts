@@ -114,11 +114,19 @@ export async function updateSession(request: NextRequest) {
       isSubscribed = cached.isSubscribed;
       trialEnd = cached.trialEnd ? new Date(cached.trialEnd) : null;
     } else {
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("onboarding_complete, is_subscribed, trial_end")
         .eq("id", user.id)
         .maybeSingle();
+
+      if (profileError) {
+        // Échec réseau vers Supabase : on laisse passer plutôt que de
+        // rediriger vers /espace/onboarding ou /espace/abonnement sur la
+        // base de valeurs par défaut incorrectes (faux positifs).
+        console.error("[middleware] échec de la requête profiles :", profileError.message);
+        return applyCookie(supabaseResponse);
+      }
 
       onboardingComplete = profile?.onboarding_complete ?? false;
       isSubscribed = profile?.is_subscribed ?? false;
