@@ -144,6 +144,16 @@ export default function Sidebar() {
         </nav>
         <div className="border-t border-white/8 pt-4 mt-4">
           <LogoutButton />
+          <p className="text-white/20 text-xs mt-4 px-1">
+            <a
+              href="https://alcalspark.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white/40 transition-colors duration-200"
+            >
+              Créé par AlcalSpark
+            </a>
+          </p>
         </div>
       </aside>
 

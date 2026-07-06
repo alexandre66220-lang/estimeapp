@@ -46,7 +46,15 @@ export default function Footer() {
 
         <div className="mt-8 pt-6 border-t border-white/8">
           <p className="text-dust/25 text-xs">
-            © 2026 Estime — Développé par AlcalSpark.
+            © 2026 Estime —{" "}
+            <a
+              href="https://alcalspark.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-dust/45 transition-colors duration-200"
+            >
+              Créé par AlcalSpark
+            </a>
           </p>
         </div>
       </div>
