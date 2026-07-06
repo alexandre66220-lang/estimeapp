@@ -80,7 +80,7 @@ export default async function VitrineArtisan({
   // Toutes les requêtes en parallèle
   const { data: profile } = await admin
     .from("profiles")
-    .select("id, prenom, nom, metier, ville, logo_url, company_name, email, photo_profil, presentation, certifications, annees_experience, liens_sociaux, statut_disponibilite, numero_siret, theme_couleur")
+    .select("id, prenom, nom, metier, ville, logo_url, company_name, email, photo_profil, presentation, certifications, annees_experience, liens_sociaux, statut_disponibilite, numero_siret, theme_couleur, slug")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -168,8 +168,34 @@ export default async function VitrineArtisan({
     ? { label: "Complet", color: "#EF4444" }
     : { label: "Disponible", color: "#22C55E" };
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: artisanNom,
+    description: profile.presentation ?? `${profile.metier ?? "Artisan"} à ${profile.ville ?? "France"}`,
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: profile.ville ?? undefined,
+      addressCountry: "FR",
+    },
+    url: `https://estime-app.com/artisan/${profile.slug}`,
+    ...(avgNote && allAvisCount > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: avgNote,
+            reviewCount: allAvisCount,
+          },
+        }
+      : {}),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <style>{`
         @keyframes vitrineFadeUp {
           from { opacity: 0; transform: translateY(20px); }

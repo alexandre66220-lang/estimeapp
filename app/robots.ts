@@ -5,8 +5,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/artisan/"],
-        disallow: ["/espace/", "/api/"],
+        allow: ["/", "/artisan/", "/fonctionnalites", "/annuaire", "/faq", "/contact", "/inscription"],
+        disallow: ["/espace/", "/api/", "/admin/"],
       },
     ],
     sitemap: "https://estime-app.com/sitemap.xml",

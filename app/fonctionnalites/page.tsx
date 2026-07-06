@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 
+export const dynamic = "force-static";
+
 export const metadata: Metadata = {
-  title: "Toutes les fonctionnalités Estime — L'app complète pour les artisans BTP",
+  title: "Toutes les fonctionnalités — Estime",
   description:
-    "Découvrez toutes les fonctionnalités d'Estime : génération de posts Instagram, gestion clients, tableau de bord financier, page vitrine publique et bien plus. 14 jours gratuits.",
+    "Posts Instagram IA, gestion clients, tableau de bord financier, page vitrine publique, score de réputation comparatif. Découvrez tout ce qu'Estime fait pour vous.",
+  alternates: { canonical: "https://estime-app.com/fonctionnalites" },
 };
 
 type Feature = { icon: string; title: string; desc: string };

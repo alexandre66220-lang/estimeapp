@@ -34,9 +34,15 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://estime-app.com"),
-  title: "Estime — Posts Instagram et avis Google pour artisans",
+  title: {
+    default: "Estime — L'app de réputation pour les artisans BTP",
+    template: "%s | Estime",
+  },
   description:
-    "Estime génère vos posts Instagram et vos demandes d'avis Google en 30 secondes depuis vos photos de chantier. Essai gratuit 14 jours.",
+    "Estime aide les artisans du BTP à générer des posts Instagram depuis leurs photos de chantier et à automatiser leurs demandes d'avis Google. 14 jours gratuits.",
+  keywords: ["artisan", "BTP", "réputation", "avis Google", "Instagram", "peintre", "plombier", "électricien", "maçon"],
+  authors: [{ name: "AlcalSpark", url: "https://alcalspark.com" }],
+  creator: "AlcalSpark",
   icons: {
     icon: "/favicon.svg",
     apple: "/apple-touch-icon.svg",
@@ -48,30 +54,25 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
   },
   openGraph: {
-    title: "Estime — Posts Instagram et avis Google pour artisans",
-    description:
-      "Estime génère vos posts Instagram et vos demandes d'avis Google en 30 secondes depuis vos photos de chantier. Essai gratuit 14 jours.",
-    url: "https://estime-app.com",
-    locale: "fr_FR",
     type: "website",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Estime — Posts Instagram et avis Google pour artisans",
-      },
-    ],
+    locale: "fr_FR",
+    url: "https://estime-app.com",
+    siteName: "Estime",
+    title: "Estime — L'app de réputation pour les artisans BTP",
+    description:
+      "Générez des posts Instagram et automatisez vos demandes d'avis Google. 14 jours gratuits sans carte bancaire.",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Estime — App artisans BTP" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Estime — Posts Instagram et avis Google pour artisans",
-    description:
-      "Estime génère vos posts Instagram et vos demandes d'avis Google en 30 secondes depuis vos photos de chantier. Essai gratuit 14 jours.",
+    title: "Estime — L'app de réputation pour les artisans BTP",
+    description: "Générez des posts Instagram et automatisez vos demandes d'avis Google.",
     images: ["/og-image.png"],
   },
-  alternates: {
-    canonical: "/",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
   },
 };
 

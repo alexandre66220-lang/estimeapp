@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getCachedProfile } from "@/lib/supabase/profile";
 import { getConseilSemaine, getConseils } from "@/lib/sanity/queries";
@@ -116,12 +117,15 @@ function ConseilSemaineCard({ article }: { article: ArticleConseil }) {
       className="block bg-dusk rounded-2xl overflow-hidden hover:opacity-90 transition-opacity"
     >
       {article.image_principale?.url && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={article.image_principale.url}
-          alt={article.image_principale.alt ?? article.titre}
-          className="w-full h-48 object-cover"
-        />
+        <div className="relative w-full h-48">
+          <Image
+            src={article.image_principale.url}
+            alt={article.image_principale.alt ?? article.titre}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, 800px"
+          />
+        </div>
       )}
       <div className="p-6">
         <div className="flex items-center gap-2 mb-3">

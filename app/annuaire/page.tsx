@@ -5,12 +5,12 @@ import { ArtisanCard } from "@/components/annuaire/ArtisanCard";
 import { AnnuaireSearchBar, AnnuaireFilters, AnnuairePagination } from "@/components/annuaire/AnnuaireClient";
 import Link from "next/link";
 
-export const revalidate = 300;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Annuaire artisans BTP — Trouvez un peintre, plombier, électricien près de chez vous",
+  title: "Annuaire artisans BTP — Trouvez un artisan de confiance | Estime",
   description:
-    "Trouvez un artisan de confiance près de chez vous parmi les professionnels du bâtiment certifiés Estime. Peintres, plombiers, électriciens, maçons — tous vérifiés et évalués par leurs clients.",
+    "Trouvez un peintre, plombier, électricien ou maçon certifié près de chez vous. Tous les artisans Estime sont évalués par leurs clients.",
   openGraph: {
     title: "Annuaire artisans BTP — Estime",
     description: "Trouvez un artisan certifié Estime près de chez vous.",

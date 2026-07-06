@@ -1,16 +1,23 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 import { PortableText } from "@portabletext/react";
 import { getConseil, getConseillsSimilaires } from "@/lib/sanity/queries";
 import type { ArticleConseil } from "@/lib/sanity/queries";
 
+export const revalidate = 3600;
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const article = await getConseil(slug);
-  if (!article) return { title: "Article introuvable - Estime" };
-  return { title: `${article.titre} - Estime` };
+  if (!article) return { title: "Article introuvable" };
+  return {
+    title: `${article.titre} | Conseils Estime`,
+    description: article.resume ?? undefined,
+    alternates: { canonical: `https://estime-app.com/espace/conseils/${slug}` },
+  };
 }
 
 const TAG_COLORS: Record<string, string> = {
@@ -32,8 +39,24 @@ export default async function ConseilDetailPage({ params }: { params: Promise<{ 
     article.categorie
   );
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.titre,
+    description: article.resume ?? undefined,
+    datePublished: article.published_at ?? undefined,
+    author: { "@type": "Organization", name: "Estime" },
+    publisher: { "@type": "Organization", name: "Estime", url: "https://estime-app.com" },
+    ...(article.image_principale?.url ? { image: article.image_principale.url } : {}),
+  };
+
   return (
     <div className="max-w-3xl mx-auto px-6 py-12 lg:py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <Link
         href="/espace/conseils"
         className="inline-flex items-center gap-1.5 text-sm text-dusk/50 hover:text-dusk mb-8 transition-colors"
@@ -44,12 +67,15 @@ export default async function ConseilDetailPage({ params }: { params: Promise<{ 
 
       <article>
         {article.image_principale?.url && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={article.image_principale.url}
-            alt={article.image_principale.alt ?? article.titre}
-            className="w-full h-56 object-cover rounded-2xl mb-8"
-          />
+          <div className="relative w-full h-56 rounded-2xl overflow-hidden mb-8">
+            <Image
+              src={article.image_principale.url}
+              alt={article.image_principale.alt ?? article.titre}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 768px"
+            />
+          </div>
         )}
 
         <div className="flex items-center gap-3 mb-4 flex-wrap">

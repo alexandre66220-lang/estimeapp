@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Hero from "@/components/Hero";
 import Problem from "@/components/Problem";
 import Solution from "@/components/Solution";
@@ -10,15 +11,22 @@ import { MotionProvider } from "@/components/MotionProvider";
 
 export const dynamic = "force-static";
 
+export const metadata: Metadata = {
+  title: "Estime — L'app Instagram et avis Google pour artisans BTP",
+  description:
+    "Prenez une photo de chantier, Estime génère votre post Instagram en 10 secondes et envoie la demande d'avis Google à votre client. 14 jours gratuits.",
+  alternates: { canonical: "https://estime-app.com" },
+};
+
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   name: "Estime",
   description:
-    "Estime génère vos posts Instagram et vos demandes d'avis Google en 30 secondes depuis vos photos de chantier.",
+    "Application de réputation pour artisans BTP : génération de posts Instagram, demandes d'avis Google automatiques, page vitrine publique.",
   url: "https://estime-app.com",
   applicationCategory: "BusinessApplication",
-  operatingSystem: "Web",
+  operatingSystem: "Web, iOS, Android",
   offers: {
     "@type": "Offer",
     price: "24.99",
