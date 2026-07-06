@@ -2,11 +2,9 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { ensureProfile } from "@/lib/supabase/profile";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { translateAuthError } from "@/lib/supabase/auth-errors";
-import { registerFilleulParrainage } from "@/lib/supabase/parrainage";
 import { devError } from "@/lib/log";
-import { sendWelcomeEmail } from "@/lib/resend/send-welcome";
 
 export async function login(formData: FormData) {
   const email = (formData.get("email") as string)?.trim();
@@ -60,16 +58,24 @@ export async function signup(formData: FormData) {
     );
   }
 
-  if (data.user && data.session) {
-    await ensureProfile(supabase, data.user);
-    if (ref) {
-      await registerFilleulParrainage(supabase, ref, data.user.id, data.user.email ?? "");
-    }
-    if (data.user.email) {
-      sendWelcomeEmail({ email: data.user.email, prenom: null }).catch((err) =>
-        devError("Échec de l'envoi de l'email de bienvenue", err)
+  // Le code de parrainage est mémorisé dès maintenant (avant même la
+  // confirmation d'email), pour être traité de façon fiable à la première
+  // visite de /espace dans app/espace/layout.tsx — même si la confirmation
+  // d'email est activée et qu'aucune session n'est encore ouverte ici.
+  if (data.user && ref) {
+    const admin = createAdminClient();
+    const { error: refError } = await admin
+      .from("profiles")
+      .upsert(
+        { id: data.user.id, email: data.user.email ?? "", referral_code_pending: ref },
+        { onConflict: "id", ignoreDuplicates: false }
       );
+    if (refError) {
+      devError("Échec de l'enregistrement du code de parrainage en attente", refError);
     }
+  }
+
+  if (data.user && data.session) {
     redirect("/espace/tableau-de-bord");
   }
 

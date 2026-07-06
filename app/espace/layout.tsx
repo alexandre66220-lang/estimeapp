@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase/server";
-import { ensureProfile } from "@/lib/supabase/profile";
+import { ensureProfile, processFirstLogin } from "@/lib/supabase/profile";
 
 export const metadata: Metadata = {
   robots: {
@@ -22,6 +22,7 @@ export default async function EspaceLayout({
   }
 
   await ensureProfile(supabase, user);
+  await processFirstLogin(supabase, user);
 
   return <>{children}</>;
 }

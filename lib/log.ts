@@ -3,3 +3,9 @@ export function devError(message: string, error?: unknown) {
     console.error(message, error);
   }
 }
+
+export function devLog(...args: unknown[]) {
+  if (process.env.NODE_ENV !== "production") {
+    console.log(...args);
+  }
+}
