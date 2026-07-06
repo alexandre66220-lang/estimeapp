@@ -62,7 +62,8 @@ export default function Footer() {
               alt="Estime - Reputation on autopilot for tradespeople | Product Hunt"
               width={250}
               height={54}
-              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1189422&theme=dark&t=1783347523671"
+              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1189422&theme=light&t=1783348237784"
+              style={{ display: "block" }}
             />
           </a>
         </div>
