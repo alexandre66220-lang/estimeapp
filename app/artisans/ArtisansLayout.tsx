@@ -38,7 +38,7 @@ export function ArtisansGrid({ artisans }: { artisans: ArtisanAnnuaire[] }) {
 export function WhyEstime({ metierLabel, villeLabel }: { metierLabel: string; villeLabel?: string }) {
   const lieu = villeLabel ? ` à ${villeLabel}` : "";
   return (
-    <section className="bg-white rounded-2xl border border-[#2B2521]/8 p-8">
+    <section className="rounded-2xl p-8" style={{ background: "#ffffff", border: "1px solid #E8E2DC" }}>
       <h2 className="font-landing-display text-xl font-semibold text-[#2B2521] mb-3">
         Pourquoi choisir un {metierLabel.toLowerCase()} certifié Estime{lieu} ?
       </h2>

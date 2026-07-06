@@ -148,7 +148,7 @@ export default async function ArtisansMetierVillePage({
             </div>
           </section>
         ) : (
-          <div className="bg-white border border-[#2B2521]/8 rounded-2xl p-8 text-center">
+          <div className="rounded-2xl p-8 text-center" style={{ background: "#ffffff", border: "1px solid #E8E2DC" }}>
             <p className="text-[#2B2521]/50 mb-2">
               Aucun {metier.label.toLowerCase()} certifié Estime à {ville.label} pour le moment.
             </p>
@@ -174,7 +174,8 @@ export default async function ArtisansMetierVillePage({
               <Link
                 key={v.slug}
                 href={`/artisans/${slug}/${v.slug}`}
-                className="text-sm px-3.5 py-1.5 rounded-full bg-white border border-[#2B2521]/8 text-[#2B2521]/65 hover:border-[#C75D3B]/40 hover:text-[#C75D3B] transition-all"
+                className="text-sm px-3.5 py-1.5 rounded-full transition-all hover:text-[#C75D3B]"
+                style={{ background: "#ffffff", border: "1px solid #E8E2DC", color: "rgba(43,37,33,0.65)" }}
               >
                 {metier.label} à {v.label}
               </Link>

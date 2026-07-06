@@ -134,7 +134,8 @@ export default async function AnnuairePage({
               <Link
                 key={`${m.slug}-${v.slug}`}
                 href={`/artisans/${m.slug}/${v.slug}`}
-                className="text-xs px-3 py-2 rounded-lg border border-[#2B2521]/10 text-[#2B2521]/60 hover:border-[#C75D3B]/40 hover:text-[#C75D3B] transition-all bg-white"
+                className="text-xs px-3 py-2 rounded-lg transition-all hover:text-[#C75D3B]"
+                style={{ background: "#ffffff", border: "1px solid rgba(43,37,33,0.10)", color: "rgba(43,37,33,0.60)" }}
               >
                 {m.label} à {v.label}
               </Link>

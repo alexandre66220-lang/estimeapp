@@ -96,7 +96,8 @@ async function MetierPage({ metier }: { metier: (typeof METIERS_SEO)[number] }) 
               <Link
                 key={v.slug}
                 href={`/artisans/${metier.slug}/${v.slug}`}
-                className="group bg-white border border-[#2B2521]/8 rounded-xl p-3.5 hover:shadow-md hover:border-[#C75D3B]/30 transition-all"
+                className="group rounded-xl p-3.5 hover:shadow-md transition-all"
+                style={{ background: "#ffffff", border: "1px solid #E8E2DC" }}
               >
                 <p className="font-medium text-[#2B2521] text-sm group-hover:text-[#C75D3B] transition-colors">
                   {metier.labelPluriel} à {v.label}
@@ -170,7 +171,8 @@ async function VillePage({ ville }: { ville: (typeof VILLES_SEO)[number] }) {
               <Link
                 key={m.slug}
                 href={`/artisans/${m.slug}/${ville.slug}`}
-                className="group bg-white border border-[#2B2521]/8 rounded-xl p-3.5 hover:shadow-md hover:border-[#C75D3B]/30 transition-all text-center"
+                className="group rounded-xl p-3.5 hover:shadow-md transition-all text-center"
+                style={{ background: "#ffffff", border: "1px solid #E8E2DC" }}
               >
                 <p className="font-medium text-[#2B2521] text-sm group-hover:text-[#C75D3B] transition-colors">
                   {m.labelPluriel}
@@ -197,7 +199,7 @@ async function VillePage({ ville }: { ville: (typeof VILLES_SEO)[number] }) {
             </div>
           </section>
         ) : (
-          <div className="bg-white border border-[#2B2521]/8 rounded-2xl p-8 text-center">
+          <div className="rounded-2xl p-8 text-center" style={{ background: "#ffffff", border: "1px solid #E8E2DC" }}>
             <p className="text-[#2B2521]/50 mb-4">
               Aucun artisan certifié Estime à {ville.label} pour le moment.
             </p>

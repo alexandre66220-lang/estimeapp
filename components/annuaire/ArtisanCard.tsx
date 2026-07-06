@@ -45,7 +45,8 @@ export function ArtisanCard({ artisan }: { artisan: ArtisanAnnuaire }) {
       />
       <Link
         href={`/artisan/${artisan.slug}`}
-        className="group relative flex flex-col bg-white rounded-2xl border border-[#2B3138]/8 p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden"
+        className="group relative flex flex-col rounded-2xl p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden"
+        style={{ background: "#ffffff", border: "1px solid #E8E2DC" }}
       >
         {/* Accent color top bar */}
         <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl opacity-60" style={{ backgroundColor: theme }} />
@@ -113,7 +114,8 @@ export function ArtisanCard({ artisan }: { artisan: ArtisanAnnuaire }) {
             {certifs.map((c) => (
               <span
                 key={c}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#2B3138]/5 text-[#2B3138]/60 border border-[#2B3138]/8"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium"
+                style={{ background: "rgba(43,49,56,0.05)", color: "rgba(43,49,56,0.6)", border: "1px solid rgba(43,49,56,0.08)" }}
               >
                 <ShieldCheck size={9} aria-hidden="true" />
                 {c}
@@ -123,7 +125,7 @@ export function ArtisanCard({ artisan }: { artisan: ArtisanAnnuaire }) {
         )}
 
         {/* CTA */}
-        <div className="mt-auto pt-3 border-t border-[#2B3138]/6">
+        <div className="mt-auto pt-3" style={{ borderTop: "1px solid rgba(43,49,56,0.06)" }}>
           <span
             className="text-sm font-semibold transition-opacity group-hover:opacity-80"
             style={{ color: theme }}

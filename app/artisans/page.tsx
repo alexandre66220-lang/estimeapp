@@ -44,7 +44,8 @@ export default function ArtisansIndexPage() {
               <Link
                 key={m.slug}
                 href={`/artisans/${m.slug}`}
-                className="group bg-white border border-[#2B2521]/8 rounded-2xl p-4 hover:shadow-md hover:border-[#C75D3B]/30 transition-all text-center"
+                className="group rounded-2xl p-4 hover:shadow-md transition-all text-center"
+                style={{ background: "#ffffff", border: "1px solid #E8E2DC" }}
               >
                 <p className="font-semibold text-[#2B2521] text-sm group-hover:text-[#C75D3B] transition-colors">
                   {m.labelPluriel}
@@ -65,7 +66,8 @@ export default function ArtisansIndexPage() {
               <Link
                 key={v.slug}
                 href={`/artisans/${v.slug}`}
-                className="group bg-white border border-[#2B2521]/8 rounded-2xl p-4 hover:shadow-md hover:border-[#C75D3B]/30 transition-all"
+                className="group rounded-2xl p-4 hover:shadow-md transition-all"
+                style={{ background: "#ffffff", border: "1px solid #E8E2DC" }}
               >
                 <p className="font-semibold text-[#2B2521] text-sm group-hover:text-[#C75D3B] transition-colors">
                   {v.label}
