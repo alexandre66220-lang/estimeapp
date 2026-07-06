@@ -35,6 +35,7 @@ export async function POST() {
       // la page Stripe, qui empêcherait le webhook de retrouver son profil.
       customer_email: user.email,
       client_reference_id: user.id,
+      allow_promotion_codes: true,
       subscription_data: {
         metadata: { user_id: user.id },
       },
