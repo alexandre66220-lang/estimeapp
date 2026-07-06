@@ -1,5 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { RangLocal } from "@/lib/score/rang-local";
 
 const MOIS_FR = [
   "janvier", "février", "mars", "avril", "mai", "juin",
@@ -38,6 +39,7 @@ export type RapportData = {
     historique: Array<{ mois: string; count: number }>;
     dernierAvis: Array<{ note: number | null; contenu: string | null; created_at: string }>;
   };
+  rangLocal: RangLocal | null;
 };
 
 export type RapportLog = {
@@ -202,6 +204,7 @@ export async function getRapportData(
       historique,
       dernierAvis,
     },
+    rangLocal: null,
   };
 }
 

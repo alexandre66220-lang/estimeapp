@@ -223,8 +223,31 @@ export function RapportMensuelPDF({
             </View>
           </View>
 
+          {/* Score comparatif */}
+          {data.rangLocal && data.rangLocal.scope !== "pioneer" && (
+            <View style={{ marginTop: 20, backgroundColor: "#FAF7F5", borderRadius: 8, padding: 14, flexDirection: "row", alignItems: "center" }}>
+              <View style={{ marginRight: 16 }}>
+                <Text style={{ fontSize: 9, color: C.muted, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+                  Classement {data.rangLocal.scope === "local" ? "local" : "national"}
+                </Text>
+                <Text style={{ fontSize: 22, fontFamily: "Helvetica-Bold", color: C.terracotta }}>
+                  #{data.rangLocal.rang}
+                  <Text style={{ fontSize: 11, color: C.muted, fontFamily: "Helvetica" }}> / {data.rangLocal.nb_total}</Text>
+                </Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={styles.progressBg}>
+                  <View style={[styles.progressFill, { width: `${Math.min(data.rangLocal.percentile, 100)}%` }]} />
+                </View>
+                <Text style={{ fontSize: 8, color: C.muted, marginTop: 4 }}>
+                  Mieux que {Math.round(data.rangLocal.percentile)} % des artisans · Moy. {Math.round(data.rangLocal.score_moyen)} pts
+                </Text>
+              </View>
+            </View>
+          )}
+
           {/* Message IA */}
-          <View style={styles.aiBox}>
+          <View style={[styles.aiBox, { marginTop: 20 }]}>
             <Text style={styles.aiText}>{ai.message}</Text>
           </View>
         </View>

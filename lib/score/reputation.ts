@@ -163,12 +163,18 @@ export async function enregistrerHistoriqueScore(
   userId: string,
   score: number
 ) {
-  await supabase.from("reputation_history").upsert(
-    {
-      user_id: userId,
-      score,
-      recorded_on: new Date().toISOString().slice(0, 10),
-    },
-    { onConflict: "user_id,recorded_on" }
-  );
+  await Promise.all([
+    supabase.from("reputation_history").upsert(
+      {
+        user_id: userId,
+        score,
+        recorded_on: new Date().toISOString().slice(0, 10),
+      },
+      { onConflict: "user_id,recorded_on" }
+    ),
+    supabase
+      .from("profiles")
+      .update({ score_actuel: score })
+      .eq("id", userId),
+  ]);
 }

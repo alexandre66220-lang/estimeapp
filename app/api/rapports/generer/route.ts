@@ -6,6 +6,7 @@ import { getRapportData } from "@/lib/supabase/rapports";
 import { generateRapportContent } from "@/lib/anthropic/generate-rapport";
 import { RapportMensuelPDF } from "@/components/pdf/RapportMensuelPDF";
 import { getCurrentUser } from "@/lib/supabase/server";
+import { getRangLocal } from "@/lib/score/rang-local";
 import { devError } from "@/lib/log";
 
 const RAPPORT_SECRET = process.env.RAPPORT_SECRET_KEY;
@@ -38,6 +39,9 @@ export async function POST(request: Request) {
     if (!data) {
       return NextResponse.json({ error: "Données introuvables" }, { status: 404 });
     }
+
+    // Enrich with ranking data
+    data.rangLocal = await getRangLocal(admin as any, userId);
 
     // Generate AI content
     const ai = await generateRapportContent({

@@ -23,7 +23,9 @@ import {
   DashboardStatsSkeleton,
 } from "@/components/espace/DashboardStats";
 import { computeReputationScore, enregistrerHistoriqueScore } from "@/lib/score/reputation";
+import { getRangLocal } from "@/lib/score/rang-local";
 import { ReputationCard } from "@/components/espace/ReputationCard";
+import { RangLocalCard } from "@/components/espace/RangLocalCard";
 import PaymentSuccessToast from "@/components/espace/PaymentSuccessToast";
 
 export const metadata: Metadata = {
@@ -71,6 +73,10 @@ export default async function TableauDeBord({
         <ReputationCardSection />
       </Suspense>
 
+      <Suspense fallback={null}>
+        <RangLocalSection />
+      </Suspense>
+
       <Suspense fallback={<DashboardStatsSkeleton />}>
         <DashboardStatsSection />
       </Suspense>
@@ -82,6 +88,17 @@ export default async function TableauDeBord({
       <Suspense fallback={<ActiviteRecenteSkeleton />}>
         <ActiviteRecente />
       </Suspense>
+    </div>
+  );
+}
+
+async function RangLocalSection() {
+  const { supabase, user } = await getCurrentUser();
+  const rang = await getRangLocal(supabase, user!.id);
+  if (!rang) return null;
+  return (
+    <div className="mb-6">
+      <RangLocalCard rang={rang} />
     </div>
   );
 }
