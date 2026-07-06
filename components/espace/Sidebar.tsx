@@ -149,7 +149,7 @@ export default function Sidebar() {
           Estime
         </Link>
         {/* Liste nav scrollable entre logo et pied */}
-        <nav className="sidebar-nav flex-1 overflow-y-auto flex flex-col gap-1 min-h-0" aria-label="Navigation de l'espace artisan">
+        <nav className="sidebar-nav flex-1 overflow-y-auto flex flex-col gap-1 min-h-0 pt-1" aria-label="Navigation de l'espace artisan">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.href}

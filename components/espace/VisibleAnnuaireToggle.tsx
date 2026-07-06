@@ -27,7 +27,7 @@ export function VisibleAnnuaireToggle({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 max-w-2xl">
+    <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 w-full max-w-2xl overflow-hidden">
       <div className="flex items-start gap-3 mb-5">
         <Globe size={20} className="text-dusk/40 mt-0.5 shrink-0" />
         <div className="flex-1 min-w-0">
@@ -38,8 +38,8 @@ export function VisibleAnnuaireToggle({
         </div>
       </div>
 
-      <div className="flex items-center justify-between p-4 rounded-xl bg-dust/50 border border-dusk/8">
-        <div>
+      <div className="flex items-center justify-between gap-3 p-4 rounded-xl bg-dust/50 border border-dusk/8">
+        <div className="min-w-0">
           <p className="text-sm font-medium text-dusk">Apparaître dans l&apos;annuaire</p>
           <p className="text-xs text-dusk/45 mt-0.5">
             {visible ? "Votre profil est visible dans l'annuaire" : "Votre profil est masqué de l'annuaire"}
