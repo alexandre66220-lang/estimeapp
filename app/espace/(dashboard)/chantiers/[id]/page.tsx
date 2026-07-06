@@ -17,6 +17,7 @@ import RelanceAction from "@/components/espace/RelanceAction";
 import { MarquerAvisRecu } from "@/components/espace/MarquerAvisRecu";
 import { EtoilesNote } from "@/components/espace/EtoilesNote";
 import { AvantApresGenerateur } from "@/components/espace/AvantApresGenerateur";
+import { StoryGenerateur } from "@/components/espace/StoryGenerateur";
 
 export const metadata: Metadata = {
   title: "Chantier - Estime",
@@ -184,6 +185,17 @@ export default async function FicheChantier({
           <AvantApresGenerateur
             chantierId={chantier.id}
             existingUrl={avantApresSignedUrl}
+          />
+        </div>
+      )}
+
+      {/* Story Instagram — visible seulement si au moins une photo */}
+      {hasPhoto && (
+        <div className="mb-6">
+          <StoryGenerateur
+            chantierId={chantier.id}
+            photoAvantUrl={photoAvantUrl}
+            photoApresUrl={photoApresUrl}
           />
         </div>
       )}
