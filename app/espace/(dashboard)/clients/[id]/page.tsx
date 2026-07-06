@@ -1,0 +1,286 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import {
+  ArrowLeft,
+  Crown,
+  Check,
+  WarningCircle,
+  Buildings,
+  MapPin,
+} from "@phosphor-icons/react/dist/ssr";
+import { getCurrentUser } from "@/lib/supabase/server";
+import { updateClientDetails } from "@/app/actions/crm";
+import { NotesClient } from "@/components/espace/NotesClient";
+import { StatutSelector } from "@/components/espace/StatutSelector";
+import { COLONNES } from "@/components/espace/KanbanBoard";
+import type { ClientStatut } from "@/lib/supabase/clients";
+
+export const metadata: Metadata = { title: "Fiche client — Estime" };
+
+const SOURCES = [
+  "Bouche à oreille",
+  "Google",
+  "Instagram",
+  "Panneau chantier",
+  "Site web",
+  "Autre",
+];
+
+export default async function FicheClient({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ message?: string; error?: string }>;
+}) {
+  const { id } = await params;
+  const { message, error } = await searchParams;
+  const { supabase, user } = await getCurrentUser();
+
+  // Toutes les données en parallèle
+  const [
+    { data: client },
+    { data: notes },
+    { data: chantiers },
+    { data: avis },
+  ] = await Promise.all([
+    supabase
+      .from("clients")
+      .select(
+        "id, prenom, nom, email, telephone, statut, source, est_vip, derniere_interaction, montant_estime, created_at"
+      )
+      .eq("id", id)
+      .eq("user_id", user!.id)
+      .maybeSingle(),
+    supabase
+      .from("notes_client")
+      .select("id, contenu, created_at")
+      .eq("client_id", id)
+      .eq("user_id", user!.id)
+      .order("created_at", { ascending: false })
+      .limit(50),
+    supabase
+      .from("chantiers")
+      .select("id, titre, montant, statut, created_at")
+      .eq("client_id", id)
+      .eq("user_id", user!.id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("avis")
+      .select("id, note_google")
+      .eq("user_id", user!.id),
+  ]);
+
+  if (!client) notFound();
+
+  const col = COLONNES.find((c) => c.statut === client.statut);
+  const totalCA = (chantiers ?? []).reduce((s, c) => s + (c.montant ?? 0), 0);
+  const nbChantiers = (chantiers ?? []).length;
+  const premierChantier = (chantiers ?? []).at(-1)?.created_at;
+  const dernierChantier = (chantiers ?? []).at(0)?.created_at;
+
+  const fmt = (iso: string) =>
+    new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+
+  return (
+    <div className="max-w-3xl mx-auto px-6 py-12 lg:py-16">
+      <Link
+        href="/espace/clients"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-dusk/60 hover:text-dusk transition-colors duration-200 mb-6"
+      >
+        <ArrowLeft size={16} weight="bold" aria-hidden="true" />
+        Mes clients
+      </Link>
+
+      {/* En-tête */}
+      <div className="flex items-start justify-between gap-4 mb-8">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="font-display text-3xl font-bold text-dusk">
+              {client.prenom} {client.nom}
+            </h1>
+            {client.est_vip && (
+              <Crown size={20} weight="fill" className="text-ambre mt-1" aria-label="VIP" />
+            )}
+          </div>
+          <p className="text-dusk/45 text-sm mt-1">{client.email}</p>
+          {client.telephone && (
+            <p className="text-dusk/45 text-sm">{client.telephone}</p>
+          )}
+        </div>
+        {col && (
+          <span className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full ${col.bg} ${col.couleur}`}>
+            {col.label}
+          </span>
+        )}
+      </div>
+
+      {message && (
+        <p className="mb-6 flex items-center gap-2 rounded-xl bg-ambre/10 text-braise text-sm px-4 py-3">
+          <Check size={16} weight="bold" className="shrink-0" />
+          {message}
+        </p>
+      )}
+      {error && (
+        <p className="mb-6 flex items-center gap-2 rounded-xl bg-red-50 text-red-700 text-sm px-4 py-3">
+          <WarningCircle size={16} weight="bold" className="shrink-0" />
+          {error}
+        </p>
+      )}
+
+      <div className="space-y-6">
+        {/* Statut pipeline */}
+        <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
+          <h2 className="font-display text-lg font-bold text-dusk mb-4">Statut pipeline</h2>
+          <StatutSelector clientId={client.id} currentStatut={client.statut as ClientStatut} />
+        </div>
+
+        {/* Infos client */}
+        <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
+          <h2 className="font-display text-lg font-bold text-dusk mb-5">Informations</h2>
+          <form action={updateClientDetails} className="space-y-5">
+            <input type="hidden" name="clientId" value={client.id} />
+
+            {/* Source */}
+            <div>
+              <label htmlFor="source" className="block text-sm font-medium text-dusk/70 mb-1.5">
+                Source
+              </label>
+              <select
+                id="source"
+                name="source"
+                defaultValue={client.source ?? ""}
+                className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all"
+              >
+                <option value="">— Non renseigné —</option>
+                {SOURCES.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Montant estimé */}
+            <div>
+              <label htmlFor="montantEstime" className="block text-sm font-medium text-dusk/70 mb-1.5">
+                Montant estimé des travaux (€)
+              </label>
+              <input
+                type="number"
+                id="montantEstime"
+                name="montantEstime"
+                min="0"
+                step="100"
+                defaultValue={client.montant_estime ?? ""}
+                placeholder="5000"
+                className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all"
+              />
+            </div>
+
+            {/* VIP */}
+            <div className="flex items-center justify-between gap-4 px-4 py-3.5 rounded-xl bg-dust">
+              <div>
+                <p className="text-sm font-medium text-dusk">Client VIP</p>
+                <p className="text-xs text-dusk/45 mt-0.5">
+                  Affiche une couronne sur la carte pipeline.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="estVip"
+                  value="true"
+                  defaultChecked={client.est_vip}
+                  className="sr-only peer"
+                  onChange={(e) => {
+                    // Le formulaire sera soumis manuellement — pas besoin d'action ici
+                  }}
+                />
+                <div className="w-10 h-6 bg-dusk/20 peer-focus:ring-2 peer-focus:ring-ambre/30 rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-ambre" />
+              </label>
+              <input type="hidden" name="estVip" value="false" />
+            </div>
+
+            <button
+              type="submit"
+              className="inline-flex items-center gap-2 text-dusk font-medium text-sm px-5 py-2.5 rounded-full border border-dusk/20 hover:bg-dusk/5 active:scale-[0.97] transition-all duration-200"
+            >
+              Enregistrer
+            </button>
+          </form>
+        </div>
+
+        {/* Statistiques */}
+        <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
+          <h2 className="font-display text-lg font-bold text-dusk mb-5">Statistiques</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <StatCard emoji="💶" label="CA total" value={totalCA > 0 ? `${totalCA.toLocaleString("fr-FR")} €` : "—"} />
+            <StatCard emoji="🏗️" label="Chantiers" value={nbChantiers > 0 ? String(nbChantiers) : "—"} />
+            <StatCard emoji="⭐" label="Avis Google" value={String(avis?.length ?? 0)} />
+            {premierChantier && (
+              <StatCard emoji="📅" label="1er chantier" value={fmt(premierChantier)} small />
+            )}
+            {dernierChantier && dernierChantier !== premierChantier && (
+              <StatCard emoji="🔄" label="Dernier chantier" value={fmt(dernierChantier)} small />
+            )}
+            {client.created_at && (
+              <StatCard emoji="👤" label="Client depuis" value={fmt(client.created_at)} small />
+            )}
+          </div>
+        </div>
+
+        {/* Chantiers liés */}
+        {(chantiers ?? []).length > 0 && (
+          <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
+            <h2 className="font-display text-lg font-bold text-dusk mb-4">Chantiers réalisés</h2>
+            <ul className="divide-y divide-dusk/8">
+              {(chantiers ?? []).map((c) => (
+                <li key={c.id} className="flex items-center justify-between gap-4 py-3">
+                  <div>
+                    <Link
+                      href={`/espace/chantiers/${c.id}`}
+                      className="text-sm font-medium text-dusk hover:text-braise transition-colors"
+                    >
+                      {c.titre}
+                    </Link>
+                    <p className="text-xs text-dusk/40 mt-0.5">{fmt(c.created_at)}</p>
+                  </div>
+                  {c.montant && (
+                    <span className="text-sm font-semibold text-dusk/70 shrink-0">
+                      {c.montant.toLocaleString("fr-FR")} €
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Notes */}
+        <NotesClient clientId={client.id} notes={notes ?? []} />
+      </div>
+    </div>
+  );
+}
+
+function StatCard({
+  emoji,
+  label,
+  value,
+  small = false,
+}: {
+  emoji: string;
+  label: string;
+  value: string;
+  small?: boolean;
+}) {
+  return (
+    <div className="bg-dust rounded-xl p-4">
+      <span className="text-xl" aria-hidden="true">{emoji}</span>
+      <p className={`font-bold text-dusk mt-2 ${small ? "text-sm" : "text-2xl font-display"}`}>
+        {value}
+      </p>
+      <p className="text-dusk/45 text-xs mt-0.5">{label}</p>
+    </div>
+  );
+}

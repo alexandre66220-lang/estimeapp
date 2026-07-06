@@ -16,6 +16,7 @@ import {
   SignOut,
   List,
   X,
+  FunnelSimple,
   type Icon as PhosphorIcon,
 } from "@phosphor-icons/react";
 import { logout } from "@/app/actions/auth";
@@ -24,6 +25,7 @@ const NAV_ITEMS: { href: string; label: string; icon: PhosphorIcon }[] = [
   { href: "/espace/tableau-de-bord", label: "Tableau de bord", icon: SquaresFour },
   { href: "/espace/mes-chantiers", label: "Mes chantiers", icon: HardHat },
   { href: "/espace/clients", label: "Mes clients", icon: AddressBook },
+  { href: "/espace/pipeline", label: "Pipeline CRM", icon: FunnelSimple },
   { href: "/espace/parrainage", label: "Parrainage", icon: Gift },
   { href: "/espace/avis", label: "Mes Avis", icon: Star },
   { href: "/espace/badge", label: "Mon Badge", icon: SealCheck },

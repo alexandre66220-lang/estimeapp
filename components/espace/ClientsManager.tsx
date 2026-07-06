@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useFormStatus } from "react-dom";
 import {
@@ -45,6 +46,7 @@ export type Client = {
   email: string;
   telephone: string | null;
   created_at: string;
+  statut?: string | null;
 };
 
 export function ClientsManager({
@@ -128,12 +130,12 @@ export function ClientsManager({
               key={client.id}
               className="flex items-center justify-between gap-4 px-5 py-4"
             >
-              <div className="min-w-0">
-                <p className="font-medium text-dusk truncate">
+              <Link href={`/espace/clients/${client.id}`} className="min-w-0 flex-1 group">
+                <p className="font-medium text-dusk group-hover:text-braise transition-colors truncate">
                   {client.prenom} {client.nom}
                 </p>
                 <p className="text-dusk/45 text-xs mt-0.5 truncate">{client.email}</p>
-              </div>
+              </Link>
               <form action={deleteClient}>
                 <input type="hidden" name="clientId" value={client.id} />
                 <DeleteButton label={`Supprimer ${client.prenom} ${client.nom}`} />

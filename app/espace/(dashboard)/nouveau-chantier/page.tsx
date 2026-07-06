@@ -101,6 +101,7 @@ function PhotoField({
 
 export default function NouveauChantier() {
   const [titre, setTitre] = useState("");
+  const [montant, setMontant] = useState("");
   const [avant, setAvant] = useState<Photo | null>(null);
   const [apres, setApres] = useState<Photo | null>(null);
   const [status, setStatus] = useState<Status>("idle");
@@ -222,6 +223,7 @@ export default function NouveauChantier() {
         titre: titre.trim(),
         photo_avant_url: photoAvantUrl,
         photo_apres_url: photoApresUrl,
+        ...(montant.trim() ? { montant: parseFloat(montant) } : {}),
       });
       if (insertError) {
         throw new Error("La création du chantier a échoué. Réessayez.");
@@ -250,6 +252,7 @@ export default function NouveauChantier() {
     if (avant) URL.revokeObjectURL(avant.preview);
     if (apres) URL.revokeObjectURL(apres.preview);
     setTitre("");
+    setMontant("");
     setAvant(null);
     setApres(null);
     setStatus("idle");
@@ -362,6 +365,24 @@ export default function NouveauChantier() {
               value={titre}
               onChange={(event) => setTitre(event.target.value)}
               placeholder="Ravalement façade, 12 rue des Tilleuls"
+              className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200 disabled:opacity-60"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="montant" className="block text-sm font-medium text-dusk/70 mb-1.5">
+              Montant du chantier (€) <span className="text-dusk/35 font-normal">— optionnel</span>
+            </label>
+            <input
+              type="number"
+              id="montant"
+              name="montant"
+              min="0"
+              step="100"
+              disabled={isBusy}
+              value={montant}
+              onChange={(event) => setMontant(event.target.value)}
+              placeholder="5000"
               className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200 disabled:opacity-60"
             />
           </div>
