@@ -21,8 +21,10 @@ export default async function EspaceLayout({
     redirect("/connexion");
   }
 
-  await ensureProfile(supabase, user);
-  await processFirstLogin(supabase, user);
+  const profile = await ensureProfile(supabase, user);
+  if (!profile || !profile.first_login_processed) {
+    await processFirstLogin(supabase, user);
+  }
 
   return <>{children}</>;
 }

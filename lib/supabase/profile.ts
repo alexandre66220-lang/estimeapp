@@ -1,5 +1,5 @@
 import "server-only";
-import { unstable_cache } from "next/cache";
+import { unstable_cache, updateTag } from "next/cache";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { ensureCodeParrainage, registerFilleulParrainage } from "@/lib/supabase/parrainage";
 import { sendWelcomeEmail } from "@/lib/resend/send-welcome";
@@ -40,11 +40,27 @@ export async function getBillingStatus(
   return data;
 }
 
-export async function ensureProfile(supabase: SupabaseClient, user: User) {
-  const existing = await getCachedProfile<{ id: string; code_parrainage: string | null }>(
+type ProfileBootstrap = {
+  id: string;
+  code_parrainage: string | null;
+  first_login_processed: boolean;
+};
+
+/**
+ * Crée le profil si besoin et retourne son état (mis en cache 5 minutes).
+ * Le booléen first_login_processed renvoyé permet à l'appelant de ne
+ * déclencher processFirstLogin() — qui fait un aller-retour Supabase
+ * d'écriture — que la toute première fois, au lieu de le faire à chaque
+ * navigation sous /espace/*.
+ */
+export async function ensureProfile(
+  supabase: SupabaseClient,
+  user: User
+): Promise<ProfileBootstrap | null> {
+  const existing = await getCachedProfile<ProfileBootstrap>(
     supabase,
     user.id,
-    "id, code_parrainage"
+    "id, code_parrainage, first_login_processed"
   );
 
   const companyName = (user.user_metadata?.company_name as string | undefined) ?? null;
@@ -60,6 +76,8 @@ export async function ensureProfile(supabase: SupabaseClient, user: User) {
   if (!existing?.code_parrainage) {
     await ensureCodeParrainage(supabase, user.id, companyName ?? user.email ?? user.id);
   }
+
+  return existing;
 }
 
 /**
@@ -68,7 +86,9 @@ export async function ensureProfile(supabase: SupabaseClient, user: User) {
  * lors de l'inscription même sans session active) et envoie l'email de
  * bienvenue. L'update conditionnée sur first_login_processed = false sert
  * de verrou atomique pour éviter une double exécution en cas de requêtes
- * concurrentes.
+ * concurrentes. Invalide le cache profil pour que les navigations
+ * suivantes voient immédiatement first_login_processed = true et arrêtent
+ * d'appeler cette fonction.
  */
 export async function processFirstLogin(supabase: SupabaseClient, user: User) {
   const { data: claimed, error } = await supabase
@@ -80,6 +100,8 @@ export async function processFirstLogin(supabase: SupabaseClient, user: User) {
     .maybeSingle();
 
   if (error || !claimed) return;
+
+  updateTag(profileCacheTag(user.id));
 
   const email = claimed.email ?? user.email ?? null;
 
