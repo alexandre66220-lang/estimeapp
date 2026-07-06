@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { devLog, devError } from "@/lib/log";
+import { sendStripeMatchFailureAlert } from "@/lib/resend/send-stripe-alert";
 
 // Reste en Node.js runtime (Serverless) : stripe.webhooks.constructEvent est
 // synchrone et dépend du module crypto de Node, indisponible sur Edge.
@@ -38,16 +39,16 @@ export async function POST(request: NextRequest) {
 
   try {
     if (event.type === "customer.subscription.created") {
-      await handleSubscriptionActive(stripe, event.data.object as Stripe.Subscription);
+      await handleSubscriptionActive(stripe, event.data.object as Stripe.Subscription, event);
     } else if (event.type === "customer.subscription.updated") {
       const subscription = event.data.object as Stripe.Subscription;
       if (isActiveStatus(subscription.status)) {
-        await handleSubscriptionActive(stripe, subscription);
+        await handleSubscriptionActive(stripe, subscription, event);
       } else {
-        await handleSubscriptionInactive(stripe, subscription);
+        await handleSubscriptionInactive(stripe, subscription, event);
       }
     } else if (event.type === "customer.subscription.deleted") {
-      await handleSubscriptionInactive(stripe, event.data.object as Stripe.Subscription);
+      await handleSubscriptionInactive(stripe, event.data.object as Stripe.Subscription, event);
     }
   } catch (error) {
     console.error("[stripe-webhook] erreur inattendue lors du traitement :", error);
@@ -68,15 +69,40 @@ function getCustomerId(subscription: Stripe.Subscription) {
 }
 
 /**
- * Cherche le profil par stripe_customer_id en priorité ; si absent (premier
- * événement reçu pour ce client), retombe sur l'email et enregistre le
+ * Cherche le profil dans l'ordre de fiabilité décroissant :
+ * 1. metadata.user_id de la subscription (= client_reference_id de la
+ *    Checkout Session, propagé via subscription_data.metadata à la
+ *    création) — identifiant fiable, indépendant de l'email saisi sur
+ *    Stripe.
+ * 2. stripe_customer_id déjà enregistré (événements suivants pour ce
+ *    client, une fois le matching initial fait).
+ * 3. email, en dernier recours (anciens Payment Links sans metadata).
+ * Dans tous les cas où un profil est trouvé via 1 ou 3, on (re)stocke
  * stripe_customer_id pour fiabiliser les événements suivants.
  */
 async function findProfileId(
   stripe: Stripe,
-  customerId: string
+  subscription: Stripe.Subscription
 ): Promise<{ profileId: string; supabase: ReturnType<typeof createAdminClient> } | null> {
   const supabase = createAdminClient();
+  const customerId = getCustomerId(subscription);
+  const userIdMetadata = subscription.metadata?.user_id || null;
+
+  if (userIdMetadata) {
+    const { data: byUserId } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", userIdMetadata)
+      .maybeSingle();
+
+    if (byUserId) {
+      await supabase
+        .from("profiles")
+        .update({ stripe_customer_id: customerId })
+        .eq("id", byUserId.id);
+      return { profileId: byUserId.id, supabase };
+    }
+  }
 
   const { data: byCustomerId } = await supabase
     .from("profiles")
@@ -89,7 +115,9 @@ async function findProfileId(
   }
 
   const customer = await stripe.customers.retrieve(customerId);
-  if (customer.deleted || !customer.email) {
+  const customerEmail = !customer.deleted ? customer.email ?? null : null;
+
+  if (!customerEmail) {
     console.error(
       "[stripe-webhook] customer sans email exploitable, impossible de matcher un profil :",
       customerId
@@ -100,14 +128,14 @@ async function findProfileId(
   const { data: byEmail } = await supabase
     .from("profiles")
     .select("id")
-    .ilike("email", customer.email)
+    .ilike("email", customerEmail)
     .maybeSingle();
 
   if (!byEmail) {
     console.error(
       "[stripe-webhook] aucun profil ne correspond au customer Stripe :",
       customerId,
-      customer.email
+      customerEmail
     );
     return null;
   }
@@ -120,10 +148,40 @@ async function findProfileId(
   return { profileId: byEmail.id, supabase };
 }
 
-async function handleSubscriptionActive(stripe: Stripe, subscription: Stripe.Subscription) {
+async function alertMatchFailure(stripe: Stripe, subscription: Stripe.Subscription, event: Stripe.Event) {
   const customerId = getCustomerId(subscription);
-  const match = await findProfileId(stripe, customerId);
-  if (!match) return;
+  let customerEmail: string | null = null;
+  try {
+    const customer = await stripe.customers.retrieve(customerId);
+    customerEmail = !customer.deleted ? customer.email ?? null : null;
+  } catch {
+    // ignore, on alerte quand même avec ce qu'on a
+  }
+
+  try {
+    await sendStripeMatchFailureAlert({
+      eventType: event.type,
+      eventId: event.id,
+      customerId,
+      customerEmail,
+      userIdMetadata: subscription.metadata?.user_id || null,
+    });
+  } catch (alertError) {
+    console.error("[stripe-webhook] échec de l'envoi de l'alerte de matching :", alertError);
+  }
+}
+
+async function handleSubscriptionActive(
+  stripe: Stripe,
+  subscription: Stripe.Subscription,
+  event: Stripe.Event
+) {
+  const customerId = getCustomerId(subscription);
+  const match = await findProfileId(stripe, subscription);
+  if (!match) {
+    await alertMatchFailure(stripe, subscription, event);
+    return;
+  }
 
   const { error } = await match.supabase
     .from("profiles")
@@ -143,10 +201,16 @@ async function handleSubscriptionActive(stripe: Stripe, subscription: Stripe.Sub
   revalidatePath("/espace", "layout");
 }
 
-async function handleSubscriptionInactive(stripe: Stripe, subscription: Stripe.Subscription) {
-  const customerId = getCustomerId(subscription);
-  const match = await findProfileId(stripe, customerId);
-  if (!match) return;
+async function handleSubscriptionInactive(
+  stripe: Stripe,
+  subscription: Stripe.Subscription,
+  event: Stripe.Event
+) {
+  const match = await findProfileId(stripe, subscription);
+  if (!match) {
+    await alertMatchFailure(stripe, subscription, event);
+    return;
+  }
 
   const { error } = await match.supabase
     .from("profiles")
