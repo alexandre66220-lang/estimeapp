@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { EnvelopeSimple, Clock, ChatCircle } from "@phosphor-icons/react/dist/ssr";
 import PageShell from "@/components/PageShell";
 
+export const dynamic = "force-static";
+
 export const metadata: Metadata = {
   title: "Contact - Estime",
   description: "Contactez l'équipe Estime pour toute question sur le service.",
