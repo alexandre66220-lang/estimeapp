@@ -6,11 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { translateAuthError } from "@/lib/supabase/auth-errors";
 import { devError } from "@/lib/log";
-import {
-  SESSION_STATUS_COOKIE,
-  SESSION_STATUS_COOKIE_OPTIONS,
-  signSessionStatus,
-} from "@/lib/supabase/session-status-cookie";
+import { SESSION_STATUS_COOKIE } from "@/lib/supabase/session-status-cookie";
 
 export async function login(formData: FormData) {
   const email = (formData.get("email") as string)?.trim();
@@ -23,7 +19,7 @@ export async function login(formData: FormData) {
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signInWithPassword({
+  const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -34,39 +30,11 @@ export async function login(formData: FormData) {
     );
   }
 
-  // On pré-charge le profil (avec timeout 2s) et on pose le cookie de statut
-  // de session AVANT la redirection. Sans ce cookie, le middleware doit
-  // requêter la table profiles à chaque accès à /espace/* et, si cette
-  // requête échoue ou est lente, il redirige à tort vers /espace/onboarding
-  // ou /espace/abonnement — c'est la cause des "plusieurs tentatives".
-  if (data.user) {
-    const profileQuery = supabase
-      .from("profiles")
-      .select("onboarding_complete, is_subscribed, trial_end")
-      .eq("id", data.user.id)
-      .maybeSingle();
-
-    const timeout = new Promise<{ data: null; error: null }>((resolve) =>
-      setTimeout(() => resolve({ data: null, error: null }), 2000)
-    );
-
-    const { data: profile } = await Promise.race([profileQuery, timeout]);
-
-    const signedValue = await signSessionStatus({
-      onboardingComplete: profile?.onboarding_complete ?? false,
-      isSubscribed: profile?.is_subscribed ?? false,
-      trialEnd: profile?.trial_end ?? null,
-    });
-
-    if (signedValue) {
-      (await cookies()).set(
-        SESSION_STATUS_COOKIE,
-        signedValue,
-        SESSION_STATUS_COOKIE_OPTIONS
-      );
-    }
-  }
-
+  // Redirection immédiate : signInWithPassword() est le seul appel bloquant.
+  // Le middleware pose le cookie estime_session_status au premier accès à
+  // /espace/* (requête profiles rapide car Supabase est déjà réveillé par le
+  // ping de ConnexionForm). En cas d'échec réseau, le middleware laisse
+  // passer sans rediriger à tort (fallback ajouté dans middleware.ts).
   redirect("/espace/tableau-de-bord");
 }
 

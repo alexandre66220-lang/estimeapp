@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { login } from "@/app/actions/auth";
 
@@ -7,6 +8,12 @@ export function ConnexionForm() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
   const message = searchParams.get("message");
+
+  useEffect(() => {
+    // Réveille le projet Supabase (cold start free plan → 10-20s) en avance,
+    // pendant que l'utilisateur saisit ses identifiants.
+    fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/health`).catch(() => {});
+  }, []);
 
   return (
     <div className="bg-white rounded-2xl p-8 border border-dusk/8">
