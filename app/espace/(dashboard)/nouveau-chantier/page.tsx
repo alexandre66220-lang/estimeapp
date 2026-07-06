@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -17,12 +18,12 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { HashtagsEditor } from "@/components/espace/HashtagsEditor";
 
-const NotationChantier = dynamic(
+const NotationChantier = dynamic<React.ComponentProps<typeof import("@/components/espace/NotationChantier").NotationChantier>>(
   () => import("@/components/espace/NotationChantier").then((mod) => mod.NotationChantier),
   { ssr: false }
 );
 
-const ShareActions = dynamic(
+const ShareActions = dynamic<React.ComponentProps<typeof import("@/components/espace/ShareActions").ShareActions>>(
   () => import("@/components/espace/ShareActions").then((mod) => mod.ShareActions),
   { ssr: false }
 );

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import {
   TrendUp,
   TrendDown,
@@ -15,11 +14,7 @@ import { getCurrentUser } from "@/lib/supabase/server";
 import { getFinancesData } from "@/lib/supabase/finances";
 import { ObjectifAnnuelForm } from "@/components/espace/ObjectifAnnuelForm";
 import { MontantChantierForm } from "@/components/espace/MontantChantierForm";
-
-const FinancesChart = dynamic(
-  () => import("@/components/espace/FinancesChart").then((m) => m.FinancesChart),
-  { ssr: false }
-);
+import { FinancesChartWrapper } from "@/components/espace/FinancesChartWrapper";
 
 export const metadata: Metadata = { title: "Finances — Estime" };
 
@@ -187,7 +182,7 @@ export default async function FinancesPage() {
             Évolution mensuelle
           </h2>
           <p className="text-dusk/45 text-xs mb-6">12 derniers mois · barre terracotta = mois en cours</p>
-          <FinancesChart data={data.monthly} currentMonth={currentMonthKey} />
+          <FinancesChartWrapper data={data.monthly} currentMonth={currentMonthKey} />
         </section>
 
         {/* SECTION 3 — Année */}

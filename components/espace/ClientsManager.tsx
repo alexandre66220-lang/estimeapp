@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type React from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useFormStatus } from "react-dom";
@@ -15,7 +16,7 @@ import {
 } from "@phosphor-icons/react";
 import { deleteClient } from "@/app/actions/clients";
 
-const AjouterClientModal = dynamic(
+const AjouterClientModal = dynamic<React.ComponentProps<typeof import("./AjouterClientModal").AjouterClientModal>>(
   () => import("./AjouterClientModal").then((mod) => mod.AjouterClientModal),
   { ssr: false }
 );
