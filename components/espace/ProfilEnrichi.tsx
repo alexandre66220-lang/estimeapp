@@ -540,7 +540,7 @@ function ThemeSection({ data, lang }: { data: ProfilEnrichiData; lang: Lang }) {
 
   return (
     <SectionCard title={t(lang, "theme")}>
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3 max-w-full">
         {VALID_THEMES.map((c) => (
           <button
             key={c}
@@ -582,7 +582,7 @@ function LangueSection({ data, lang, onLangChange }: { data: ProfilEnrichiData; 
 
   return (
     <SectionCard title={t(lang, "langue")}>
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-2">
         {LANGUES.map(({ code, flag, label }) => (
           <button
             key={code}

@@ -21,9 +21,12 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 body {
+  overflow-x: hidden;
   font-family: var(--font-public-sans), system-ui, sans-serif;
   background-color: #F2EDE4;
   color: #2B3138;
