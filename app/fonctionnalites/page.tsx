@@ -132,12 +132,7 @@ const SECTIONS: Section[] = [
         title: "Agenda des chantiers",
         desc: "Une vue calendrier mensuel de tous vos chantiers avec leurs statuts et dates.",
       },
-      {
-        icon: "✍️",
-        title: "Génération de bio Instagram et Facebook",
-        desc: "L'IA génère une bio professionnelle optimisée pour vos réseaux sociaux selon votre métier et votre ville.",
-      },
-      {
+{
         icon: "📄",
         title: "Rapport PDF mensuel",
         desc: "Chaque 1er du mois, recevez par email un bilan complet de votre activité en PDF : chantiers, posts, avis, score.",
