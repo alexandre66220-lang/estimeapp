@@ -127,6 +127,7 @@ async function ProfilEnrichiSection() {
     slug_personnalise: string | null;
     theme_couleur: string;
     langue_interface: string;
+    theme_mode: string;
     metier: string | null;
     ville: string | null;
     prenom: string | null;
@@ -134,7 +135,7 @@ async function ProfilEnrichiSection() {
   }>(
     supabase,
     user!.id,
-    "photo_profil, presentation, certifications, annees_experience, statut_disponibilite, statut_jusqu_au, liens_sociaux, numero_siret, slug, slug_personnalise, theme_couleur, langue_interface, metier, ville, prenom, nom"
+    "photo_profil, presentation, certifications, annees_experience, statut_disponibilite, statut_jusqu_au, liens_sociaux, numero_siret, slug, slug_personnalise, theme_couleur, langue_interface, theme_mode, metier, ville, prenom, nom"
   );
 
   let photoUrl: string | null = null;
@@ -160,6 +161,7 @@ async function ProfilEnrichiSection() {
     slug_personnalise: profile?.slug_personnalise ?? null,
     theme_couleur: profile?.theme_couleur ?? "#C75D3B",
     langue_interface: profile?.langue_interface ?? "fr",
+    theme_mode: profile?.theme_mode ?? "system",
     metier: profile?.metier ?? null,
     ville: profile?.ville ?? null,
     prenom: profile?.prenom ?? null,

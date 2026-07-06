@@ -1,0 +1,2 @@
+ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS theme_mode TEXT NOT NULL DEFAULT 'system';

@@ -283,6 +283,27 @@ export async function saveTheme(couleur: string): Promise<{ error?: string }> {
 
 // ─── Langue ───────────────────────────────────────────────────────────────────
 
+// ─── Mode sombre ──────────────────────────────────────────────────────────────
+
+export async function saveThemeMode(mode: string): Promise<{ error?: string }> {
+  const VALID = ["light", "dark", "system"];
+  if (!VALID.includes(mode)) return { error: "Mode invalide." };
+
+  const { supabase, user } = await getUser();
+  if (!user) return { error: "Non autorisé" };
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ theme_mode: mode })
+    .eq("id", user.id);
+
+  if (error) return { error: "Impossible d'enregistrer." };
+  await invalidate(user.id);
+  return {};
+}
+
+// ─── Langue ───────────────────────────────────────────────────────────────────
+
 export async function saveLangue(langue: string): Promise<{ error?: string }> {
   if (!VALID_LANGUES.includes(langue)) return { error: "Langue invalide." };
 

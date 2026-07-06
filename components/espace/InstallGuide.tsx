@@ -219,6 +219,38 @@ export function InstallGuide() {
           <strong className="text-dusk">Résultat :</strong> Estime apparaît sur votre écran d&apos;accueil comme une vraie application — en plein écran, sans barre de navigation du navigateur.
         </p>
       </div>
+
+      {/* Shortcuts section — iOS only */}
+      {(platform === "ios" || platform === "unknown") && (
+        <div className="bg-white rounded-2xl border border-dusk/8 p-6">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-lg">⚡</span>
+            <h2 className="font-display text-lg font-bold text-dusk">Raccourcis rapides</h2>
+          </div>
+          <p className="text-dusk/55 text-sm mb-5">
+            Sur iPhone, appuyez <strong>longtemps</strong> sur l&apos;icône Estime pour accéder directement à vos fonctionnalités clés.
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { emoji: "🏗️", label: "Nouveau chantier", desc: "Créer un chantier rapidement" },
+              { emoji: "⭐", label: "Mon score", desc: "Voir votre score de fidélité" },
+              { emoji: "👥", label: "Mes clients", desc: "Accéder à votre carnet" },
+              { emoji: "✨", label: "Générer un post", desc: "Créer un post réseaux sociaux" },
+            ].map((s) => (
+              <div key={s.label} className={`${STEP_CLASS} flex-col gap-2 p-3`}>
+                <span className="text-2xl">{s.emoji}</span>
+                <div>
+                  <p className="font-semibold text-dusk text-xs">{s.label}</p>
+                  <p className="text-dusk/50 text-xs mt-0.5">{s.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-dusk/40 text-xs mt-4 text-center">
+            Disponible après avoir ajouté Estime à l&apos;écran d&apos;accueil
+          </p>
+        </div>
+      )}
     </div>
   );
 }

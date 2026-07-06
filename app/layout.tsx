@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Public_Sans, Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import CookieConsent from "@/components/CookieConsent";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -85,8 +86,10 @@ export default function RootLayout({
       className={`${bricolage.variable} ${publicSans.variable} ${fraunces.variable} ${jakarta.variable} antialiased`}
     >
       <body className="min-h-screen flex flex-col">
-        {children}
-        <CookieConsent />
+        <ThemeProvider>
+          {children}
+          <CookieConsent />
+        </ThemeProvider>
       </body>
     </html>
   );

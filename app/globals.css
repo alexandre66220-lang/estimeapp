@@ -15,6 +15,33 @@
   --font-landing-sans: var(--font-jakarta);
 }
 
+/* ── Variables de thème (clair / sombre) ────────────────────────────────── */
+:root {
+  --bg-app:      #F2EDE4;
+  --bg-card:     #FFFFFF;
+  --bg-input:    rgba(242,237,228,0.5);
+  --bg-sidebar:  #FFFFFF;
+  --text-main:   #2B3138;
+  --text-muted:  rgba(43,49,56,0.5);
+  --text-subtle: rgba(43,49,56,0.35);
+  --border:      rgba(43,49,56,0.08);
+  --border-med:  rgba(43,49,56,0.15);
+  --dust-bg:     #F2EDE4;
+}
+
+.dark {
+  --bg-app:      #0F0E0C;
+  --bg-card:     #1C1A17;
+  --bg-input:    #252320;
+  --bg-sidebar:  #141210;
+  --text-main:   #F8F5F2;
+  --text-muted:  #9C9489;
+  --text-subtle: #6B6460;
+  --border:      #2E2B27;
+  --border-med:  #3A3733;
+  --dust-bg:     #1C1A17;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -28,11 +55,48 @@ html {
 body {
   overflow-x: hidden;
   font-family: var(--font-public-sans), system-ui, sans-serif;
-  background-color: #F2EDE4;
-  color: #2B3138;
+  background-color: var(--bg-app);
+  color: var(--text-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 200ms, color 200ms;
 }
+
+/* ── Classes utilitaires dark-mode via CSS vars ──────────────────────────── */
+.dm-bg-app    { background-color: var(--bg-app); }
+.dm-bg-card   { background-color: var(--bg-card); }
+.dm-bg-input  { background-color: var(--bg-input); }
+.dm-bg-sidebar { background-color: var(--bg-sidebar); }
+.dm-text-main  { color: var(--text-main); }
+.dm-text-muted { color: var(--text-muted); }
+.dm-text-subtle { color: var(--text-subtle); }
+.dm-border    { border-color: var(--border); }
+.dm-border-med { border-color: var(--border-med); }
+
+/* ── Composants espace artisan — variantes dark ───────────────────────────── */
+.dark .bg-white   { background-color: var(--bg-card) !important; }
+.dark .bg-dust,
+.dark .bg-\[#F8F5F2\],
+.dark .bg-\[#F2EDE4\] { background-color: var(--bg-input) !important; }
+.dark .min-h-screen.bg-dust { background-color: var(--bg-app) !important; }
+.dark .border-dusk\/8  { border-color: var(--border)     !important; }
+.dark .border-dusk\/15 { border-color: var(--border-med) !important; }
+.dark .text-dusk   { color: var(--text-main)   !important; }
+.dark .text-dusk\/50,
+.dark .text-dusk\/55,
+.dark .text-dusk\/60 { color: var(--text-muted) !important; }
+.dark .text-dusk\/35,
+.dark .text-dusk\/40,
+.dark .text-dusk\/45 { color: var(--text-subtle) !important; }
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-med) !important;
+}
+.dark input::placeholder,
+.dark textarea::placeholder { color: var(--text-subtle) !important; }
 
 ::selection {
   background-color: #D9883D;

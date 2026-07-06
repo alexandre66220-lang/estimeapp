@@ -30,6 +30,8 @@ import {
   saveTheme,
   saveLangue,
 } from "@/app/actions/profil-enrichi";
+import { ThemeToggle } from "@/components/espace/ThemeToggle";
+import { DynamicManifest } from "@/components/DynamicManifest";
 
 const VALID_THEMES = ["#C75D3B", "#385144", "#2D4A6B", "#7B2D3E", "#C8922A", "#3D3D3D"] as const;
 const VALID_CERTIFS = [
@@ -56,6 +58,7 @@ export type ProfilEnrichiData = {
   slug_personnalise: string | null;
   theme_couleur: string;
   langue_interface: string;
+  theme_mode: string;
   metier: string | null;
   ville: string | null;
   prenom: string | null;
@@ -534,31 +537,57 @@ const THEME_LABELS: Record<string, string> = {
   "#3D3D3D": "Anthracite",
 };
 
-function ThemeSection({ data, lang }: { data: ProfilEnrichiData; lang: Lang }) {
+function ThemeSection({ data, lang, onThemeChange }: { data: ProfilEnrichiData; lang: Lang; onThemeChange: (c: string) => void }) {
   const [couleur, setCouleur] = useState(data.theme_couleur);
   const { state, save } = useSave();
 
+  function handleSelect(c: string) {
+    setCouleur(c);
+  }
+
   return (
-    <SectionCard title={t(lang, "theme")}>
-      <div className="flex flex-wrap gap-3 max-w-full">
+    <SectionCard title="Personnalisation">
+      {/* Couleur d'accent */}
+      <p className="text-xs font-medium text-dusk/60 mb-2">{t(lang, "theme")}</p>
+      <div className="flex flex-wrap gap-3 max-w-full mb-1">
         {VALID_THEMES.map((c) => (
           <button
             key={c}
             type="button"
-            onClick={() => setCouleur(c)}
+            onClick={() => handleSelect(c)}
             title={THEME_LABELS[c]}
             aria-label={THEME_LABELS[c]}
             className={`w-10 h-10 rounded-full transition-all ${
-              couleur === c ? "scale-110 ring-2 ring-offset-2 ring-[" + c + "]" : "hover:scale-105"
+              couleur === c ? "scale-110" : "hover:scale-105"
             }`}
             style={{ backgroundColor: c, boxShadow: couleur === c ? `0 0 0 2px white, 0 0 0 4px ${c}` : undefined }}
           />
         ))}
       </div>
-      <p className="mt-2 text-xs text-dusk/50">{THEME_LABELS[couleur]}</p>
-      <form action={() => save(() => saveTheme(couleur))}>
+      <p className="text-xs text-dusk/40 mb-1">{THEME_LABELS[couleur]}</p>
+
+      {/* Aperçu icône */}
+      <div className="flex items-center gap-3 p-3 rounded-xl bg-dust/40 border border-dusk/8 mb-4">
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-sm" style={{ backgroundColor: couleur }}>
+          E
+        </div>
+        <div className="min-w-0">
+          <p className="text-xs font-medium text-dusk">Icône de l&apos;app</p>
+          <p className="text-[11px] text-dusk/45 leading-tight">
+            Pour voir la nouvelle icône, réinstallez l&apos;app sur votre écran d&apos;accueil.
+          </p>
+        </div>
+      </div>
+
+      <form action={() => { save(() => saveTheme(couleur)); onThemeChange(couleur); }}>
         <SaveBtn state={state} lang={lang} />
       </form>
+
+      {/* Mode sombre */}
+      <div className="mt-6 pt-5 border-t border-dusk/8">
+        <p className="text-xs font-medium text-dusk/60 mb-3">Mode d&apos;affichage</p>
+        <ThemeToggle defaultMode={data.theme_mode} />
+      </div>
     </SectionCard>
   );
 }
@@ -610,9 +639,11 @@ function LangueSection({ data, lang, onLangChange }: { data: ProfilEnrichiData; 
 
 export function ProfilEnrichi({ data }: { data: ProfilEnrichiData }) {
   const [lang, setLang] = useState<Lang>((data.langue_interface as Lang) || "fr");
+  const [themeColor, setThemeColor] = useState(data.theme_couleur);
 
   return (
     <div className="space-y-6">
+      <DynamicManifest themeColor={themeColor} />
       <PhotoSection data={data} lang={lang} />
       <PresentationSection data={data} lang={lang} />
       <CertificationsSection data={data} lang={lang} />
@@ -620,7 +651,7 @@ export function ProfilEnrichi({ data }: { data: ProfilEnrichiData }) {
       <ReseauxSection data={data} lang={lang} />
       <SiretSection data={data} lang={lang} />
       <SlugSection data={data} lang={lang} />
-      <ThemeSection data={data} lang={lang} />
+      <ThemeSection data={data} lang={lang} onThemeChange={setThemeColor} />
       <LangueSection data={data} lang={lang} onLangChange={setLang} />
     </div>
   );
