@@ -83,7 +83,8 @@ export function getAvisListe(
         .from("avis")
         .select("id, client_prenom, note_google, date_avis, chantiers(id, titre)")
         .eq("user_id", userId)
-        .order("date_avis", { ascending: false });
+        .order("date_avis", { ascending: false })
+        .limit(20);
 
       return (data ?? []).map((item) => ({
         id: item.id,

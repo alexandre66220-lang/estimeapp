@@ -15,11 +15,15 @@ import {
   Plus,
 } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
-import { ShareActions } from "@/components/espace/ShareActions";
 import { HashtagsEditor } from "@/components/espace/HashtagsEditor";
 
 const NotationChantier = dynamic(
   () => import("@/components/espace/NotationChantier").then((mod) => mod.NotationChantier),
+  { ssr: false }
+);
+
+const ShareActions = dynamic(
+  () => import("@/components/espace/ShareActions").then((mod) => mod.ShareActions),
   { ssr: false }
 );
 

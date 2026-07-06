@@ -90,7 +90,8 @@ async function ChantiersList({
     .from("chantiers")
     .select("id, titre, statut, photo_avant_url, photo_apres_url, created_at, note")
     .eq("user_id", user!.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(20);
 
   if (note) {
     query = query.eq("note", Number(note));
