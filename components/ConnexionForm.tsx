@@ -1,19 +1,91 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { login } from "@/app/actions/auth";
+
+function LoadingOverlay() {
+  return (
+    <div
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-6"
+      style={{
+        background: "#2B2521",
+        animation: "fadeInOverlay 200ms ease forwards",
+      }}
+    >
+      <span
+        className="font-display text-3xl font-bold tracking-tight"
+        style={{ color: "#F8F5F2" }}
+      >
+        Estime
+      </span>
+      {/* Spinner terracotta */}
+      <svg
+        width="36"
+        height="36"
+        viewBox="0 0 36 36"
+        fill="none"
+        style={{ animation: "spinOverlay 0.8s linear infinite" }}
+        aria-hidden="true"
+      >
+        <circle cx="18" cy="18" r="15" stroke="#C75D3B" strokeOpacity="0.25" strokeWidth="3" />
+        <path
+          d="M18 3 A15 15 0 0 1 33 18"
+          stroke="#C75D3B"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+      </svg>
+      <p style={{ color: "#9C9489", fontSize: "0.875rem" }}>Connexion en cours…</p>
+      <style>{`
+        @keyframes fadeInOverlay { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes spinOverlay   { to { transform: rotate(360deg) } }
+      `}</style>
+    </div>
+  );
+}
 
 export function ConnexionForm() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
   const message = searchParams.get("message");
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [, startTransition] = useTransition();
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    // Réveille le projet Supabase (cold start free plan → 10-20s) en avance,
+    // Réveille l'endpoint auth Supabase (cold start free plan → 10-20s)
     // pendant que l'utilisateur saisit ses identifiants.
     fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/health`).catch(() => {});
-  }, []);
+
+    // Précharge le bundle JS du tableau de bord pendant la saisie
+    const timer = setTimeout(() => {
+      router.prefetch("/espace/tableau-de-bord");
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [router]);
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    // Affiche le loader immédiatement, AVANT tout appel réseau
+    setIsLoading(true);
+
+    startTransition(async () => {
+      try {
+        await login(formData);
+      } catch {
+        // redirect() lève une exception interne que Next.js intercepte ;
+        // tout autre catch indique une erreur inattendue, on retire le loader.
+        setIsLoading(false);
+      }
+    });
+  }
+
+  if (isLoading) return <LoadingOverlay />;
 
   return (
     <div className="bg-white rounded-2xl p-8 border border-dusk/8">
@@ -35,7 +107,7 @@ export function ConnexionForm() {
         </p>
       )}
 
-      <form action={login} className="space-y-5">
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label
             htmlFor="email"

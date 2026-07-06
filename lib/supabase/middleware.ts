@@ -114,11 +114,26 @@ export async function updateSession(request: NextRequest) {
       isSubscribed = cached.isSubscribed;
       trialEnd = cached.trialEnd ? new Date(cached.trialEnd) : null;
     } else {
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("onboarding_complete, is_subscribed, trial_end")
-        .eq("id", user.id)
-        .maybeSingle();
+      // Timeout de 2 s sur la requête profiles : si Supabase est lent,
+      // on laisse passer plutôt que de bloquer l'artisan indéfiniment.
+      const profileTimeout = new Promise<null>((resolve) =>
+        setTimeout(() => resolve(null), 2000)
+      );
+      const profileResult = await Promise.race([
+        supabase
+          .from("profiles")
+          .select("onboarding_complete, is_subscribed, trial_end")
+          .eq("id", user.id)
+          .maybeSingle(),
+        profileTimeout.then(() => null),
+      ]);
+
+      if (profileResult === null) {
+        console.error("[middleware] timeout requête profiles (2s) — laisse passer");
+        return applyCookie(supabaseResponse);
+      }
+
+      const { data: profile, error: profileError } = profileResult;
 
       if (profileError) {
         // Échec réseau vers Supabase : on laisse passer plutôt que de
