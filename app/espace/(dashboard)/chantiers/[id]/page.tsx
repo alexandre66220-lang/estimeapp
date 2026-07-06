@@ -44,14 +44,50 @@ export default async function FicheChantier({
 
   const { supabase, user } = await getCurrentUser();
 
-  const { data: chantier } = await supabase
-    .from("chantiers")
-    .select(
-      "id, titre, photo_avant_url, photo_apres_url, statut, client_nom, client_email, termine_at, created_at"
-    )
-    .eq("id", id)
-    .eq("user_id", user!.id)
-    .maybeSingle();
+  // Seule la requête `chantier` doit attendre (notFound() en dépend) ; les
+  // autres ne dépendent que de `id`/`user.id`, déjà connus, donc elles
+  // partent en parallèle plutôt qu'après coup.
+  const [
+    { data: chantier },
+    { data: profile },
+    { data: posts },
+    { data: relances },
+    { data: carnetClients },
+    { data: avis },
+  ] = await Promise.all([
+    supabase
+      .from("chantiers")
+      .select(
+        "id, titre, photo_avant_url, photo_apres_url, statut, client_nom, client_email, termine_at, created_at"
+      )
+      .eq("id", id)
+      .eq("user_id", user!.id)
+      .maybeSingle(),
+    supabase
+      .from("profiles")
+      .select("lien_avis_google")
+      .eq("id", user!.id)
+      .maybeSingle(),
+    supabase
+      .from("posts")
+      .select("id, contenu, image_url, plateforme, created_at")
+      .eq("chantier_id", id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("relances")
+      .select("id, type, statut, envoyee_at, created_at")
+      .eq("chantier_id", id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("clients")
+      .select("prenom, nom, email")
+      .eq("user_id", user!.id),
+    supabase
+      .from("avis")
+      .select("id, note_google, date_avis")
+      .eq("chantier_id", id)
+      .maybeSingle(),
+  ]);
 
   if (!chantier) {
     notFound();
@@ -61,34 +97,6 @@ export default async function FicheChantier({
     getSignedChantierPhotoUrl(supabase, chantier.photo_avant_url),
     getSignedChantierPhotoUrl(supabase, chantier.photo_apres_url),
   ]);
-
-  const [{ data: profile }, { data: posts }, { data: relances }, { data: carnetClients }, { data: avis }] =
-    await Promise.all([
-      supabase
-        .from("profiles")
-        .select("lien_avis_google")
-        .eq("id", user!.id)
-        .maybeSingle(),
-      supabase
-        .from("posts")
-        .select("id, contenu, image_url, plateforme, created_at")
-        .eq("chantier_id", id)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("relances")
-        .select("id, type, statut, envoyee_at, created_at")
-        .eq("chantier_id", id)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("clients")
-        .select("prenom, nom, email")
-        .eq("user_id", user!.id),
-      supabase
-        .from("avis")
-        .select("id, note_google, date_avis")
-        .eq("chantier_id", id)
-        .maybeSingle(),
-    ]);
 
   const isTermine = chantier.statut === "termine";
   const hasLienAvisGoogle = Boolean(profile?.lien_avis_google);

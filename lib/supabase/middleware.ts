@@ -46,9 +46,18 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user: Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"] = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (error) {
+    // Échec réseau lors de l'appel à Supabase : on ne redirige pas vers
+    // /connexion (ça déconnecterait un utilisateur dont la session est en
+    // fait valide), on laisse passer la requête et c'est la page elle-même
+    // qui gérera l'erreur (cf. app/espace/error.tsx).
+    console.error("[middleware] échec réseau lors de auth.getUser() :", error);
+    return supabaseResponse;
+  }
 
   const isProtectedRoute = path.startsWith("/espace");
 
