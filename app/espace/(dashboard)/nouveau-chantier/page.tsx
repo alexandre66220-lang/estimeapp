@@ -17,6 +17,8 @@ import {
 } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
 import { HashtagsEditor } from "@/components/espace/HashtagsEditor";
+import { usePointsToast } from "@/components/espace/PointsToastProvider";
+import { addPointsFidelite } from "@/app/actions/fidelite";
 
 const NotationChantier = dynamic<React.ComponentProps<typeof import("@/components/espace/NotationChantier").NotationChantier>>(
   () => import("@/components/espace/NotationChantier").then((mod) => mod.NotationChantier),
@@ -101,6 +103,7 @@ function PhotoField({
 }
 
 export default function NouveauChantier() {
+  const { notify } = usePointsToast();
   const [titre, setTitre] = useState("");
   const [montant, setMontant] = useState("");
   const [avant, setAvant] = useState<Photo | null>(null);
@@ -176,6 +179,11 @@ export default function NouveauChantier() {
     setCaption(json.post.contenu);
     setHashtags(json.post.hashtags ?? []);
     setStatus("success");
+
+    // Points fidélité pour génération de post
+    addPointsFidelite("post_instagram").then((res) => {
+      if (res) notify("post_instagram", res.pointsAdded, res.leveledUp);
+    });
   }
 
   async function handleSubmit(event: React.FormEvent) {
@@ -231,6 +239,12 @@ export default function NouveauChantier() {
       }
 
       setChantierId(newChantierId);
+
+      // Points fidélité pour création de chantier
+      addPointsFidelite("chantier_cree").then((res) => {
+        if (res) notify("chantier_cree", res.pointsAdded, res.leveledUp);
+      });
+
       await generatePost(newChantierId);
     } catch (error) {
       setStatus("error");

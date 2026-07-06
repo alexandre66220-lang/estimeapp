@@ -24,6 +24,7 @@ import {
 } from "@/components/espace/DashboardStats";
 import { computeReputationScore, enregistrerHistoriqueScore } from "@/lib/score/reputation";
 import { getRangLocal } from "@/lib/score/rang-local";
+import { updateStreak } from "@/app/actions/fidelite";
 import { ReputationCard } from "@/components/espace/ReputationCard";
 import { RangLocalCard } from "@/components/espace/RangLocalCard";
 import PaymentSuccessToast from "@/components/espace/PaymentSuccessToast";
@@ -114,10 +115,28 @@ async function DashboardStatsSection() {
 async function ReputationCardSection() {
   const { supabase, user } = await getCurrentUser();
 
-  const score = await computeReputationScore(supabase, user!.id);
+  const [score, streak] = await Promise.all([
+    computeReputationScore(supabase, user!.id),
+    updateStreak(),
+  ]);
   await enregistrerHistoriqueScore(supabase, user!.id, score.total);
 
-  return <ReputationCard score={score} />;
+  return (
+    <>
+      {streak.streakJours >= 2 && (
+        <div className="flex items-center gap-2 mb-4 text-sm text-dusk/70">
+          <span className="text-lg">🔥</span>
+          <span>
+            <strong>{streak.streakJours} jours</strong> de connexion consécutifs
+            {streak.streakJours >= 7 && streak.streakJours % 7 === 0 && (
+              <span className="ml-2 text-ambre font-semibold">+25 pts bonus !</span>
+            )}
+          </span>
+        </div>
+      )}
+      <ReputationCard score={score} />
+    </>
+  );
 }
 
 function ReputationCardSkeleton() {

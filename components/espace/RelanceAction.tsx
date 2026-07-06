@@ -9,6 +9,8 @@ import {
   ArrowsClockwise,
 } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
+import { usePointsToast } from "@/components/espace/PointsToastProvider";
+import { addPointsFidelite } from "@/app/actions/fidelite";
 
 async function sendRelance(chantierId: string) {
   const response = await fetch("/api/envoyer-relance", {
@@ -32,6 +34,7 @@ export default function RelanceAction({
   termineAt: string | null;
 }) {
   const router = useRouter();
+  const { notify } = usePointsToast();
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -53,6 +56,9 @@ export default function RelanceAction({
 
     try {
       await sendRelance(chantierId);
+      addPointsFidelite("demande_avis").then((res) => {
+        if (res) notify("demande_avis", res.pointsAdded, res.leveledUp);
+      });
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : "Une erreur est survenue."
