@@ -141,13 +141,15 @@ export default function Sidebar() {
       {/* Sidebar desktop fixe */}
       <aside className="hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:left-0 lg:w-64 lg:px-5 lg:py-6 bg-dusk border-r border-white/8 z-20">
         <div className="lumiere-fin-chantier absolute top-0 left-0 right-0 h-20 opacity-25 pointer-events-none" aria-hidden="true" />
+        {/* Logo — fixe en haut */}
         <Link
           href="/espace/tableau-de-bord"
-          className="relative font-display text-xl font-bold text-dust tracking-tight mb-10 inline-block"
+          className="relative font-display text-xl font-bold text-dust tracking-tight mb-6 inline-block shrink-0"
         >
           Estime
         </Link>
-        <nav className="flex-1 flex flex-col gap-1" aria-label="Navigation de l'espace artisan">
+        {/* Liste nav scrollable entre logo et pied */}
+        <nav className="sidebar-nav flex-1 overflow-y-auto flex flex-col gap-1 min-h-0" aria-label="Navigation de l'espace artisan">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.href}
@@ -159,7 +161,8 @@ export default function Sidebar() {
             />
           ))}
         </nav>
-        <div className="border-t border-white/8 pt-4 mt-4">
+        {/* Pied — fixe en bas */}
+        <div className="border-t border-white/8 pt-4 mt-4 shrink-0">
           <PresentationModeButton className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-dust/55 hover:bg-white/5 hover:text-dust transition-colors duration-200 mb-1" />
           <LogoutButton />
           <p className="text-white/20 text-xs mt-4 px-1">

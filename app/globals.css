@@ -30,17 +30,19 @@
 }
 
 .dark {
-  --bg-app:      #0F0E0C;
-  --bg-card:     #1C1A17;
-  --bg-input:    #252320;
-  --bg-sidebar:  #141210;
-  --text-main:   #F8F5F2;
-  --text-muted:  #C4BDB5;
-  --text-label:  #D4CEC8;
-  --text-subtle: #B8B0A8;
-  --border:      #2E2B27;
-  --border-med:  #3A3733;
-  --dust-bg:     #1C1A17;
+  --bg-app:           #0F0E0C;
+  --bg-card:          #1C1A17;
+  --bg-input:         #252320;
+  --bg-sidebar:       #141210;
+  --text-main:        #F8F5F2;   /* principal — ratio >15:1 sur bg-app */
+  --text-muted:       #C8C0B8;   /* secondaire — ratio ~10:1             */
+  --text-label:       #E0D8D0;   /* labels/titres cards — ratio ~13:1    */
+  --text-subtle:      #B8B2AC;   /* pills, badges non actifs — ratio ~8:1*/
+  --text-desc:        #C0B8B0;   /* descriptions sous les titres         */
+  --text-placeholder: #8A847E;   /* placeholders inputs — ratio ~5:1     */
+  --border:           #2E2B27;
+  --border-med:       #3A3733;
+  --dust-bg:          #1C1A17;
 }
 
 *, *::before, *::after {
@@ -102,7 +104,17 @@ body {
   border-color: var(--border-med) !important;
 }
 .dark input::placeholder,
-.dark textarea::placeholder { color: var(--text-subtle) !important; }
+.dark textarea::placeholder { color: var(--text-placeholder) !important; }
+
+/* ── Scrollbar discrète pour la nav latérale ─────────────────────────────── */
+.sidebar-nav {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.10) transparent;
+}
+.sidebar-nav::-webkit-scrollbar       { width: 4px; }
+.sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.10); border-radius: 2px; }
+.sidebar-nav::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.20); }
 
 ::selection {
   background-color: #D9883D;
