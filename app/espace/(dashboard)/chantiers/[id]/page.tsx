@@ -63,7 +63,7 @@ export default async function FicheChantier({
     supabase
       .from("chantiers")
       .select(
-        "id, titre, photo_avant_url, photo_apres_url, avant_apres_url, statut, client_nom, client_email, termine_at, created_at, montant, depenses, heures_passees, sous_traitance, frais_deplacement"
+        "id, titre, photo_avant_url, photo_apres_url, avant_apres_url, statut, client_nom, client_email, termine_at, created_at, montant, depenses, heures_passees, sous_traitance, frais_deplacement, autres_couts, taux_horaire_objectif"
       )
       .eq("id", id)
       .eq("user_id", user!.id)
@@ -323,6 +323,8 @@ export default async function FicheChantier({
           heures_passees: chantier.heures_passees ?? null,
           sous_traitance: chantier.sous_traitance ?? null,
           frais_deplacement: chantier.frais_deplacement ?? null,
+          autres_couts: chantier.autres_couts ?? null,
+          taux_horaire_objectif: chantier.taux_horaire_objectif ?? null,
         }}
       />
 

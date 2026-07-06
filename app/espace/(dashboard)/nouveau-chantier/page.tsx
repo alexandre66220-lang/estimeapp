@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -16,6 +16,7 @@ import {
   Plus,
   ChatTeardrop,
   TextAlignLeft,
+  CaretDown,
 } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
 import { PostEditor } from "@/components/espace/PostEditor";
@@ -43,11 +44,27 @@ const LONGUEUR_OPTIONS: { value: LongueurPost; label: string; sub: string }[] = 
   { value: "long", label: "Long", sub: "~600 car." },
 ];
 
+const GENERATING_MESSAGES = [
+  "Analyse de votre photo en cours...",
+  "Rédaction du post en cours...",
+  "Ajout des hashtags locaux...",
+  "Finalisation...",
+];
+
 type Photo = { file: File; preview: string };
-
 type Status = "idle" | "uploading" | "generating" | "success" | "error";
-
 type GeneratedPost = { contenu: string; image_url: string; hashtags: string[] };
+
+function parseNum(v: string): number | null {
+  const n = parseFloat(v.replace(",", "."));
+  return isNaN(n) || n < 0 ? null : n;
+}
+
+function extractPartialLegende(raw: string): string {
+  const match = raw.match(/"legende"\s*:\s*"((?:[^"\\]|\\.)*)(?:"|$)/);
+  if (!match) return "";
+  return match[1].replace(/\\n/g, "\n").replace(/\\"/g, '"').replace(/\\\\/g, "\\");
+}
 
 function PhotoField({
   inputId,
@@ -72,13 +89,7 @@ function PhotoField({
       <div className="relative aspect-[4/3] rounded-xl overflow-hidden">
         {photo ? (
           <>
-            <Image
-              src={photo.preview}
-              alt={`Aperçu photo ${label.toLowerCase()}`}
-              fill
-              unoptimized
-              className="object-cover"
-            />
+            <Image src={photo.preview} alt={`Aperçu photo ${label.toLowerCase()}`} fill unoptimized className="object-cover" />
             <button
               type="button"
               onClick={onClear}
@@ -115,6 +126,81 @@ function PhotoField({
   );
 }
 
+function FinancialDetailSection({
+  disabled,
+  coutFournitures, setCoutFournitures,
+  coutSousTraitance, setCoutSousTraitance,
+  fraisDeplacement, setFraisDeplacement,
+  autresCouts, setAutresCouts,
+  heuresPassees, setHeuresPassees,
+  tauxHoraireObjectif, setTauxHoraireObjectif,
+}: {
+  disabled: boolean;
+  coutFournitures: string; setCoutFournitures: (v: string) => void;
+  coutSousTraitance: string; setCoutSousTraitance: (v: string) => void;
+  fraisDeplacement: string; setFraisDeplacement: (v: string) => void;
+  autresCouts: string; setAutresCouts: (v: string) => void;
+  heuresPassees: string; setHeuresPassees: (v: string) => void;
+  tauxHoraireObjectif: string; setTauxHoraireObjectif: (v: string) => void;
+}) {
+  const inputClass = "w-full px-3 py-2.5 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200 disabled:opacity-60";
+
+  const fournitures = parseNum(coutFournitures) ?? 0;
+  const sousTraitance = parseNum(coutSousTraitance) ?? 0;
+  const deplacements = parseNum(fraisDeplacement) ?? 0;
+  const autres = parseNum(autresCouts) ?? 0;
+  const heures = parseNum(heuresPassees) ?? 0;
+
+  const totalCouts = fournitures + sousTraitance + deplacements + autres;
+  const showCalcs = totalCouts > 0;
+
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-medium text-dusk/60 mb-1">Coût fournitures (€)</label>
+          <input type="number" min="0" step="1" disabled={disabled} value={coutFournitures} onChange={e => setCoutFournitures(e.target.value)} placeholder="Peinture, matériaux..." className={inputClass} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-dusk/60 mb-1">Sous-traitance (€)</label>
+          <input type="number" min="0" step="1" disabled={disabled} value={coutSousTraitance} onChange={e => setCoutSousTraitance(e.target.value)} placeholder="Montant sous-traitants" className={inputClass} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-dusk/60 mb-1">Frais de déplacement (€)</label>
+          <input type="number" min="0" step="1" disabled={disabled} value={fraisDeplacement} onChange={e => setFraisDeplacement(e.target.value)} placeholder="Carburant, péages..." className={inputClass} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-dusk/60 mb-1">Autres coûts (€)</label>
+          <input type="number" min="0" step="1" disabled={disabled} value={autresCouts} onChange={e => setAutresCouts(e.target.value)} placeholder="Location matériel, divers" className={inputClass} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-dusk/60 mb-1">Heures de travail réelles</label>
+          <input type="number" min="0" step="0.5" disabled={disabled} value={heuresPassees} onChange={e => setHeuresPassees(e.target.value)} placeholder="0" className={inputClass} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-dusk/60 mb-1">Taux horaire objectif (€/h)</label>
+          <input type="number" min="0" step="1" disabled={disabled} value={tauxHoraireObjectif} onChange={e => setTauxHoraireObjectif(e.target.value)} placeholder="ex. 45" className={inputClass} />
+        </div>
+      </div>
+
+      {showCalcs && (
+        <div className="rounded-xl bg-dust/60 border border-dusk/8 p-3 text-xs space-y-1.5">
+          <div className="flex justify-between text-dusk/60">
+            <span>Total des coûts</span>
+            <span className="font-semibold text-dusk">{totalCouts.toLocaleString("fr-FR")} €</span>
+          </div>
+          {heures > 0 && totalCouts > 0 && (
+            <div className="flex justify-between text-dusk/60">
+              <span>Coût horaire moyen</span>
+              <span className="font-semibold text-dusk">{(totalCouts / heures).toFixed(0)} €/h</span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function NouveauChantier() {
   const { notify } = usePointsToast();
   const [titre, setTitre] = useState("");
@@ -129,38 +215,48 @@ export default function NouveauChantier() {
   const [favoris, setFavoris] = useState<string[]>([]);
   const [ton, setTon] = useState<TonPost>("professionnel");
   const [longueur, setLongueur] = useState<LongueurPost>("moyen");
-
   const [chantierId, setChantierId] = useState<string | null>(null);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [streamingText, setStreamingText] = useState("");
+  const [msgIndex, setMsgIndex] = useState(0);
+
+  // Financial detail
+  const [coutFournitures, setCoutFournitures] = useState("");
+  const [coutSousTraitance, setCoutSousTraitance] = useState("");
+  const [fraisDeplacement, setFraisDeplacement] = useState("");
+  const [autresCouts, setAutresCouts] = useState("");
+  const [heuresPassees, setHeuresPassees] = useState("");
+  const [tauxHoraireObjectif, setTauxHoraireObjectif] = useState("");
+
   const isBusy = status === "uploading" || status === "generating";
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     async function loadFavoris() {
       const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const { data } = await supabase
-        .from("profiles")
-        .select("hashtags_favoris")
-        .eq("id", user.id)
-        .maybeSingle();
+      const { data } = await supabase.from("profiles").select("hashtags_favoris").eq("id", user.id).maybeSingle();
       setFavoris(data?.hashtags_favoris ?? []);
     }
     loadFavoris();
   }, []);
 
-  async function handleToggleFavori(tag: string) {
-    const next = favoris.includes(tag)
-      ? favoris.filter((t) => t !== tag)
-      : [...favoris, tag];
-    setFavoris(next);
+  // Rotating messages during generation
+  useEffect(() => {
+    if (status !== "generating") return;
+    setMsgIndex(0);
+    const interval = setInterval(() => {
+      setMsgIndex((i) => (i + 1) % GENERATING_MESSAGES.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [status]);
 
+  async function handleToggleFavori(tag: string) {
+    const next = favoris.includes(tag) ? favoris.filter((t) => t !== tag) : [...favoris, tag];
+    setFavoris(next);
     const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     await supabase.from("profiles").update({ hashtags_favoris: next }).eq("id", user.id);
   }
@@ -180,26 +276,98 @@ export default function NouveauChantier() {
     else setApres(null);
   }
 
-  async function generatePost(chantierId: string, tonOverride?: TonPost, longueurOverride?: LongueurPost, silent = false) {
-    if (!silent) setStatus("generating");
-    const response = await fetch("/api/generate-post", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chantierId, tonPost: tonOverride ?? ton, longueurPost: longueurOverride ?? longueur }),
-    });
-    const json = await response.json();
-    if (!response.ok) {
-      throw new Error(json.error ?? "La génération du post a échoué.");
+  async function generatePost(
+    chantierId: string,
+    tonOverride?: TonPost,
+    longueurOverride?: LongueurPost,
+    silent = false
+  ) {
+    if (!silent) {
+      setStatus("generating");
+      setStreamingText("");
     }
-    setPost(json.post);
-    setCaption(json.post.contenu);
-    setHashtags(json.post.hashtags ?? []);
-    setStatus("success");
 
-    // Points fidélité pour génération de post
-    addPointsFidelite("post_instagram").then((res) => {
-      if (res) notify("post_instagram", res.pointsAdded, res.leveledUp);
-    });
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 15000);
+
+    try {
+      const response = await fetch("/api/generate-post", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chantierId,
+          tonPost: tonOverride ?? ton,
+          longueurPost: longueurOverride ?? longueur,
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const json = await response.json().catch(() => ({}));
+        throw new Error((json as { error?: string }).error ?? "La génération du post a échoué.");
+      }
+
+      const reader = response.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let accumulatedText = "";
+      let eventType = "";
+      // Reset timeout once stream starts
+      clearTimeout(timeoutId);
+      const streamTimeout = setTimeout(() => controller.abort(), 30000);
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
+
+          for (const line of lines) {
+            if (line.startsWith("event: ")) {
+              eventType = line.slice(7).trim();
+            } else if (line.startsWith("data: ")) {
+              const data = JSON.parse(line.slice(6)) as Record<string, unknown>;
+              if (eventType === "chunk") {
+                accumulatedText += data.text as string;
+                const partial = extractPartialLegende(accumulatedText);
+                if (partial) setStreamingText(partial);
+                // Reset stream timeout on each chunk
+                clearTimeout(streamTimeout);
+              } else if (eventType === "complete") {
+                const completedPost = data.post as GeneratedPost & { id: string; created_at: string };
+                setPost(completedPost);
+                setCaption(completedPost.contenu);
+                setHashtags(completedPost.hashtags ?? []);
+                setStatus("success");
+              } else if (eventType === "error") {
+                throw new Error((data.message as string) ?? "La génération a échoué.");
+              }
+              eventType = "";
+            }
+          }
+        }
+      } finally {
+        clearTimeout(streamTimeout);
+      }
+
+      addPointsFidelite("post_instagram").then((res) => {
+        if (res) notify("post_instagram", res.pointsAdded, res.leveledUp);
+      });
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error("La génération prend plus de temps que prévu. Réessayez dans quelques instants.");
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+      abortRef.current = null;
+    }
   }
 
   async function handleSubmit(event: React.FormEvent) {
@@ -218,14 +386,9 @@ export default function NouveauChantier() {
     try {
       setStatus("uploading");
       const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error("Votre session a expiré. Reconnectez-vous puis réessayez.");
-      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Votre session a expiré. Reconnectez-vous puis réessayez.");
       const userId = user.id;
-
       const newChantierId = crypto.randomUUID();
 
       async function uploadPhoto(photo: Photo, name: "avant" | "apres") {
@@ -233,14 +396,21 @@ export default function NouveauChantier() {
         const { error } = await supabase.storage
           .from("chantiers")
           .upload(path, photo.file, { contentType: photo.file.type, upsert: true });
-        if (error) {
-          throw new Error(`L'envoi de la photo ${name} a échoué. Réessayez.`);
-        }
+        if (error) throw new Error(`L'envoi de la photo ${name} a échoué. Réessayez.`);
         return path;
       }
 
       const photoAvantUrl = avant ? await uploadPhoto(avant, "avant") : null;
       const photoApresUrl = apres ? await uploadPhoto(apres, "apres") : null;
+
+      const financialData: Record<string, number | null> = {};
+      if (montant.trim()) financialData.montant = parseNum(montant);
+      if (coutFournitures.trim()) financialData.depenses = parseNum(coutFournitures);
+      if (coutSousTraitance.trim()) financialData.sous_traitance = parseNum(coutSousTraitance);
+      if (fraisDeplacement.trim()) financialData.frais_deplacement = parseNum(fraisDeplacement);
+      if (autresCouts.trim()) financialData.autres_couts = parseNum(autresCouts);
+      if (heuresPassees.trim()) financialData.heures_passees = parseNum(heuresPassees);
+      if (tauxHoraireObjectif.trim()) financialData.taux_horaire_objectif = parseNum(tauxHoraireObjectif);
 
       const { error: insertError } = await supabase.from("chantiers").insert({
         id: newChantierId,
@@ -248,15 +418,12 @@ export default function NouveauChantier() {
         titre: titre.trim(),
         photo_avant_url: photoAvantUrl,
         photo_apres_url: photoApresUrl,
-        ...(montant.trim() ? { montant: parseFloat(montant) } : {}),
+        ...financialData,
       });
-      if (insertError) {
-        throw new Error("La création du chantier a échoué. Réessayez.");
-      }
+      if (insertError) throw new Error("La création du chantier a échoué. Réessayez.");
 
       setChantierId(newChantierId);
 
-      // Points fidélité pour création de chantier
       addPointsFidelite("chantier_cree").then((res) => {
         if (res) notify("chantier_cree", res.pointsAdded, res.leveledUp);
       });
@@ -272,6 +439,7 @@ export default function NouveauChantier() {
     if (!chantierId) return;
     setErrorMessage(null);
     setIsRegenerating(true);
+    setStreamingText("");
     try {
       await generatePost(chantierId, undefined, undefined, true);
     } catch (error) {
@@ -285,18 +453,13 @@ export default function NouveauChantier() {
   function handleReset() {
     if (avant) URL.revokeObjectURL(avant.preview);
     if (apres) URL.revokeObjectURL(apres.preview);
-    setTitre("");
-    setMontant("");
-    setAvant(null);
-    setApres(null);
-    setStatus("idle");
-    setErrorMessage(null);
-    setPost(null);
-    setCaption("");
-    setHashtags([]);
-    setChantierId(null);
-    setTon("professionnel");
-    setLongueur("moyen");
+    abortRef.current?.abort();
+    setTitre(""); setMontant(""); setAvant(null); setApres(null);
+    setStatus("idle"); setErrorMessage(null); setPost(null);
+    setCaption(""); setHashtags([]); setChantierId(null);
+    setTon("professionnel"); setLongueur("moyen"); setStreamingText("");
+    setCoutFournitures(""); setCoutSousTraitance(""); setFraisDeplacement("");
+    setAutresCouts(""); setHeuresPassees(""); setTauxHoraireObjectif("");
   }
 
   return (
@@ -316,50 +479,68 @@ export default function NouveauChantier() {
         </p>
       </div>
 
+      {/* Generating skeleton */}
+      {status === "generating" && (
+        <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 mb-4">
+          <div className="flex items-center gap-2 mb-5">
+            <CircleNotch size={16} className="animate-spin text-braise shrink-0" aria-hidden="true" />
+            <span className="text-sm text-dusk/60">{GENERATING_MESSAGES[msgIndex]}</span>
+          </div>
+          {streamingText ? (
+            <p className="text-sm text-dusk/80 leading-relaxed whitespace-pre-wrap">
+              {streamingText}
+              <span className="animate-pulse ml-0.5">▌</span>
+            </p>
+          ) : (
+            <div className="space-y-2 animate-pulse">
+              <div className="h-4 bg-dusk/8 rounded w-full" />
+              <div className="h-4 bg-dusk/8 rounded w-4/5" />
+              <div className="h-4 bg-dusk/8 rounded w-3/5" />
+            </div>
+          )}
+        </div>
+      )}
+
       {status === "success" && post ? (
         <>
-        <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
-          <div className="flex items-center gap-2 text-braise mb-5">
-            <Check size={18} weight="bold" aria-hidden="true" />
-            <span className="text-sm font-semibold">Post Instagram généré</span>
-          </div>
+          <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
+            <div className="flex items-center gap-2 text-braise mb-5">
+              <Check size={18} weight="bold" aria-hidden="true" />
+              <span className="text-sm font-semibold">Post Instagram généré</span>
+            </div>
 
-          <PostEditor
-            chantierId={chantierId!}
-            initialCaption={caption}
-            initialHashtags={hashtags}
-            imageUrl={post.image_url}
-            onRegenerate={handleRetryGenerate}
-            isRegenerating={isRegenerating}
-          />
+            <PostEditor
+              chantierId={chantierId!}
+              initialCaption={caption}
+              initialHashtags={hashtags}
+              imageUrl={post.image_url}
+              onRegenerate={handleRetryGenerate}
+              isRegenerating={isRegenerating}
+            />
 
-          <div className="flex flex-col sm:flex-row gap-3 pt-6 mt-6 border-t border-dusk/8">
-            {chantierId && (
-              <Link
-                href={`/espace/chantiers/${chantierId}`}
+            <div className="flex flex-col sm:flex-row gap-3 pt-6 mt-6 border-t border-dusk/8">
+              {chantierId && (
+                <Link
+                  href={`/espace/chantiers/${chantierId}`}
+                  className="inline-flex items-center justify-center gap-2 text-dusk font-medium text-sm px-6 py-3 rounded-full border border-dusk/20 hover:bg-dusk/5 active:scale-[0.97] transition-all duration-200"
+                >
+                  Voir le chantier
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={handleReset}
                 className="inline-flex items-center justify-center gap-2 text-dusk font-medium text-sm px-6 py-3 rounded-full border border-dusk/20 hover:bg-dusk/5 active:scale-[0.97] transition-all duration-200"
               >
-                Voir le chantier
-              </Link>
-            )}
-            <button
-              type="button"
-              onClick={handleReset}
-              className="inline-flex items-center justify-center gap-2 text-dusk font-medium text-sm px-6 py-3 rounded-full border border-dusk/20 hover:bg-dusk/5 active:scale-[0.97] transition-all duration-200"
-            >
-              <Plus size={18} weight="bold" aria-hidden="true" />
-              Créer un autre chantier
-            </button>
+                <Plus size={18} weight="bold" aria-hidden="true" />
+                Créer un autre chantier
+              </button>
+            </div>
           </div>
-        </div>
-
-        {chantierId && <NotationChantier chantierId={chantierId} />}
+          {chantierId && <NotationChantier chantierId={chantierId} />}
         </>
-      ) : (
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 space-y-6"
-        >
+      ) : status !== "generating" ? (
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 space-y-6">
           <div>
             <label htmlFor="titre" className="block text-sm font-medium text-dusk/70 mb-1.5">
               Titre du chantier
@@ -371,53 +552,19 @@ export default function NouveauChantier() {
               required
               disabled={isBusy}
               value={titre}
-              onChange={(event) => setTitre(event.target.value)}
+              onChange={(e) => setTitre(e.target.value)}
               placeholder="Ravalement façade, 12 rue des Tilleuls"
               className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200 disabled:opacity-60"
             />
           </div>
 
-          <div>
-            <label htmlFor="montant" className="block text-sm font-medium text-dusk/70 mb-1.5">
-              Montant du chantier (€) <span className="text-dusk/35 font-normal">— optionnel</span>
-            </label>
-            <input
-              type="number"
-              id="montant"
-              name="montant"
-              min="0"
-              step="100"
-              disabled={isBusy}
-              value={montant}
-              onChange={(event) => setMontant(event.target.value)}
-              placeholder="5000"
-              className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200 disabled:opacity-60"
-            />
-          </div>
-
           <div className="grid grid-cols-2 gap-4">
-            <PhotoField
-              inputId="photo-avant"
-              label="Photo avant"
-              photo={avant}
-              disabled={isBusy}
-              onSelect={(file) => setPhoto("avant", file)}
-              onClear={() => clearPhoto("avant")}
-            />
-            <PhotoField
-              inputId="photo-apres"
-              label="Photo après"
-              photo={apres}
-              disabled={isBusy}
-              onSelect={(file) => setPhoto("apres", file)}
-              onClear={() => clearPhoto("apres")}
-            />
+            <PhotoField inputId="photo-avant" label="Photo avant" photo={avant} disabled={isBusy} onSelect={(f) => setPhoto("avant", f)} onClear={() => clearPhoto("avant")} />
+            <PhotoField inputId="photo-apres" label="Photo après" photo={apres} disabled={isBusy} onSelect={(f) => setPhoto("apres", f)} onClear={() => clearPhoto("apres")} />
           </div>
-          <p className="text-dusk/45 text-xs">
-            Au moins une des deux photos est nécessaire.
-          </p>
+          <p className="text-dusk/45 text-xs">Au moins une des deux photos est nécessaire.</p>
 
-          {/* Ton de communication */}
+          {/* Ton */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <ChatTeardrop size={14} className="text-dusk/40" aria-hidden="true" />
@@ -431,9 +578,7 @@ export default function NouveauChantier() {
                   disabled={isBusy}
                   onClick={() => setTon(value)}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors disabled:opacity-50 ${
-                    ton === value
-                      ? "bg-braise text-white border-braise"
-                      : "border-dusk/15 text-dusk/60 hover:bg-dust/60"
+                    ton === value ? "bg-braise text-white border-braise" : "border-dusk/15 text-dusk/60 hover:bg-dust/60"
                   }`}
                 >
                   {emoji} {label}
@@ -442,7 +587,7 @@ export default function NouveauChantier() {
             </div>
           </div>
 
-          {/* Longueur du post */}
+          {/* Longueur */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <TextAlignLeft size={14} className="text-dusk/40" aria-hidden="true" />
@@ -456,19 +601,52 @@ export default function NouveauChantier() {
                   disabled={isBusy}
                   onClick={() => setLongueur(value)}
                   className={`flex-1 flex flex-col items-center py-2.5 rounded-xl border text-sm font-medium transition-colors disabled:opacity-50 ${
-                    longueur === value
-                      ? "bg-braise text-white border-braise"
-                      : "border-dusk/15 text-dusk/60 hover:bg-dust/60"
+                    longueur === value ? "bg-braise text-white border-braise" : "border-dusk/15 text-dusk/60 hover:bg-dust/60"
                   }`}
                 >
                   {label}
-                  <span className={`text-xs mt-0.5 ${longueur === value ? "text-white/70" : "text-dusk/40"}`}>
-                    {sub}
-                  </span>
+                  <span className={`text-xs mt-0.5 ${longueur === value ? "text-white/70" : "text-dusk/40"}`}>{sub}</span>
                 </button>
               ))}
             </div>
           </div>
+
+          {/* Détail financier collapsible */}
+          <details className="group">
+            <summary className="flex items-center gap-2 text-sm font-medium text-dusk/60 cursor-pointer hover:text-dusk transition-colors list-none select-none">
+              <span className="w-5 h-5 rounded-full border border-dusk/20 flex items-center justify-center group-open:bg-braise group-open:border-braise transition-colors">
+                <CaretDown size={10} className="text-dusk/40 group-open:text-white group-open:rotate-180 transition-transform" />
+              </span>
+              Détail financier <span className="text-dusk/35 font-normal">— optionnel</span>
+            </summary>
+            <div className="mt-4 pt-4 border-t border-dusk/8">
+              <div className="mb-3">
+                <label htmlFor="montant" className="block text-xs font-medium text-dusk/60 mb-1">
+                  Montant facturé HT (€)
+                </label>
+                <input
+                  type="number"
+                  id="montant"
+                  min="0"
+                  step="100"
+                  disabled={isBusy}
+                  value={montant}
+                  onChange={(e) => setMontant(e.target.value)}
+                  placeholder="5000"
+                  className="w-full px-3 py-2.5 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200 disabled:opacity-60"
+                />
+              </div>
+              <FinancialDetailSection
+                disabled={isBusy}
+                coutFournitures={coutFournitures} setCoutFournitures={setCoutFournitures}
+                coutSousTraitance={coutSousTraitance} setCoutSousTraitance={setCoutSousTraitance}
+                fraisDeplacement={fraisDeplacement} setFraisDeplacement={setFraisDeplacement}
+                autresCouts={autresCouts} setAutresCouts={setAutresCouts}
+                heuresPassees={heuresPassees} setHeuresPassees={setHeuresPassees}
+                tauxHoraireObjectif={tauxHoraireObjectif} setTauxHoraireObjectif={setTauxHoraireObjectif}
+              />
+            </div>
+          </details>
 
           {errorMessage && (
             <div className="flex items-start gap-2.5 rounded-xl bg-red-50 text-red-700 text-sm px-4 py-3">
@@ -494,13 +672,12 @@ export default function NouveauChantier() {
             disabled={isBusy}
             className="w-full inline-flex items-center justify-center gap-2 bg-braise text-white font-semibold text-sm px-6 py-3.5 rounded-full hover:bg-ambre active:scale-[0.97] transition-all duration-200 disabled:opacity-70 disabled:active:scale-100"
           >
-            {isBusy && <CircleNotch size={18} weight="bold" className="animate-spin" aria-hidden="true" />}
+            {status === "uploading" && <CircleNotch size={18} weight="bold" className="animate-spin" aria-hidden="true" />}
             {status === "uploading" && "Envoi des photos en cours..."}
-            {status === "generating" && "Génération du post (environ 30 secondes)..."}
             {!isBusy && "Générer mon post"}
           </button>
         </form>
-      )}
+      ) : null}
     </div>
   );
 }

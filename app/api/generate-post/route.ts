@@ -1,6 +1,5 @@
-import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { generateInstagramCaption } from "@/lib/anthropic/generate-caption";
+import { streamInstagramCaptionText, parseGeneratedCaption } from "@/lib/anthropic/generate-caption";
 import { getSignedChantierPhotoUrl } from "@/lib/supabase/storage";
 import { devError } from "@/lib/log";
 
@@ -16,14 +15,11 @@ export async function POST(request: Request) {
     tonPost = body.tonPost;
     longueurPost = body.longueurPost;
   } catch {
-    return NextResponse.json({ error: "Requête invalide." }, { status: 400 });
+    return new Response(JSON.stringify({ error: "Requête invalide." }), { status: 400 });
   }
 
   if (!chantierId) {
-    return NextResponse.json(
-      { error: "L'identifiant du chantier est manquant." },
-      { status: 400 }
-    );
+    return new Response(JSON.stringify({ error: "L'identifiant du chantier est manquant." }), { status: 400 });
   }
 
   const supabase = await createClient();
@@ -32,7 +28,7 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
+    return new Response(JSON.stringify({ error: "Non authentifié." }), { status: 401 });
   }
 
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
@@ -43,19 +39,13 @@ export async function POST(request: Request) {
     .gte("created_at", oneHourAgo);
 
   if ((generationsLastHour ?? 0) >= 10) {
-    return NextResponse.json(
-      {
-        error:
-          "Vous avez atteint la limite de 10 générations par heure. Réessayez plus tard.",
-      },
+    return new Response(
+      JSON.stringify({ error: "Vous avez atteint la limite de 10 générations par heure. Réessayez plus tard." }),
       { status: 429 }
     );
   }
 
-  const [
-    { data: chantier, error: chantierError },
-    { data: profile },
-  ] = await Promise.all([
+  const [{ data: chantier, error: chantierError }, { data: profile }] = await Promise.all([
     supabase
       .from("chantiers")
       .select("id, titre, photo_avant_url, photo_apres_url, user_id")
@@ -70,7 +60,7 @@ export async function POST(request: Request) {
   ]);
 
   if (chantierError || !chantier) {
-    return NextResponse.json({ error: "Chantier introuvable." }, { status: 404 });
+    return new Response(JSON.stringify({ error: "Chantier introuvable." }), { status: 404 });
   }
 
   const [signedAvantUrl, signedApresUrl] = await Promise.all([
@@ -81,63 +71,88 @@ export async function POST(request: Request) {
   const images = [
     signedAvantUrl ? { url: signedAvantUrl, label: "avant" as const } : null,
     signedApresUrl ? { url: signedApresUrl, label: "après" as const } : null,
-  ].filter((image): image is { url: string; label: "avant" | "après" } => image !== null);
+  ].filter((img): img is { url: string; label: "avant" | "après" } => img !== null);
 
   if (images.length === 0) {
-    return NextResponse.json(
-      { error: "Aucune photo n'est associée à ce chantier." },
-      { status: 400 }
-    );
+    return new Response(JSON.stringify({ error: "Aucune photo n'est associée à ce chantier." }), { status: 400 });
   }
 
-  let generated: { legende: string; hashtags: string[] };
-  try {
-    generated = await generateInstagramCaption({
-      titre: chantier.titre,
-      images,
-      prenom: profile?.prenom,
-      nom: profile?.nom,
-      metier: profile?.metier,
-      ville: profile?.ville,
-      tonPost: tonPost ?? profile?.ton_post,
-      longueurPost: longueurPost,
-      hashtagsFavoris: profile?.hashtags_favoris,
-    });
-  } catch (error) {
-    devError("generate-post: échec de l'appel à Claude", error);
-    return NextResponse.json(
-      { error: "La génération du post a échoué. Réessayez dans quelques instants." },
-      { status: 502 }
-    );
-  }
+  const captionParams = {
+    titre: chantier.titre,
+    images,
+    prenom: profile?.prenom,
+    nom: profile?.nom,
+    metier: profile?.metier,
+    ville: profile?.ville,
+    tonPost: tonPost ?? profile?.ton_post,
+    longueurPost: longueurPost,
+    hashtagsFavoris: profile?.hashtags_favoris,
+  };
 
   const favoris = (profile?.hashtags_favoris ?? []).filter(
     (tag: string) => typeof tag === "string" && tag.trim().length > 0
   );
-  const hashtags = Array.from(new Set([...favoris, ...generated.hashtags]));
-
   const imageUrl = signedApresUrl ?? signedAvantUrl;
+  const userId = user.id;
+  const chantierId_ = chantier.id;
 
-  const { data: post, error: insertError } = await supabase
-    .from("posts")
-    .insert({
-      chantier_id: chantier.id,
-      user_id: user.id,
-      contenu: generated.legende,
-      hashtags,
-      image_url: imageUrl,
-      plateforme: "instagram",
-    })
-    .select("id, contenu, hashtags, image_url, plateforme, created_at")
-    .single();
+  const encoder = new TextEncoder();
 
-  if (insertError || !post) {
-    devError("generate-post: échec de l'enregistrement du post", insertError);
-    return NextResponse.json(
-      { error: "Le post a été généré mais n'a pas pu être enregistré." },
-      { status: 500 }
-    );
-  }
+  return new Response(
+    new ReadableStream({
+      async start(controller) {
+        function send(event: string, data: unknown) {
+          controller.enqueue(
+            encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
+          );
+        }
 
-  return NextResponse.json({ post });
+        try {
+          let fullText = "";
+
+          for await (const chunk of streamInstagramCaptionText(captionParams)) {
+            fullText += chunk;
+            send("chunk", { text: chunk });
+          }
+
+          const generated = parseGeneratedCaption(fullText);
+          const hashtags = Array.from(new Set([...favoris, ...generated.hashtags]));
+
+          const { data: post, error: insertError } = await supabase
+            .from("posts")
+            .insert({
+              chantier_id: chantierId_,
+              user_id: userId,
+              contenu: generated.legende,
+              hashtags,
+              image_url: imageUrl,
+              plateforme: "instagram",
+            })
+            .select("id, contenu, hashtags, image_url, plateforme, created_at")
+            .single();
+
+          if (insertError || !post) {
+            devError("generate-post: échec de l'enregistrement du post", insertError);
+            send("error", { message: "Le post a été généré mais n'a pas pu être enregistré." });
+            return;
+          }
+
+          send("complete", { post });
+        } catch (error) {
+          devError("generate-post: erreur streaming", error);
+          send("error", { message: "La génération du post a échoué. Réessayez dans quelques instants." });
+        } finally {
+          controller.close();
+        }
+      },
+    }),
+    {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no",
+      },
+    }
+  );
 }

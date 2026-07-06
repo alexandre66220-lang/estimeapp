@@ -9,6 +9,8 @@ type RentabiliteData = {
   heures_passees: number | null;
   sous_traitance: number | null;
   frais_deplacement: number | null;
+  autres_couts?: number | null;
+  taux_horaire_objectif?: number | null;
 };
 
 function parseNum(v: string): number | null {
@@ -40,6 +42,8 @@ export function RentabiliteChantier({
   const [heures, setHeures] = useState(initial.heures_passees?.toString() ?? "");
   const [sousTraitance, setSousTraitance] = useState(initial.sous_traitance?.toString() ?? "");
   const [frais, setFrais] = useState(initial.frais_deplacement?.toString() ?? "");
+  const [autresCouts, setAutresCouts] = useState(initial.autres_couts?.toString() ?? "");
+  const [tauxHoraireObjectif, setTauxHoraireObjectif] = useState(initial.taux_horaire_objectif?.toString() ?? "");
   const [charges, setCharges] = useState(tauxCharges.toString());
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,9 +54,11 @@ export function RentabiliteChantier({
   const h = parseNum(heures) ?? 0;
   const st = parseNum(sousTraitance) ?? 0;
   const fr = parseNum(frais) ?? 0;
+  const ac = parseNum(autresCouts) ?? 0;
   const tc = parseNum(charges) ?? 45;
 
-  const margeBrute = m - d - st - fr;
+  const totalCouts = d + st + fr + ac;
+  const margeBrute = m - totalCouts;
   const tauxMarge = m > 0 ? (margeBrute / m) * 100 : 0;
   const tauxHoraire = h > 0 ? margeBrute / h : null;
   const resultatNet = margeBrute * (1 - tc / 100);
@@ -66,6 +72,8 @@ export function RentabiliteChantier({
         heures_passees: parseNum(heures),
         sous_traitance: parseNum(sousTraitance),
         frais_deplacement: parseNum(frais),
+        autres_couts: parseNum(autresCouts),
+        taux_horaire_objectif: parseNum(tauxHoraireObjectif),
       });
       if (result.error) {
         setError(result.error);
@@ -85,16 +93,12 @@ export function RentabiliteChantier({
 
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div>
-          <label className="block text-xs font-medium text-dusk/60 mb-1">Montant chantier (€)</label>
+          <label className="block text-xs font-medium text-dusk/60 mb-1">Montant facturé HT (€)</label>
           <input type="number" min="0" step="0.01" value={montant} onChange={(e) => setMontant(e.target.value)} placeholder="0" className={inputClass} />
         </div>
         <div>
-          <label className="block text-xs font-medium text-dusk/60 mb-1">Dépenses matériaux (€)</label>
-          <input type="number" min="0" step="0.01" value={depenses} onChange={(e) => setDepenses(e.target.value)} placeholder="0" className={inputClass} />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-dusk/60 mb-1">Heures passées</label>
-          <input type="number" min="0" step="0.5" value={heures} onChange={(e) => setHeures(e.target.value)} placeholder="0" className={inputClass} />
+          <label className="block text-xs font-medium text-dusk/60 mb-1">Coût fournitures (€)</label>
+          <input type="number" min="0" step="0.01" value={depenses} onChange={(e) => setDepenses(e.target.value)} placeholder="Matériaux, peinture..." className={inputClass} />
         </div>
         <div>
           <label className="block text-xs font-medium text-dusk/60 mb-1">Sous-traitance (€)</label>
@@ -102,7 +106,19 @@ export function RentabiliteChantier({
         </div>
         <div>
           <label className="block text-xs font-medium text-dusk/60 mb-1">Frais de déplacement (€)</label>
-          <input type="number" min="0" step="0.01" value={frais} onChange={(e) => setFrais(e.target.value)} placeholder="0" className={inputClass} />
+          <input type="number" min="0" step="0.01" value={frais} onChange={(e) => setFrais(e.target.value)} placeholder="Carburant, péages..." className={inputClass} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-dusk/60 mb-1">Autres coûts (€)</label>
+          <input type="number" min="0" step="0.01" value={autresCouts} onChange={(e) => setAutresCouts(e.target.value)} placeholder="Location matériel, divers" className={inputClass} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-dusk/60 mb-1">Heures de travail réelles</label>
+          <input type="number" min="0" step="0.5" value={heures} onChange={(e) => setHeures(e.target.value)} placeholder="0" className={inputClass} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-dusk/60 mb-1">Taux horaire objectif (€/h)</label>
+          <input type="number" min="0" step="1" value={tauxHoraireObjectif} onChange={(e) => setTauxHoraireObjectif(e.target.value)} placeholder="ex. 45" className={inputClass} />
         </div>
         <div>
           <label className="block text-xs font-medium text-dusk/60 mb-1">Taux de charges (%) <span className="text-dusk/35 font-normal">auto-entr. : 45%</span></label>
@@ -110,9 +126,12 @@ export function RentabiliteChantier({
         </div>
       </div>
 
-      {/* Résultats */}
       {m > 0 && (
         <div className="rounded-xl bg-dust/50 border border-dusk/8 p-4 mb-4 space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-dusk/60">Total des coûts</span>
+            <span className="font-semibold text-dusk">{fmtEur(totalCouts)}</span>
+          </div>
           <div className="flex justify-between text-sm">
             <span className="text-dusk/60">Marge brute</span>
             <span className="font-semibold text-dusk">{fmtEur(margeBrute)}</span>

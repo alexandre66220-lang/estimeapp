@@ -16,7 +16,7 @@ import { ObjectifAnnuelForm } from "@/components/espace/ObjectifAnnuelForm";
 import { MontantChantierForm } from "@/components/espace/MontantChantierForm";
 import { FinancesChartWrapper } from "@/components/espace/FinancesChartWrapper";
 import { FinancesTabs } from "@/components/espace/FinancesTabs";
-import { getRentabiliteStats } from "@/components/espace/RentabiliteFinances";
+import { getRentabiliteAnnuelle } from "@/components/espace/RentabiliteFinances";
 
 export const metadata: Metadata = { title: "Finances — Estime" };
 
@@ -71,9 +71,9 @@ function encouragement(pct: number) {
 
 export default async function FinancesPage() {
   const { supabase, user } = await getCurrentUser();
-  const [data, rentabiliteStats] = await Promise.all([
+  const [data, rentabiliteAnnuelle] = await Promise.all([
     getFinancesData(supabase, user!.id),
-    getRentabiliteStats(supabase, user!.id),
+    getRentabiliteAnnuelle(supabase, user!.id),
   ]);
 
   const now = new Date();
@@ -105,7 +105,7 @@ export default async function FinancesPage() {
         </a>
       </div>
 
-      <FinancesTabs rentabiliteStats={rentabiliteStats}>
+      <FinancesTabs rentabiliteAnnuelle={rentabiliteAnnuelle}>
       {/* État vide */}
       {!data.hasAnyData && (
         <div className="bg-white rounded-2xl border border-dusk/8 py-20 px-6 flex flex-col items-center text-center mb-6">
