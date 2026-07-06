@@ -35,6 +35,7 @@ export default function Footer() {
               <li><Link href="/cgu" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">CGU</Link></li>
               <li><Link href="/cgv" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">CGV</Link></li>
               <li><Link href="/politique-confidentialite" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">Politique de confidentialité</Link></li>
+              <li><Link href="/a-propos" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">À propos</Link></li>
               <li><Link href="/contact" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">Contact</Link></li>
               <li><ManageCookiesLink className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200 text-left" /></li>
             </ul>

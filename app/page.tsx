@@ -26,22 +26,42 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   name: "Estime",
-  description:
-    "Application de réputation pour artisans BTP : génération de posts Instagram, demandes d'avis Google automatiques, page vitrine publique.",
-  url: "https://estime-app.com",
   applicationCategory: "BusinessApplication",
+  applicationSubCategory: "Reputation Management",
   operatingSystem: "Web, iOS, Android",
+  url: "https://estime-app.com",
+  description:
+    "Estime aide les artisans du BTP à générer des posts Instagram depuis leurs photos de chantier et à automatiser leurs demandes d'avis Google. Inclut un CRM, un tableau de bord financier et une page vitrine publique.",
+  keywords:
+    "artisan BTP, réputation en ligne, avis Google, Instagram artisan, peintre, plombier, électricien, maçon, SaaS artisan",
+  inLanguage: "fr-FR",
   offers: {
     "@type": "Offer",
     price: "24.99",
     priceCurrency: "EUR",
-    priceValidUntil: "2027-12-31",
+    priceValidUntil: "2027-01-01",
     availability: "https://schema.org/InStock",
+    seller: { "@type": "Organization", name: "Estime" },
   },
   aggregateRating: {
     "@type": "AggregateRating",
     ratingValue: "5",
-    reviewCount: "1",
+    ratingCount: "1",
+  },
+  featureList: [
+    "Génération de posts Instagram par IA",
+    "Demandes d'avis Google automatiques",
+    "Page vitrine publique artisan",
+    "CRM artisan",
+    "Score de réputation comparatif",
+    "Tableau de bord financier",
+    "Rapport PDF mensuel",
+    "Programme de fidélité",
+  ],
+  creator: {
+    "@type": "Organization",
+    name: "AlcalSpark",
+    url: "https://alcalspark.com",
   },
 };
 

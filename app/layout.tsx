@@ -74,6 +74,13 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true },
   },
+  other: {
+    "application-name": "Estime",
+    author: "AlcalSpark",
+    category: "SaaS, Réputation, Artisans BTP",
+    classification: "Business, SaaS, Artisans",
+    target: "Artisans du BTP, peintres, plombiers, électriciens, maçons",
+  },
 };
 
 export default function RootLayout({

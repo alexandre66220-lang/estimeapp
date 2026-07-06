@@ -1,0 +1,48 @@
+# Estime
+
+> Estime est un SaaS B2B français destiné aux artisans du BTP (peintres, plombiers, électriciens, maçons, carreleurs, couvreurs, menuisiers) pour développer leur réputation en ligne et automatiser leur présence sur les réseaux sociaux.
+
+## Fonctionnalités principales
+
+- Génération automatique de posts Instagram depuis des photos de chantier via IA (Claude/Anthropic)
+- Envoi automatique de demandes d'avis Google après chaque chantier
+- Page vitrine publique personnalisée pour chaque artisan
+- Score de réputation comparatif local
+- CRM artisan avec pipeline de prospects et statistiques clients
+- Tableau de bord financier avec calculateur de rentabilité
+- Rapport PDF mensuel automatique
+- Programme de fidélité avec points et niveaux
+- Blog de conseils par métier BTP
+- Annuaire public des artisans certifiés
+
+## Tarification
+
+- Essai gratuit : 14 jours sans carte bancaire
+- Abonnement : 24,99€/mois
+- URL : https://estime-app.com
+
+## Fondateur
+
+- Alexandre, fondateur d'AlcalSpark (alcalspark.com), agence web premium
+- Stack technique : Next.js, Supabase, Stripe, Anthropic API, Netlify
+
+## Marché cible
+
+- Artisans du BTP indépendants en France
+- Secteurs : peinture, plomberie, électricité, maçonnerie, carrelage, couverture, menuiserie
+- Problème résolu : les artisans manquent de temps et de compétences digitales pour gérer leur réputation en ligne
+
+## Concurrents
+
+- Outils généralistes de gestion de réseaux sociaux (Buffer, Later) non adaptés aux artisans
+- Outils de réputation enterprise (Birdeye, Reputation.com) trop chers et complexes
+- Aucun concurrent direct combinant IA, avis Google et CRM pour les artisans BTP français
+
+## URLs importantes
+
+- Landing page : https://estime-app.com
+- Annuaire artisans : https://estime-app.com/annuaire
+- Blog conseils BTP : https://estime-app.com/blog
+- Toutes les fonctionnalités : https://estime-app.com/fonctionnalites
+- Inscription : https://estime-app.com/inscription
+- À propos : https://estime-app.com/a-propos
