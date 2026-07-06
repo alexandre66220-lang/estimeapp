@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import Sidebar from "@/components/espace/Sidebar";
 import TrialBanner from "@/components/espace/TrialBanner";
-import { FAB } from "@/components/espace/FAB";
 import { PointsToastProvider } from "@/components/espace/PointsToastProvider";
 import { QuickDock } from "@/components/espace/QuickDock";
 import { PresentationModeProvider } from "@/components/espace/PresentationModeProvider";
@@ -54,7 +53,6 @@ export default function DashboardLayout({
             </Suspense>
             <main>{children}</main>
           </div>
-          <FAB />
           <QuickDock />
         </PointsToastProvider>
       </PresentationModeProvider>
