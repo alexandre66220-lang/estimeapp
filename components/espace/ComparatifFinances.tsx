@@ -76,7 +76,7 @@ function PeriodePicker({ value, onChange, label }: PeriodePickerProps) {
 
   return (
     <div className="space-y-2">
-      <p className="text-xs font-semibold text-dusk/60 uppercase tracking-wide">{label}</p>
+      <p className="text-xs font-semibold text-dusk/60 dark:text-[#F8F5F2] uppercase tracking-wide">{label}</p>
       <div className="flex gap-1">
         {(["mois", "trimestre", "annee"] as const).map((t) => (
           <button
@@ -84,7 +84,7 @@ function PeriodePicker({ value, onChange, label }: PeriodePickerProps) {
             type="button"
             onClick={() => onChange({ ...value, type: t, index: t === "annee" ? 0 : value.index })}
             className={`flex-1 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-              value.type === t ? "bg-[#C75D3B] text-white border-[#C75D3B]" : "border-dusk/15 text-dusk/60 hover:bg-dust/60"
+              value.type === t ? "bg-[#C75D3B] text-white border-[#C75D3B]" : "border-dusk/15 dark:border-white/12 text-dusk/60 dark:text-[#C8C0B8] hover:bg-dust/60 dark:hover:bg-white/6"
             }`}
           >
             {t === "mois" ? "Mois" : t === "trimestre" ? "Trimestre" : "Année"}
@@ -95,7 +95,7 @@ function PeriodePicker({ value, onChange, label }: PeriodePickerProps) {
         <select
           value={value.year}
           onChange={(e) => onChange({ ...value, year: Number(e.target.value) })}
-          className="flex-1 px-3 py-2 rounded-xl border border-dusk/15 bg-dust/50 text-dusk text-sm focus:outline-none"
+          className="flex-1 px-3 py-2 rounded-xl border border-dusk/15 dark:border-white/15 bg-dust/50 dark:bg-[#1C1A17] text-dusk dark:text-[#F8F5F2] text-sm focus:outline-none"
         >
           {years.map((y) => <option key={y} value={y}>{y}</option>)}
         </select>
@@ -103,7 +103,7 @@ function PeriodePicker({ value, onChange, label }: PeriodePickerProps) {
           <select
             value={value.index}
             onChange={(e) => onChange({ ...value, index: Number(e.target.value) })}
-            className="flex-1 px-3 py-2 rounded-xl border border-dusk/15 bg-dust/50 text-dusk text-sm focus:outline-none"
+            className="flex-1 px-3 py-2 rounded-xl border border-dusk/15 dark:border-white/15 bg-dust/50 dark:bg-[#1C1A17] text-dusk dark:text-[#F8F5F2] text-sm focus:outline-none"
           >
             {MOIS.map((m, i) => <option key={i} value={i}>{m}</option>)}
           </select>
@@ -112,7 +112,7 @@ function PeriodePicker({ value, onChange, label }: PeriodePickerProps) {
           <select
             value={value.index}
             onChange={(e) => onChange({ ...value, index: Number(e.target.value) })}
-            className="flex-1 px-3 py-2 rounded-xl border border-dusk/15 bg-dust/50 text-dusk text-sm focus:outline-none"
+            className="flex-1 px-3 py-2 rounded-xl border border-dusk/15 dark:border-white/15 bg-dust/50 dark:bg-[#1C1A17] text-dusk dark:text-[#F8F5F2] text-sm focus:outline-none"
           >
             {["T1","T2","T3","T4"].map((t, i) => <option key={i} value={i}>{t}</option>)}
           </select>
@@ -193,7 +193,7 @@ export function ComparatifFinances() {
     <div className="space-y-5">
       {/* Quick presets */}
       <div className="flex flex-wrap gap-2">
-        <p className="text-xs text-dusk/50 self-center">Raccourcis :</p>
+        <p className="text-xs text-dusk/50 dark:text-[#C8C0B8] self-center">Raccourcis :</p>
         {[
           { label: "Ce mois vs mois dernier", preset: "mois" as const },
           { label: "Ce trimestre vs dernier", preset: "trimestre" as const },
@@ -203,7 +203,7 @@ export function ComparatifFinances() {
             key={preset}
             type="button"
             onClick={() => applyQuickPreset(preset)}
-            className="text-xs px-3 py-1.5 rounded-full border border-dusk/15 text-dusk/60 hover:bg-dust/60 transition-colors"
+            className="text-xs px-3 py-1.5 rounded-full border border-dusk/15 dark:border-white/15 text-dusk/60 dark:text-[#E0D8D0] hover:bg-dust/60 dark:hover:bg-white/6 transition-colors"
           >
             {label}
           </button>
@@ -212,10 +212,10 @@ export function ComparatifFinances() {
 
       {/* Period pickers */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-dust/50 rounded-xl p-4">
+        <div className="bg-dust/50 dark:bg-[#252320] rounded-xl p-4 border border-transparent dark:border-white/6">
           <PeriodePicker value={periodes[0]} onChange={(p) => { setPeriodes([p, periodes[1]]); setStatsA(null); }} label="Période A" />
         </div>
-        <div className="bg-dust/50 rounded-xl p-4">
+        <div className="bg-dust/50 dark:bg-[#252320] rounded-xl p-4 border border-transparent dark:border-white/6">
           <PeriodePicker value={periodes[1]} onChange={(p) => { setPeriodes([periodes[0], p]); setStatsB(null); }} label="Période B" />
         </div>
       </div>

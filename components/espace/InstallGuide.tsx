@@ -21,8 +21,11 @@ function isStandalone(): boolean {
   );
 }
 
-const STEP_CLASS = "flex items-start gap-4 p-4 rounded-2xl bg-dust/60 border border-dusk/6";
+const STEP_CLASS = "flex items-start gap-4 p-4 rounded-2xl bg-dust/60 dark:bg-[#2A2520] border border-dusk/6 dark:border-white/8";
 const NUM_CLASS = "w-8 h-8 rounded-full bg-[#C75D3B] text-white text-sm font-bold flex items-center justify-center shrink-0 mt-0.5";
+const STEP_TITLE = "font-semibold text-dusk dark:text-[#F8F5F2] text-sm";
+const STEP_DESC = "text-dusk/55 dark:text-[#C8C0B8] text-sm mt-0.5";
+const STEP_STRONG = "dark:text-[#F8F5F2]";
 
 function IosSteps() {
   return (
@@ -30,8 +33,8 @@ function IosSteps() {
       <div className={STEP_CLASS}>
         <div className={NUM_CLASS}>1</div>
         <div>
-          <p className="font-semibold text-dusk text-sm">Ouvrez Safari</p>
-          <p className="text-dusk/55 text-sm mt-0.5">
+          <p className={STEP_TITLE}>Ouvrez Safari</p>
+          <p className={STEP_DESC}>
             Naviguez vers <span className="font-mono text-xs bg-dusk/8 px-1.5 py-0.5 rounded">estime-app.com</span> dans Safari (pas Chrome ni Firefox).
           </p>
         </div>
@@ -40,9 +43,9 @@ function IosSteps() {
       <div className={STEP_CLASS}>
         <div className={NUM_CLASS}>2</div>
         <div>
-          <p className="font-semibold text-dusk text-sm">Appuyez sur Partager</p>
-          <p className="text-dusk/55 text-sm mt-0.5">
-            Le bouton <strong>partager</strong> se trouve en bas de l&apos;écran Safari — c&apos;est un carré avec une flèche vers le haut.
+          <p className={STEP_TITLE}>Appuyez sur Partager</p>
+          <p className={STEP_DESC}>
+            Le bouton <strong className={STEP_STRONG}>partager</strong> se trouve en bas de l&apos;écran Safari — c&apos;est un carré avec une flèche vers le haut.
           </p>
         </div>
         <span className="text-3xl ml-auto">⬆️</span>
@@ -50,9 +53,9 @@ function IosSteps() {
       <div className={STEP_CLASS}>
         <div className={NUM_CLASS}>3</div>
         <div>
-          <p className="font-semibold text-dusk text-sm">Sur l&apos;écran d&apos;accueil</p>
-          <p className="text-dusk/55 text-sm mt-0.5">
-            Faites défiler le menu vers le bas et appuyez sur <strong>&laquo;&nbsp;Sur l&apos;écran d&apos;accueil&nbsp;&raquo;</strong>.
+          <p className={STEP_TITLE}>Sur l&apos;écran d&apos;accueil</p>
+          <p className={STEP_DESC}>
+            Faites défiler le menu vers le bas et appuyez sur <strong className={STEP_STRONG}>&laquo;&nbsp;Sur l&apos;écran d&apos;accueil&nbsp;&raquo;</strong>.
           </p>
         </div>
         <span className="text-3xl ml-auto">📱</span>
@@ -60,9 +63,9 @@ function IosSteps() {
       <div className={STEP_CLASS}>
         <div className={NUM_CLASS}>4</div>
         <div>
-          <p className="font-semibold text-dusk text-sm">Appuyez sur Ajouter</p>
-          <p className="text-dusk/55 text-sm mt-0.5">
-            Confirmez en appuyant sur <strong>&laquo;&nbsp;Ajouter&nbsp;&raquo;</strong> en haut à droite.
+          <p className={STEP_TITLE}>Appuyez sur Ajouter</p>
+          <p className={STEP_DESC}>
+            Confirmez en appuyant sur <strong className={STEP_STRONG}>&laquo;&nbsp;Ajouter&nbsp;&raquo;</strong> en haut à droite.
           </p>
         </div>
         <span className="text-3xl ml-auto">✅</span>
@@ -77,8 +80,8 @@ function AndroidSteps() {
       <div className={STEP_CLASS}>
         <div className={NUM_CLASS}>1</div>
         <div>
-          <p className="font-semibold text-dusk text-sm">Ouvrez Chrome</p>
-          <p className="text-dusk/55 text-sm mt-0.5">
+          <p className={STEP_TITLE}>Ouvrez Chrome</p>
+          <p className={STEP_DESC}>
             Naviguez vers <span className="font-mono text-xs bg-dusk/8 px-1.5 py-0.5 rounded">estime-app.com</span> dans Google Chrome.
           </p>
         </div>
@@ -87,9 +90,9 @@ function AndroidSteps() {
       <div className={STEP_CLASS}>
         <div className={NUM_CLASS}>2</div>
         <div>
-          <p className="font-semibold text-dusk text-sm">Menu 3 points</p>
-          <p className="text-dusk/55 text-sm mt-0.5">
-            Appuyez sur les <strong>3 points verticaux</strong> en haut à droite de Chrome.
+          <p className={STEP_TITLE}>Menu 3 points</p>
+          <p className={STEP_DESC}>
+            Appuyez sur les <strong className={STEP_STRONG}>3 points verticaux</strong> en haut à droite de Chrome.
           </p>
         </div>
         <span className="text-3xl ml-auto">⋮</span>
@@ -97,9 +100,9 @@ function AndroidSteps() {
       <div className={STEP_CLASS}>
         <div className={NUM_CLASS}>3</div>
         <div>
-          <p className="font-semibold text-dusk text-sm">Ajouter à l&apos;écran d&apos;accueil</p>
-          <p className="text-dusk/55 text-sm mt-0.5">
-            Dans le menu, appuyez sur <strong>&laquo;&nbsp;Ajouter à l&apos;écran d&apos;accueil&nbsp;&raquo;</strong>.
+          <p className={STEP_TITLE}>Ajouter à l&apos;écran d&apos;accueil</p>
+          <p className={STEP_DESC}>
+            Dans le menu, appuyez sur <strong className={STEP_STRONG}>&laquo;&nbsp;Ajouter à l&apos;écran d&apos;accueil&nbsp;&raquo;</strong>.
           </p>
         </div>
         <span className="text-3xl ml-auto">📲</span>
@@ -107,9 +110,9 @@ function AndroidSteps() {
       <div className={STEP_CLASS}>
         <div className={NUM_CLASS}>4</div>
         <div>
-          <p className="font-semibold text-dusk text-sm">Confirmez</p>
-          <p className="text-dusk/55 text-sm mt-0.5">
-            Appuyez sur <strong>&laquo;&nbsp;Ajouter&nbsp;&raquo;</strong> dans la boîte de dialogue.
+          <p className={STEP_TITLE}>Confirmez</p>
+          <p className={STEP_DESC}>
+            Appuyez sur <strong className={STEP_STRONG}>&laquo;&nbsp;Ajouter&nbsp;&raquo;</strong> dans la boîte de dialogue.
           </p>
         </div>
         <span className="text-3xl ml-auto">✅</span>
@@ -124,8 +127,8 @@ function DesktopSteps() {
       <div className={STEP_CLASS}>
         <span className="text-3xl">💻</span>
         <div>
-          <p className="font-semibold text-dusk text-sm">Utilisez votre téléphone</p>
-          <p className="text-dusk/55 text-sm mt-0.5">
+          <p className={STEP_TITLE}>Utilisez votre téléphone</p>
+          <p className={STEP_DESC}>
             L&apos;installation sur l&apos;écran d&apos;accueil fonctionne sur iPhone et Android. Ouvrez cette page depuis votre téléphone pour voir les instructions adaptées.
           </p>
         </div>
@@ -179,8 +182,8 @@ export function InstallGuide() {
       <div className="bg-[#C75D3B]/6 border border-[#C75D3B]/15 rounded-2xl p-5 flex items-center gap-4">
         <span className="text-4xl">🏠</span>
         <div>
-          <p className="font-semibold text-dusk text-sm">Une vraie application</p>
-          <p className="text-dusk/60 text-xs mt-0.5">
+          <p className={STEP_TITLE}>Une vraie application</p>
+          <p className="text-dusk/60 dark:text-[#C8C0B8] text-xs mt-0.5">
             Lancez Estime depuis votre écran d&apos;accueil, sans ouvrir le navigateur. Accès plus rapide, plein écran.
           </p>
         </div>
@@ -213,10 +216,10 @@ export function InstallGuide() {
       )}
 
       {/* Result */}
-      <div className="bg-dusk/4 rounded-2xl p-5 flex items-center gap-3">
+      <div className="bg-dusk/4 dark:bg-[#2A2520] rounded-2xl p-5 flex items-center gap-3 border border-transparent dark:border-white/6">
         <span className="text-2xl">🎉</span>
-        <p className="text-sm text-dusk/70">
-          <strong className="text-dusk">Résultat :</strong> Estime apparaît sur votre écran d&apos;accueil comme une vraie application — en plein écran, sans barre de navigation du navigateur.
+        <p className="text-sm text-dusk/70 dark:text-[#C8C0B8]">
+          <strong className="text-dusk dark:text-[#F8F5F2]">Résultat :</strong> Estime apparaît sur votre écran d&apos;accueil comme une vraie application — en plein écran, sans barre de navigation du navigateur.
         </p>
       </div>
 
@@ -228,7 +231,7 @@ export function InstallGuide() {
             <h2 className="font-display text-lg font-bold text-dusk">Raccourcis rapides</h2>
           </div>
           <p className="text-dusk/55 text-sm mb-5">
-            Sur iPhone, appuyez <strong>longtemps</strong> sur l&apos;icône Estime pour accéder directement à vos fonctionnalités clés.
+            Sur iPhone, appuyez <strong className="dark:text-[#F8F5F2]">longtemps</strong> sur l&apos;icône Estime pour accéder directement à vos fonctionnalités clés.
           </p>
           <div className="grid grid-cols-2 gap-3">
             {[
@@ -240,8 +243,8 @@ export function InstallGuide() {
               <div key={s.label} className={`${STEP_CLASS} flex-col gap-2 p-3`}>
                 <span className="text-2xl">{s.emoji}</span>
                 <div>
-                  <p className="font-semibold text-dusk text-xs">{s.label}</p>
-                  <p className="text-dusk/50 text-xs mt-0.5">{s.desc}</p>
+                  <p className="font-semibold text-dusk dark:text-[#F8F5F2] text-xs">{s.label}</p>
+                  <p className="text-dusk/50 dark:text-[#C8C0B8] text-xs mt-0.5">{s.desc}</p>
                 </div>
               </div>
             ))}
