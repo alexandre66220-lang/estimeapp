@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AnimateIn } from "./AnimateIn";
 
 const FEATURES = [
@@ -12,14 +13,14 @@ const FEATURES = [
     body: "Un email personnalisé envoyé à votre client pour lui demander un avis sur votre fiche Google.",
   },
   {
-    icon: "#️⃣",
-    title: "Hashtags selon votre ville et métier",
-    body: "Les hashtags sont générés automatiquement selon votre métier et votre localisation pour maximiser votre portée.",
+    icon: "🌐",
+    title: "Page vitrine publique offerte",
+    body: "Une page personnalisée à partager à vos prospects, incluse dans chaque abonnement.",
   },
   {
     icon: "📈",
-    title: "Score de réputation en temps réel",
-    body: "Suivez votre progression semaine après semaine grâce à un score basé sur vos chantiers, posts et avis reçus.",
+    title: "Score comparatif local",
+    body: "Comparez votre réputation avec les autres artisans du même métier dans votre ville.",
   },
   {
     icon: "🏅",
@@ -30,21 +31,6 @@ const FEATURES = [
     icon: "📋",
     title: "Carnet d'adresses intégré",
     body: "Gérez vos clients directement dans Estime pour envoyer vos demandes d'avis en quelques clics.",
-  },
-  {
-    icon: "🎁",
-    title: "Parrainez, gagnez des mois gratuits",
-    body: "Invitez d'autres artisans sur Estime et gagnez 1 mois gratuit pour chaque filleul qui s'abonne.",
-  },
-  {
-    icon: "✅",
-    title: "Notez vos chantiers en interne",
-    body: "Gardez une trace de votre satisfaction sur chaque projet pour mieux suivre votre activité dans le temps.",
-  },
-  {
-    icon: "📊",
-    title: "Taux de conversion des avis",
-    body: "Suivez combien de clients ont laissé un avis après votre demande et optimisez votre approche.",
   },
 ];
 
@@ -82,6 +68,17 @@ export default function Features() {
             </AnimateIn>
           ))}
         </div>
+
+        <AnimateIn delay={0.2}>
+          <div className="mt-12 text-center">
+            <Link
+              href="/fonctionnalites"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-[#C75D3B] text-[#C75D3B] font-landing-sans font-medium text-sm hover:bg-[#C75D3B]/8 transition-colors duration-200"
+            >
+              Voir toutes les fonctionnalités →
+            </Link>
+          </div>
+        </AnimateIn>
       </div>
     </section>
   );
