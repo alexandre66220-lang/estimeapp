@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { METIERS_SEO, VILLES_SEO } from "@/lib/localSeo/data";
 
 const BASE = "https://estime-app.com";
 
@@ -63,5 +64,39 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/blog`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
   ];
 
-  return [...staticRoutes, ...blogIndex, ...vitrineRoutes, ...conseilRoutes];
+  // Pages SEO locales artisans
+  const artisansIndex: MetadataRoute.Sitemap = [
+    { url: `${BASE}/artisans`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
+  ];
+  const artisansVille: MetadataRoute.Sitemap = VILLES_SEO.map((v) => ({
+    url: `${BASE}/artisans/${v.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+  }));
+  const artisansMetier: MetadataRoute.Sitemap = METIERS_SEO.map((m) => ({
+    url: `${BASE}/artisans/${m.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+  }));
+  const artisansMetierVille: MetadataRoute.Sitemap = METIERS_SEO.flatMap((m) =>
+    VILLES_SEO.map((v) => ({
+      url: `${BASE}/artisans/${m.slug}/${v.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    }))
+  );
+
+  return [
+    ...staticRoutes,
+    ...blogIndex,
+    ...artisansIndex,
+    ...artisansMetier,
+    ...artisansVille,
+    ...artisansMetierVille,
+    ...vitrineRoutes,
+    ...conseilRoutes,
+  ];
 }

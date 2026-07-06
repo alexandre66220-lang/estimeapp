@@ -33,7 +33,7 @@ export default function Hero() {
               Blog
             </Link>
             <Link
-              href="/annuaire"
+              href="/artisans"
               className="font-landing-sans text-sm text-[#F8F5F2]/60 hover:text-dust/90 transition-colors duration-200 hidden sm:block"
             >
               Trouver un artisan

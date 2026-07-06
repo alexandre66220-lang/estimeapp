@@ -43,6 +43,26 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/artisans/peintre" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
+                  Peintres
+                </Link>
+              </li>
+              <li>
+                <Link href="/artisans/plombier" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
+                  Plombiers
+                </Link>
+              </li>
+              <li>
+                <Link href="/artisans/electricien" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
+                  Électriciens
+                </Link>
+              </li>
+              <li>
+                <Link href="/artisans/macon" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
+                  Maçons
+                </Link>
+              </li>
+              <li>
                 <Link href="/fonctionnalites" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
                   Fonctionnalités
                 </Link>

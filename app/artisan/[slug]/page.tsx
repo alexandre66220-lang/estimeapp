@@ -463,6 +463,28 @@ export default async function VitrineArtisan({
 
         </main>
 
+        {/* ── Lien SEO local ── */}
+        {(profile.metier || profile.ville) && (
+          <div className="max-w-2xl mx-auto px-5 py-4 text-center">
+            {profile.metier && profile.ville && (() => {
+              const metierSlug = profile.metier!.toLowerCase()
+                .normalize("NFD").replace(/[̀-ͯ]/g, "")
+                .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+              const villeSlug = profile.ville!.toLowerCase()
+                .normalize("NFD").replace(/[̀-ͯ]/g, "")
+                .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+              return (
+                <Link
+                  href={`/artisans/${metierSlug}/${villeSlug}`}
+                  className="text-xs text-[#2B2521]/40 hover:text-[#C75D3B] transition-colors"
+                >
+                  Voir tous les {profile.metier!.toLowerCase()}s à {profile.ville} →
+                </Link>
+              );
+            })()}
+          </div>
+        )}
+
         {/* ── Footer vitrine ── */}
         <footer className="border-t border-[#2B2521]/6 bg-white mt-16">
           <div className="max-w-2xl mx-auto px-5 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">

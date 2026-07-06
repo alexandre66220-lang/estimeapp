@@ -121,6 +121,16 @@ export default async function AnnuairePage({
         </Suspense>
       </main>
 
+      {/* Lien maillage interne */}
+      <div className="mt-8 text-center">
+        <Link
+          href="/artisans"
+          className="text-sm text-[#2B3138]/50 hover:text-[#C75D3B] transition-colors"
+        >
+          Parcourir les artisans par ville →
+        </Link>
+      </div>
+
       {/* Footer */}
       <footer className="mt-16 bg-[#1A1410] py-8 px-6 text-center">
         <p className="text-[#F2EDE4]/25 text-xs">
