@@ -8,6 +8,7 @@ import { niveauPourScore, NIVEAUX } from "@/lib/score/reputation";
 import { ContactModal } from "@/components/artisan/ContactModal";
 import { FadeIn } from "@/components/artisan/FadeIn";
 import { PostGrid } from "@/components/artisan/PostGrid";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/faq";
 
 export const revalidate = 3600;
 
@@ -168,6 +169,12 @@ export default async function VitrineArtisan({
     ? { label: "Complet", color: "#EF4444" }
     : { label: "Disponible", color: "#22C55E" };
 
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Accueil", url: "https://estime-app.com" },
+    { name: "Annuaire", url: "https://estime-app.com/annuaire" },
+    { name: artisanNom, url: `https://estime-app.com/artisan/${profile.slug}` },
+  ]);
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -192,10 +199,8 @@ export default async function VitrineArtisan({
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <style>{`
         @keyframes vitrineFadeUp {
           from { opacity: 0; transform: translateY(20px); }

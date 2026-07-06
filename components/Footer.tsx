@@ -5,78 +5,39 @@ export default function Footer() {
   return (
     <footer className="bg-noir py-10 border-t border-white/8">
       <div className="max-w-6xl mx-auto px-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
-          <p className="font-landing-display text-lg font-semibold text-dust">
-            Estime
-          </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+          <div>
+            <p className="font-landing-display text-lg font-semibold text-dust mb-3">Estime</p>
+            <p className="text-dust/35 text-xs leading-relaxed max-w-[200px]">
+              L&apos;app de réputation pour les artisans BTP.
+            </p>
+          </div>
 
-          <nav aria-label="Liens du pied de page">
-            <ul className="flex flex-wrap gap-x-8 gap-y-2" role="list">
-              <li>
-                <Link href="/mentions-legales" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
-                  Mentions légales
-                </Link>
-              </li>
-              <li>
-                <Link href="/cgu" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
-                  CGU
-                </Link>
-              </li>
-              <li>
-                <Link href="/cgv" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
-                  CGV
-                </Link>
-              </li>
-              <li>
-                <Link href="/politique-confidentialite" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
-                  Politique de confidentialité
-                </Link>
-              </li>
-              <li>
-                <Link href="/blog" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link href="/annuaire" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
-                  Annuaire artisans
-                </Link>
-              </li>
-              <li>
-                <Link href="/artisans/peintre" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
-                  Peintres
-                </Link>
-              </li>
-              <li>
-                <Link href="/artisans/plombier" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
-                  Plombiers
-                </Link>
-              </li>
-              <li>
-                <Link href="/artisans/electricien" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
-                  Électriciens
-                </Link>
-              </li>
-              <li>
-                <Link href="/artisans/macon" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
-                  Maçons
-                </Link>
-              </li>
-              <li>
-                <Link href="/fonctionnalites" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
-                  Fonctionnalités
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <ManageCookiesLink className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200 text-left" />
-              </li>
+          <div>
+            <p className="text-dust/50 text-xs font-semibold uppercase tracking-wider mb-3">Ressources</p>
+            <ul className="space-y-2" role="list">
+              <li><Link href="/blog" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">Blog</Link></li>
+              <li><Link href="/artisans" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">Artisans par métier</Link></li>
+              <li><Link href="/annuaire" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">Annuaire artisans</Link></li>
+              <li><Link href="/fonctionnalites" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">Fonctionnalités</Link></li>
+              <li><Link href="/artisans/peintre" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">Peintres BTP</Link></li>
+              <li><Link href="/artisans/plombier" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">Plombiers</Link></li>
+              <li><Link href="/artisans/electricien" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">Électriciens</Link></li>
+              <li><Link href="/artisans/macon" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">Maçons</Link></li>
             </ul>
-          </nav>
+          </div>
+
+          <div>
+            <p className="text-dust/50 text-xs font-semibold uppercase tracking-wider mb-3">Légal</p>
+            <ul className="space-y-2" role="list">
+              <li><Link href="/mentions-legales" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">Mentions légales</Link></li>
+              <li><Link href="/cgu" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">CGU</Link></li>
+              <li><Link href="/cgv" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">CGV</Link></li>
+              <li><Link href="/politique-confidentialite" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">Politique de confidentialité</Link></li>
+              <li><Link href="/contact" className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200">Contact</Link></li>
+              <li><ManageCookiesLink className="text-dust/45 text-sm hover:text-dust/75 transition-colors duration-200 text-left" /></li>
+            </ul>
+          </div>
         </div>
 
         <div className="mt-8 pt-6 border-t border-white/8">

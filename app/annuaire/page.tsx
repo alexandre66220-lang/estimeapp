@@ -4,6 +4,10 @@ import { searchAnnuaire } from "@/app/actions/annuaire";
 import { ArtisanCard } from "@/components/annuaire/ArtisanCard";
 import { AnnuaireSearchBar, AnnuaireFilters, AnnuairePagination } from "@/components/annuaire/AnnuaireClient";
 import Link from "next/link";
+import { METIERS_SEO, VILLES_SEO } from "@/lib/localSeo/data";
+
+const TOP_METIERS = METIERS_SEO.slice(0, 4);
+const TOP_VILLES = VILLES_SEO.slice(0, 5);
 
 export const revalidate = 3600;
 
@@ -121,15 +125,28 @@ export default async function AnnuairePage({
         </Suspense>
       </main>
 
-      {/* Lien maillage interne */}
-      <div className="mt-8 text-center">
-        <Link
-          href="/artisans"
-          className="text-sm text-[#2B3138]/50 hover:text-[#C75D3B] transition-colors"
-        >
-          Parcourir les artisans par ville →
-        </Link>
-      </div>
+      {/* Maillage interne — combinaisons métier/ville */}
+      <section className="mt-16 border-t border-[#2B2521]/8 pt-10">
+        <h2 className="text-base font-semibold text-[#2B2521] mb-6">Recherches fréquentes</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {TOP_METIERS.flatMap((m) =>
+            TOP_VILLES.map((v) => (
+              <Link
+                key={`${m.slug}-${v.slug}`}
+                href={`/artisans/${m.slug}/${v.slug}`}
+                className="text-xs px-3 py-2 rounded-lg border border-[#2B2521]/10 text-[#2B2521]/60 hover:border-[#C75D3B]/40 hover:text-[#C75D3B] transition-all bg-white"
+              >
+                {m.label} à {v.label}
+              </Link>
+            ))
+          )}
+        </div>
+        <div className="mt-4">
+          <Link href="/artisans" className="text-sm text-[#2B3138]/50 hover:text-[#C75D3B] transition-colors">
+            Parcourir tous les métiers et villes →
+          </Link>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="mt-16 bg-[#1A1410] py-8 px-6 text-center">

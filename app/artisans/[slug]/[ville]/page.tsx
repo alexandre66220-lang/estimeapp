@@ -4,6 +4,10 @@ import { notFound } from "next/navigation";
 import { METIERS_SEO, VILLES_SEO, findMetier, findVille } from "@/lib/localSeo/data";
 import { getArtisansByMetierVille } from "@/lib/localSeo/queries";
 import { ArtisansNav, ArtisansGrid, WhyEstime, JoinCta } from "../../ArtisansLayout";
+import { buildFaqJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo/faq";
+import { FaqAccordion } from "@/components/seo/FaqAccordion";
+
+const BASE = "https://estime-app.com";
 
 export const revalidate = 3600;
 
@@ -27,16 +31,26 @@ export async function generateMetadata({
   const ville = findVille(villeSlug);
   if (!metier || !ville) return {};
 
+  const ogImageUrl = `${BASE}/api/og?type=artisans&metier=${encodeURIComponent(metier.label)}&ville=${encodeURIComponent(ville.label)}`;
   return {
     title: `${metier.label} à ${ville.label} — Artisans certifiés Estime | Estime`,
     description: `Trouvez un ${metier.label.toLowerCase()} de confiance à ${ville.label}. Artisans évalués par leurs clients, avec score de réputation et avis Google vérifiés.`,
-    alternates: { canonical: `https://estime-app.com/artisans/${slug}/${villeSlug}` },
+    alternates: {
+      canonical: `${BASE}/artisans/${slug}/${villeSlug}`,
+      languages: { fr: `${BASE}/artisans/${slug}/${villeSlug}` },
+    },
     robots: { index: true, follow: true },
     openGraph: {
       title: `${metier.label} à ${ville.label} — Artisans certifiés Estime`,
       description: `Trouvez un ${metier.label.toLowerCase()} de confiance à ${ville.label} (${ville.departement}).`,
-      url: `https://estime-app.com/artisans/${slug}/${villeSlug}`,
+      url: `${BASE}/artisans/${slug}/${villeSlug}`,
       type: "website",
+      locale: "fr_FR",
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: `${metier.label} à ${ville.label}` }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: [ogImageUrl],
     },
   };
 }
@@ -54,20 +68,43 @@ export default async function ArtisansMetierVillePage({
 
   const artisans = await getArtisansByMetierVille(metier.label, ville.label, 12);
 
+  const faqItems = [
+    {
+      q: `Comment trouver un ${metier.label.toLowerCase()} de confiance à ${ville.label} ?`,
+      a: `Cherchez un ${metier.label.toLowerCase()} certifié Estime à ${ville.label} : leurs scores de réputation et avis Google sont vérifiés et transparents.`,
+    },
+    {
+      q: `Combien coûte un ${metier.label.toLowerCase()} à ${ville.label} ?`,
+      a: `Les tarifs varient selon la prestation. Demandez plusieurs devis et comparez les avis Google pour choisir le meilleur rapport qualité/prix.`,
+    },
+    {
+      q: `Comment vérifier la réputation d'un ${metier.label.toLowerCase()} à ${ville.label} ?`,
+      a: `Consultez ses avis Google, son score de réputation Estime et ses photos de chantiers réalisés.`,
+    },
+  ];
+
   const jsonLdOrg = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: `${metier.labelPluriel} à ${ville.label}`,
     description: `Liste des ${metier.labelPluriel.toLowerCase()} certifiés Estime à ${ville.label}, ${ville.departement}`,
-    url: `https://estime-app.com/artisans/${slug}/${villeSlug}`,
+    url: `${BASE}/artisans/${slug}/${villeSlug}`,
   };
+
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Accueil", url: BASE },
+    { name: "Artisans", url: `${BASE}/artisans` },
+    { name: metier.labelPluriel, url: `${BASE}/artisans/${slug}` },
+    { name: ville.label, url: `${BASE}/artisans/${slug}/${villeSlug}` },
+  ]);
+
+  const faqJsonLd = buildFaqJsonLd(faqItems);
 
   return (
     <div style={{ background: "#F8F5F2" }} className="min-h-screen">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdOrg) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdOrg) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <ArtisansNav />
 
       <main className="max-w-6xl mx-auto px-6 py-12 lg:py-16 space-y-8">
@@ -146,6 +183,12 @@ export default async function ArtisansMetierVillePage({
         </section>
 
         <WhyEstime metierLabel={metier.label} villeLabel={ville.label} />
+
+        {/* FAQ */}
+        <div style={{ background: "#ffffff", border: "1px solid #E8E2DC" }} className="rounded-2xl p-6 lg:p-8">
+          <FaqAccordion items={faqItems} title={`FAQ — ${metier.label} à ${ville.label}`} />
+        </div>
+
         <JoinCta metierLabel={metier.label} villeLabel={ville.label} />
       </main>
     </div>

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Footer from "@/components/Footer";
+import { FaqAccordionDark } from "@/components/seo/FaqAccordion";
+import { FAQ_FONCTIONNALITES, buildFaqJsonLd } from "@/lib/seo/faq";
 
 export const dynamic = "force-static";
 
@@ -188,9 +190,12 @@ const SECTIONS: Section[] = [
   },
 ];
 
+const faqJsonLd = buildFaqJsonLd(FAQ_FONCTIONNALITES);
+
 export default function FonctionnalitesPage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <main style={{ background: "#F8F5F2", color: "#2B2521", minHeight: "100vh" }}>
         {/* Nav minimale */}
         <nav
@@ -270,6 +275,13 @@ export default function FonctionnalitesPage() {
               </div>
             </section>
           ))}
+        </div>
+
+        {/* FAQ */}
+        <div style={{ background: "#2B2521" }} className="py-16 px-6">
+          <div className="max-w-3xl mx-auto">
+            <FaqAccordionDark items={FAQ_FONCTIONNALITES} title="Questions fréquentes sur les fonctionnalités" />
+          </div>
         </div>
 
         {/* CTA final */}

@@ -8,6 +8,8 @@ import Pricing from "@/components/Pricing";
 import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
 import { MotionProvider } from "@/components/MotionProvider";
+import { FaqAccordionDark } from "@/components/seo/FaqAccordion";
+import { FAQ_LANDING, buildFaqJsonLd } from "@/lib/seo/faq";
 
 export const dynamic = "force-static";
 
@@ -17,6 +19,8 @@ export const metadata: Metadata = {
     "Prenez une photo de chantier, Estime génère votre post Instagram en 10 secondes et envoie la demande d'avis Google à votre client. 14 jours gratuits.",
   alternates: { canonical: "https://estime-app.com" },
 };
+
+const faqJsonLd = buildFaqJsonLd(FAQ_LANDING);
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -48,6 +52,10 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <main>
         <MotionProvider>
           <Hero />
@@ -58,6 +66,11 @@ export default function Home() {
           <Pricing />
           <FinalCTA />
         </MotionProvider>
+        <section className="bg-noir py-16 px-6">
+          <div className="max-w-3xl mx-auto">
+            <FaqAccordionDark items={FAQ_LANDING} title="Questions fréquentes" />
+          </div>
+        </section>
       </main>
       <Footer />
     </>
