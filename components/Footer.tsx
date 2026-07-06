@@ -40,7 +40,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-white/8">
+        <div className="mt-8 pt-6 border-t border-white/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <p className="text-dust/25 text-xs">
             © 2026 Estime —{" "}
             <a
@@ -52,6 +52,19 @@ export default function Footer() {
               Créé par AlcalSpark
             </a>
           </p>
+          <a
+            href="https://www.producthunt.com/products/estime?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-estime"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt="Estime - Reputation on autopilot for tradespeople | Product Hunt"
+              width={250}
+              height={54}
+              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1189422&theme=dark&t=1783347523671"
+            />
+          </a>
         </div>
       </div>
     </footer>
