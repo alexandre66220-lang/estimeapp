@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { InstallGuide } from "@/components/espace/InstallGuide";
 import { WidgetInstallGuide } from "@/components/espace/WidgetInstallGuide";
+import { PlanningNotifBanner } from "@/components/espace/PlanningNotifBanner";
 import { getCurrentUser } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -24,6 +25,13 @@ export default async function InstallerPage() {
       <div className="space-y-6">
         <InstallGuide />
         {user && <WidgetInstallGuide userId={user.id} />}
+        <div>
+          <h2 className="font-display text-xl font-bold text-dusk mb-2">Activer les notifications</h2>
+          <p className="text-dusk/50 text-sm mb-4">
+            Recevez une alerte push quand c&apos;est l&apos;heure de publier un post programmé.
+          </p>
+          <PlanningNotifBanner />
+        </div>
       </div>
     </div>
   );

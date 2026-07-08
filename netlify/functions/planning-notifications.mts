@@ -50,10 +50,10 @@ export default async function handler() {
   console.log(`[planning-notifications] ${posts.length} post(s) à notifier`);
 
   for (const post of posts) {
-    // Marquer comme publié
+    // Marquer comme publié et notification envoyée
     const { error: updateError } = await supabase
       .from("posts_programmes")
-      .update({ statut: "publie" })
+      .update({ statut: "publie", notification_envoyee: true })
       .eq("id", post.id);
 
     if (updateError) {

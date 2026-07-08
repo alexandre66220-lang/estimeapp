@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { PlanningCalendar, type PostProgramme, type ChantierPost } from "@/components/espace/PlanningCalendar";
+import { PlanningNotifBanner } from "@/components/espace/PlanningNotifBanner";
+import type { ReseauSocial } from "@/lib/planning/creneaux";
 
 export const metadata: Metadata = {
   title: "Planning éditorial - Estime",
@@ -12,7 +14,7 @@ export default async function PlanningPage() {
   const [{ data: postsProgrammes }, { data: posts }] = await Promise.all([
     supabase
       .from("posts_programmes")
-      .select("id, chantier_id, texte_post, hashtags, image_url, date_publication, statut")
+      .select("id, chantier_id, texte_post, hashtags, image_url, date_publication, statut, reseau_social")
       .eq("user_id", user!.id)
       .neq("statut", "annule")
       .order("date_publication", { ascending: true }),
@@ -23,7 +25,6 @@ export default async function PlanningPage() {
       .order("created_at", { ascending: false }),
   ]);
 
-  // Enrich posts_programmes with chantier title
   const chantierTitles = new Map<string, string>();
   for (const p of posts ?? []) {
     const titre = (p.chantiers as { titre?: string } | null)?.titre;
@@ -33,12 +34,13 @@ export default async function PlanningPage() {
   const planningPosts: PostProgramme[] = (postsProgrammes ?? []).map((p) => ({
     id: p.id,
     chantier_id: p.chantier_id,
-    texte_post: p.texte_post,
+    texte_post: p.texte_post ?? "",
     hashtags: p.hashtags ?? [],
     image_url: p.image_url,
     date_publication: p.date_publication,
     statut: p.statut as PostProgramme["statut"],
     chantier_titre: p.chantier_id ? chantierTitles.get(p.chantier_id) ?? null : null,
+    reseau_social: (p.reseau_social as ReseauSocial) ?? "instagram",
   }));
 
   const chantierPosts: ChantierPost[] = (posts ?? [])
@@ -54,12 +56,13 @@ export default async function PlanningPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12 lg:py-16">
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="font-display text-3xl font-bold text-dusk">Planning éditorial</h1>
         <p className="text-dusk/50 text-sm mt-1">
-          Programmez vos posts Instagram et gérez votre calendrier de publication.
+          Programmez vos posts et gérez votre calendrier de publication.
         </p>
       </div>
+      <PlanningNotifBanner />
       <PlanningCalendar posts={planningPosts} chantierPosts={chantierPosts} />
     </div>
   );
