@@ -29,6 +29,15 @@ export async function getFinancesEtendues(
   const today = new Date();
   const todayStr = today.toISOString().slice(0, 10);
 
+  // Profile for tresorerie starting point
+  const { data: profileData } = await supabase
+    .from("profiles")
+    .select("tresorerie_actuelle")
+    .eq("id", userId)
+    .maybeSingle();
+
+  const tresorerieInitiale = profileData?.tresorerie_actuelle ?? 0;
+
   // All payments for this user
   const { data: paiements } = await supabase
     .from("paiements_chantier")
@@ -128,7 +137,7 @@ export async function getFinancesEtendues(
   }
 
   const semaines: PrevisionnelSemaine[] = [];
-  let soldeCumul = 0;
+  let soldeCumul = tresorerieInitiale;
   for (let i = 0; i < 13; i++) {
     const debut = addDays(today, i * 7);
     const fin = addDays(today, (i + 1) * 7);

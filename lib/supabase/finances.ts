@@ -5,6 +5,7 @@ export type MonthlyData = {
   month: string;
   label: string;
   ca: number;
+  depenses: number;
   count: number;
 };
 
@@ -43,7 +44,7 @@ export async function getFinancesData(
 
   const start12 = new Date(currentYear, currentMonth - 11, 1).toISOString();
 
-  const [{ data: chantiers12 }, { data: chantiersRecents }, { data: profile }] =
+  const [{ data: chantiers12 }, { data: chantiersRecents }, { data: profile }, { data: entrees12 }] =
     await Promise.all([
       supabase
         .from("chantiers")
@@ -64,6 +65,11 @@ export async function getFinancesData(
         .select("objectif_annuel")
         .eq("id", userId)
         .maybeSingle(),
+      supabase
+        .from("entrees_financieres")
+        .select("type, montant, date")
+        .eq("user_id", userId)
+        .gte("date", start12.slice(0, 10)),
     ]);
 
   // Build 12-month rolling data
@@ -80,11 +86,21 @@ export async function getFinancesData(
       return cd.getFullYear() === y && cd.getMonth() === m;
     });
 
+    const rentrees = (entrees12 ?? []).filter((e) => {
+      const ed = new Date(e.date);
+      return e.type === "rentree" && ed.getFullYear() === y && ed.getMonth() === m;
+    });
+    const depensesManuel = (entrees12 ?? []).filter((e) => {
+      const ed = new Date(e.date);
+      return e.type === "depense" && ed.getFullYear() === y && ed.getMonth() === m;
+    });
+
     monthly.push({
       month: monthKey,
       label,
-      ca: items.reduce((s, c) => s + (c.montant ?? 0), 0),
-      count: items.length,
+      ca: items.reduce((s, c) => s + (c.montant ?? 0), 0) + rentrees.reduce((s, e) => s + (e.montant ?? 0), 0),
+      depenses: depensesManuel.reduce((s, e) => s + (e.montant ?? 0), 0),
+      count: items.length + rentrees.length,
     });
   }
 

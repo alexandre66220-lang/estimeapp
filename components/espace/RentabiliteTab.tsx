@@ -36,7 +36,7 @@ type SortKey = "date" | "montant" | "couts" | "marge" | "taux" | "heures" | "tau
 
 type Recommendation = { titre: string; conseil: string };
 
-export function RentabiliteTab({ data }: { data: RentabiliteAnnuelle }) {
+export function RentabiliteTab({ data, tauxImposition }: { data: RentabiliteAnnuelle; tauxImposition: number | null }) {
   const [sortKey, setSortKey] = useState<SortKey>("date");
   const [sortAsc, setSortAsc] = useState(false);
   const [analyse, setAnalyse] = useState<Recommendation[] | null>(null);
@@ -132,7 +132,9 @@ export function RentabiliteTab({ data }: { data: RentabiliteAnnuelle }) {
           { label: "Marge brute totale", value: fmtEur(data.margeBruteTotale), color: data.margeBruteTotale >= 0 ? "text-green-600" : "text-red-500" },
           { label: "Taux de marge moyen", value: data.tauxMargeMoyen !== null ? `${data.tauxMargeMoyen.toFixed(1)} %` : "—", color: data.tauxMargeMoyen !== null && data.tauxMargeMoyen >= 30 ? "text-green-600" : "text-red-500" },
           { label: "Taux horaire moyen", value: data.tauxHoraireMoyen !== null ? `${data.tauxHoraireMoyen.toFixed(0)} €/h` : "—", color: "text-dusk" },
-          { label: "Coûts fournitures", value: fmtEur(data.totalFournitures), color: "text-dusk" },
+          tauxImposition !== null
+            ? { label: "Résultat net après impôt (estimé)", value: fmtEur(data.margeBruteTotale * (1 - tauxImposition / 100)), color: data.margeBruteTotale >= 0 ? "text-green-600" : "text-red-500" }
+            : { label: "Résultat net après impôt", value: "Définir dans profil", color: "text-dusk/30" },
           data.meilleureChantier
             ? { label: "Meilleur chantier", value: `${data.meilleureChantier.titre.slice(0, 20)} · ${data.meilleureChantier.taux.toFixed(0)}%`, color: "text-green-600" }
             : { label: "Meilleur chantier", value: "—", color: "text-dusk/40" },

@@ -11,6 +11,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { VisibleAnnuaireToggle } from "@/components/espace/VisibleAnnuaireToggle";
 import { SecuritySection } from "@/components/espace/SecuritySection";
 import { WidgetCopyUrl } from "@/components/espace/WidgetCopyUrl";
+import { TresorerieForm } from "@/components/espace/TresorerieForm";
+import { StatutJuridiqueForm } from "@/components/espace/StatutJuridiqueForm";
 
 export const metadata: Metadata = {
   title: "Mon profil - Estime",
@@ -55,6 +57,14 @@ export default async function Profil({
 
         <Suspense fallback={null}>
           <WidgetSection />
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <TresorerieSectionWrapper />
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <StatutJuridiqueSectionWrapper />
         </Suspense>
 
         <Suspense fallback={null}>
@@ -211,6 +221,51 @@ async function SecuritySectionWrapper() {
   }
 
   return <SecuritySection sessionExpiry={sessionExpiry} />;
+}
+
+async function TresorerieSectionWrapper() {
+  const { supabase, user } = await getCurrentUser();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("tresorerie_actuelle, tresorerie_maj_le")
+    .eq("id", user!.id)
+    .maybeSingle();
+
+  return (
+    <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 max-w-2xl">
+      <h2 className="font-display text-lg font-bold text-dusk mb-1">Trésorerie</h2>
+      <p className="text-dusk/50 text-sm mb-5">
+        Renseignez votre solde de trésorerie actuel. Il sera utilisé comme point de départ dans votre prévisionnel.
+      </p>
+      <TresorerieForm
+        tresorerieActuelle={profile?.tresorerie_actuelle ?? null}
+        tresorerieMajLe={profile?.tresorerie_maj_le ?? null}
+      />
+    </div>
+  );
+}
+
+async function StatutJuridiqueSectionWrapper() {
+  const { supabase, user } = await getCurrentUser();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("statut_juridique, regime_imposition, taux_imposition_estime")
+    .eq("id", user!.id)
+    .maybeSingle();
+
+  return (
+    <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 max-w-2xl">
+      <h2 className="font-display text-lg font-bold text-dusk mb-1">Statut juridique et fiscalité</h2>
+      <p className="text-dusk/50 text-sm mb-5">
+        Ces informations permettent d&apos;estimer votre résultat net après impôt dans le calculateur de rentabilité.
+      </p>
+      <StatutJuridiqueForm
+        statutJuridique={profile?.statut_juridique ?? null}
+        regimeImposition={profile?.regime_imposition ?? null}
+        tauxImpositionEstime={profile?.taux_imposition_estime ?? null}
+      />
+    </div>
+  );
 }
 
 async function AnnuaireSection() {

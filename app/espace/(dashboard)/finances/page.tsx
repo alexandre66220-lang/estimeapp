@@ -19,6 +19,7 @@ import { FinancesChartWrapper } from "@/components/espace/FinancesChartWrapper";
 import { FinancesTabs } from "@/components/espace/FinancesTabs";
 import { getRentabiliteAnnuelle } from "@/components/espace/RentabiliteFinances";
 import { SanteFinanciere } from "@/components/espace/SanteFinanciere";
+import { AjouterDonneeFinanciereModal } from "@/components/espace/AjouterDonneeFinanciereModal";
 
 export const metadata: Metadata = { title: "Finances — Estime" };
 
@@ -73,11 +74,27 @@ function encouragement(pct: number) {
 
 export default async function FinancesPage() {
   const { supabase, user } = await getCurrentUser();
-  const [data, rentabiliteAnnuelle, financesEtendues] = await Promise.all([
+  const [data, rentabiliteAnnuelle, financesEtendues, { data: chantiersListe }, { data: profilFiscal }] = await Promise.all([
     getFinancesData(supabase, user!.id),
     getRentabiliteAnnuelle(supabase, user!.id),
     getFinancesEtendues(supabase, user!.id),
+    supabase
+      .from("chantiers")
+      .select("id, titre")
+      .eq("user_id", user!.id)
+      .order("created_at", { ascending: false })
+      .limit(50),
+    supabase
+      .from("profiles")
+      .select("taux_imposition_estime")
+      .eq("id", user!.id)
+      .maybeSingle(),
   ]);
+
+  const chantiersPourSelect = (chantiersListe ?? []).map((c: { id: string; titre: string | null }) => ({
+    id: c.id,
+    titre: c.titre ?? "Chantier sans titre",
+  }));
 
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -98,14 +115,17 @@ export default async function FinancesPage() {
             Suivi de votre chiffre d&apos;affaires et de vos paiements.
           </p>
         </div>
-        <a
-          href="/api/finances/export"
-          download
-          className="inline-flex items-center gap-2 text-dusk font-medium text-sm px-5 py-2.5 rounded-full border border-dusk/20 hover:bg-dusk/5 active:scale-[0.97] transition-all duration-200"
-        >
-          <Download size={16} weight="bold" />
-          Exporter CSV {currentYear}
-        </a>
+        <div className="flex items-center gap-3 flex-wrap">
+          <AjouterDonneeFinanciereModal chantiers={chantiersPourSelect} />
+          <a
+            href="/api/finances/export"
+            download
+            className="inline-flex items-center gap-2 text-dusk font-medium text-sm px-5 py-2.5 rounded-full border border-dusk/20 hover:bg-dusk/5 active:scale-[0.97] transition-all duration-200"
+          >
+            <Download size={16} weight="bold" />
+            Exporter CSV {currentYear}
+          </a>
+        </div>
       </div>
 
       <FinancesTabs
@@ -113,6 +133,7 @@ export default async function FinancesPage() {
         impayes={financesEtendues.impayes}
         previsionnel={financesEtendues.previsionnel}
         seuilAlerte={1000}
+        tauxImposition={profilFiscal?.taux_imposition_estime ?? null}
       >
       {/* État vide */}
       {!data.hasAnyData && (

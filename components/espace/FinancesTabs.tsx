@@ -25,6 +25,7 @@ export function FinancesTabs({
   impayes,
   previsionnel,
   seuilAlerte,
+  tauxImposition,
 }: {
   children: React.ReactNode;
   rentabiliteAnnuelle: RentabiliteAnnuelle;
@@ -37,6 +38,7 @@ export function FinancesTabs({
     depenses30: number;
   };
   seuilAlerte: number;
+  tauxImposition?: number | null;
 }) {
   const [tab, setTab] = useState<Tab>("tableau-de-bord");
   const [seuil, setSeuil] = useState(seuilAlerte);
@@ -92,7 +94,7 @@ export function FinancesTabs({
         </div>
       )}
 
-      {tab === "rentabilite" && <RentabiliteTab data={rentabiliteAnnuelle} />}
+      {tab === "rentabilite" && <RentabiliteTab data={rentabiliteAnnuelle} tauxImposition={tauxImposition ?? null} />}
     </div>
   );
 }
