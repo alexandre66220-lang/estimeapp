@@ -30,47 +30,59 @@ export async function getArtisansByMetierVille(
   villeLabel: string,
   limit = 12
 ): Promise<ArtisanAnnuaire[]> {
-  const admin = createAdminClient();
-  const { data } = await admin
-    .from("profiles")
-    .select(SELECT_FIELDS)
-    .eq("is_subscribed", true)
-    .eq("visible_annuaire", true)
-    .ilike("metier", `%${metierLabel}%`)
-    .ilike("ville", `%${villeLabel}%`)
-    .order("score_actuel", { ascending: false, nullsFirst: false })
-    .limit(limit);
-  return (data ?? []).map(sanitize);
+  try {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("profiles")
+      .select(SELECT_FIELDS)
+      .eq("is_subscribed", true)
+      .eq("visible_annuaire", true)
+      .ilike("metier", `%${metierLabel}%`)
+      .ilike("ville", `%${villeLabel}%`)
+      .order("score_actuel", { ascending: false, nullsFirst: false })
+      .limit(limit);
+    return (data ?? []).map(sanitize);
+  } catch {
+    return [];
+  }
 }
 
 export async function getArtisansByVille(
   villeLabel: string,
   limit = 12
 ): Promise<ArtisanAnnuaire[]> {
-  const admin = createAdminClient();
-  const { data } = await admin
-    .from("profiles")
-    .select(SELECT_FIELDS)
-    .eq("is_subscribed", true)
-    .eq("visible_annuaire", true)
-    .ilike("ville", `%${villeLabel}%`)
-    .order("score_actuel", { ascending: false, nullsFirst: false })
-    .limit(limit);
-  return (data ?? []).map(sanitize);
+  try {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("profiles")
+      .select(SELECT_FIELDS)
+      .eq("is_subscribed", true)
+      .eq("visible_annuaire", true)
+      .ilike("ville", `%${villeLabel}%`)
+      .order("score_actuel", { ascending: false, nullsFirst: false })
+      .limit(limit);
+    return (data ?? []).map(sanitize);
+  } catch {
+    return [];
+  }
 }
 
 export async function getArtisansByMetier(
   metierLabel: string,
   limit = 12
 ): Promise<ArtisanAnnuaire[]> {
-  const admin = createAdminClient();
-  const { data } = await admin
-    .from("profiles")
-    .select(SELECT_FIELDS)
-    .eq("is_subscribed", true)
-    .eq("visible_annuaire", true)
-    .ilike("metier", `%${metierLabel}%`)
-    .order("score_actuel", { ascending: false, nullsFirst: false })
-    .limit(limit);
-  return (data ?? []).map(sanitize);
+  try {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("profiles")
+      .select(SELECT_FIELDS)
+      .eq("is_subscribed", true)
+      .eq("visible_annuaire", true)
+      .ilike("metier", `%${metierLabel}%`)
+      .order("score_actuel", { ascending: false, nullsFirst: false })
+      .limit(limit);
+    return (data ?? []).map(sanitize);
+  } catch {
+    return [];
+  }
 }
