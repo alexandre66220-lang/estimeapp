@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import {
   ArrowLeft,
   Check,
@@ -102,7 +102,7 @@ export default async function FicheChantier({
   ]);
 
   if (!chantier) {
-    notFound();
+    redirect("/espace/mes-chantiers");
   }
 
   const hasPhoto = Boolean(chantier.photo_avant_url || chantier.photo_apres_url);
