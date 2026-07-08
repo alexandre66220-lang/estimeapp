@@ -20,6 +20,7 @@ import { AvantApresGenerateur } from "@/components/espace/AvantApresGenerateur";
 import { StoryGenerateur } from "@/components/espace/StoryGenerateur";
 import { NotesChantier } from "@/components/espace/NotesChantier";
 import { RentabiliteChantier } from "@/components/espace/RentabiliteChantier";
+import { ProgrammerPublicationButton } from "@/components/espace/ProgrammerPublicationButton";
 
 export const metadata: Metadata = {
   title: "Chantier - Estime",
@@ -215,9 +216,16 @@ export default async function FicheChantier({
             <ClipboardText size={18} weight="bold" aria-hidden="true" />
             <span className="text-sm font-semibold">Post Instagram généré</span>
           </div>
-          <p className="text-dusk/70 text-sm leading-relaxed whitespace-pre-wrap">
+          <p className="text-dusk/70 text-sm leading-relaxed whitespace-pre-wrap mb-4">
             {posts[0].contenu}
           </p>
+          <ProgrammerPublicationButton
+            chantierId={chantier.id}
+            postId={posts[0].id}
+            textePost={posts[0].contenu}
+            hashtags={[]}
+            imageUrl={posts[0].image_url}
+          />
         </div>
       )}
 

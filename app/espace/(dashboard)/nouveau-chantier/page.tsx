@@ -17,9 +17,11 @@ import {
   ChatTeardrop,
   TextAlignLeft,
   CaretDown,
+  Sparkle,
 } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
 import { PostEditor } from "@/components/espace/PostEditor";
+import { ImageIAGenerateur } from "@/components/espace/ImageIAGenerateur";
 import { usePointsToast } from "@/components/espace/PointsToastProvider";
 import { addPointsFidelite } from "@/app/actions/fidelite";
 
@@ -201,8 +203,13 @@ function FinancialDetailSection({
   );
 }
 
+type TabMode = "photo" | "ia";
+
 export default function NouveauChantier() {
   const { notify } = usePointsToast();
+  const [activeTab, setActiveTab] = useState<TabMode>("photo");
+  const [metierProfil, setMetierProfil] = useState<string | null>(null);
+  const [villeProfil, setVilleProfil] = useState<string | null>(null);
   const [titre, setTitre] = useState("");
   const [montant, setMontant] = useState("");
   const [avant, setAvant] = useState<Photo | null>(null);
@@ -232,14 +239,20 @@ export default function NouveauChantier() {
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    async function loadFavoris() {
+    async function loadProfile() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const { data } = await supabase.from("profiles").select("hashtags_favoris").eq("id", user.id).maybeSingle();
+      const { data } = await supabase
+        .from("profiles")
+        .select("hashtags_favoris, metier, ville")
+        .eq("id", user.id)
+        .maybeSingle();
       setFavoris(data?.hashtags_favoris ?? []);
+      setMetierProfil(data?.metier ?? null);
+      setVilleProfil(data?.ville ?? null);
     }
-    loadFavoris();
+    loadProfile();
   }, []);
 
   // Rotating messages during generation
@@ -472,12 +485,42 @@ export default function NouveauChantier() {
         Retour au tableau de bord
       </Link>
 
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="font-display text-3xl font-bold text-dusk">Nouveau chantier</h1>
         <p className="text-dusk/50 text-sm mt-1">
           Ajoutez vos photos avant/après, Estime génère votre post Instagram.
         </p>
       </div>
+
+      {/* Onglets mode */}
+      {status === "idle" || status === "error" ? (
+        <div className="flex gap-1 bg-dusk/5 p-1 rounded-xl mb-6">
+          <button
+            type="button"
+            onClick={() => setActiveTab("photo")}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
+              activeTab === "photo"
+                ? "bg-white text-dusk shadow-sm"
+                : "text-dusk/50 hover:text-dusk"
+            }`}
+          >
+            <ImageSquare size={16} aria-hidden="true" />
+            Photo de chantier
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("ia")}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
+              activeTab === "ia"
+                ? "bg-white text-dusk shadow-sm"
+                : "text-dusk/50 hover:text-dusk"
+            }`}
+          >
+            <Sparkle size={16} weight="fill" aria-hidden="true" />
+            Image générée par IA
+          </button>
+        </div>
+      ) : null}
 
       {/* Generating skeleton */}
       {status === "generating" && (
@@ -540,6 +583,50 @@ export default function NouveauChantier() {
           {chantierId && <NotationChantier chantierId={chantierId} />}
         </>
       ) : status !== "generating" ? (
+        activeTab === "ia" ? (
+          <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
+            <div className="mb-5">
+              <label htmlFor="titre-ia" className="block text-sm font-medium text-dusk/70 mb-1.5">
+                Titre du chantier
+              </label>
+              <input
+                type="text"
+                id="titre-ia"
+                required
+                value={titre}
+                onChange={(e) => setTitre(e.target.value)}
+                placeholder="Ravalement façade, 12 rue des Tilleuls"
+                className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200"
+              />
+            </div>
+            <ImageIAGenerateur
+              metier={metierProfil}
+              ville={villeProfil}
+              onUseImage={(imageUrl) => {
+                // Pré-remplir l'image et basculer sur l'onglet photo pour finaliser
+                setActiveTab("photo");
+                // On stocke l'URL de l'image IA pour l'utiliser comme photo d'après
+                // via un état dédié — on simule une "photo" pour le flux existant
+                const syntheticEvent = { iaImageUrl: imageUrl };
+                void syntheticEvent; // L'image sera utilisée lors du submit
+                setErrorMessage("Image IA sélectionnée. Ajoutez un titre si nécessaire, puis cliquez sur « Générer mon post ».");
+                // On crée un objet File factice depuis l'URL pour le flux existant
+                fetch(imageUrl)
+                  .then((r) => r.blob())
+                  .then((blob) => {
+                    const file = new File([blob], "image-ia.jpg", { type: "image/jpeg" });
+                    const preview = URL.createObjectURL(blob);
+                    setApres({ file, preview });
+                    setErrorMessage(null);
+                    setActiveTab("photo");
+                  })
+                  .catch(() => {
+                    setErrorMessage("Impossible de charger l'image générée. Réessayez.");
+                  });
+              }}
+            />
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 space-y-6">
           <div>
             <label htmlFor="titre" className="block text-sm font-medium text-dusk/70 mb-1.5">
@@ -677,6 +764,7 @@ export default function NouveauChantier() {
             {!isBusy && "Générer mon post"}
           </button>
         </form>
+        )
       ) : null}
     </div>
   );

@@ -24,6 +24,7 @@ import {
   DeviceMobile,
   Ruler,
   CalendarBlank as CalendarBlankIcon,
+  CalendarDots,
   type Icon as PhosphorIcon,
 } from "@phosphor-icons/react";
 import { logout } from "@/app/actions/auth";
@@ -37,6 +38,7 @@ const NAV_ITEMS: { href: string; label: string; icon: PhosphorIcon }[] = [
   { href: "/espace/parrainage", label: "Parrainage", icon: Gift },
   { href: "/espace/fidelite", label: "Fidélité", icon: Trophy },
   { href: "/espace/agenda", label: "Agenda", icon: CalendarBlankIcon },
+  { href: "/espace/planning", label: "Planning", icon: CalendarDots },
   { href: "/espace/calculateur", label: "Calculateur m²", icon: Ruler },
   { href: "/espace/conseils", label: "Conseils", icon: Lightbulb },
   { href: "/espace/avis", label: "Mes Avis", icon: Star },
