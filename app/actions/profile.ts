@@ -156,8 +156,7 @@ export async function updateProfil(formData: FormData) {
     slug = await ensureUniqueSlug(admin, base);
   }
 
-  const { error } = await supabase.from("profiles").upsert({
-    id: user.id,
+  const { error } = await supabase.from("profiles").update({
     prenom,
     nom,
     metier,
@@ -165,9 +164,10 @@ export async function updateProfil(formData: FormData) {
     ton_post: tonPost,
     lien_avis_google: lienAvisGoogle,
     ...(slug ? { slug } : {}),
-  });
+  }).eq("id", user.id);
 
   if (error) {
+    console.error("[updateProfil] Supabase error:", error.message, error.code, error.details);
     redirect(
       `/espace/profil?error=${encodeURIComponent(
         "Impossible d'enregistrer votre profil. Réessayez."

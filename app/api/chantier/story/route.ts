@@ -151,28 +151,35 @@ async function buildStory({
       .download(logoPath);
 
     if (!logoErr && logoBlob) {
-      const logoBuf = Buffer.from(await logoBlob.arrayBuffer());
-      const resized = await sharp(logoBuf)
-        .resize(LOGO_MAX, LOGO_MAX, { fit: "inside", withoutEnlargement: true })
-        .ensureAlpha()
-        .toBuffer();
-      const meta = await sharp(resized).metadata();
-      const lw = meta.width ?? LOGO_MAX;
-      const lh = meta.height ?? LOGO_MAX;
+      try {
+        const logoBuf = Buffer.from(await logoBlob.arrayBuffer());
+        const resized = await sharp(logoBuf)
+          .resize(LOGO_MAX, LOGO_MAX, { fit: "inside", withoutEnlargement: true })
+          .ensureAlpha()
+          .toBuffer();
+        const meta = await sharp(resized).metadata();
+        const lw = meta.width ?? LOGO_MAX;
+        const lh = meta.height ?? LOGO_MAX;
 
-      // Fond semi-transparent derrière le logo
-      overlays.push({
-        input: makeLogoBgSvg(lw, lh),
-        top: LOGO_MARGIN - 12,
-        left: LOGO_MARGIN - 12,
-      });
-      overlays.push({
-        input: resized,
-        top: LOGO_MARGIN,
-        left: LOGO_MARGIN,
-      });
+        overlays.push({
+          input: makeLogoBgSvg(lw, lh),
+          top: LOGO_MARGIN - 12,
+          left: LOGO_MARGIN - 12,
+        });
+        overlays.push({
+          input: resized,
+          top: LOGO_MARGIN,
+          left: LOGO_MARGIN,
+        });
+      } catch (logoSharpErr) {
+        console.error("[story] Logo processing failed, falling back to initials:", logoSharpErr);
+        overlays.push({
+          input: makeInitialesSvg(fallbackInitiales),
+          top: LOGO_MARGIN,
+          left: LOGO_MARGIN,
+        });
+      }
     } else {
-      // Logo introuvable → initiales
       overlays.push({
         input: makeInitialesSvg(fallbackInitiales),
         top: LOGO_MARGIN,

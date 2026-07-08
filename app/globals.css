@@ -96,6 +96,14 @@ body {
 .dark .text-dusk\/35,
 .dark .text-dusk\/40,
 .dark .text-dusk\/45 { color: var(--text-subtle) !important; }
+.dark .text-dusk\/80,
+.dark .text-dusk\/85,
+.dark .text-dusk\/90,
+.dark .text-dusk\/95 { color: var(--text-label) !important; }
+.dark .bg-dust\/30,
+.dark .bg-dust\/40,
+.dark .bg-dust\/50,
+.dark .bg-dust\/60 { background-color: var(--bg-input) !important; }
 .dark input,
 .dark textarea,
 .dark select {

@@ -37,6 +37,7 @@ export async function POST(request: Request) {
     .maybeSingle();
 
   if (usageError) {
+    console.error("[generer-image] usage_ia query error:", usageError.message, usageError.code);
     return NextResponse.json({ error: "Erreur de quota." }, { status: 500 });
   }
 
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
   // Construire le prompt final
   const finalPrompt = `${prompt.trim()}, style photographique professionnel, qualité commerciale, lumière naturelle, net et propre, haute résolution`;
 
-  // Appeler Replicate — flux-schnell
+  // Appeler Replicate — flux-schnell (timeout 20s pour Prefer: wait)
   const predictionRes = await fetch("https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions", {
     method: "POST",
     headers: {
@@ -71,6 +72,7 @@ export async function POST(request: Request) {
         output_quality: 90,
       },
     }),
+    signal: AbortSignal.timeout(20_000),
   });
 
   if (!predictionRes.ok) {
@@ -89,19 +91,27 @@ export async function POST(request: Request) {
   if (prediction.status === "succeeded" && Array.isArray(prediction.output)) {
     imageUrl = prediction.output[0] ?? null;
   } else if (prediction.status !== "failed" && prediction.id) {
-    // Polling jusqu'à 30s
-    for (let i = 0; i < 15; i++) {
+    // Polling jusqu'à 8s (4 × 2s) — fallback si Prefer: wait a expiré
+    console.log("[generer-image] Polling prediction", prediction.id, "status:", prediction.status);
+    for (let i = 0; i < 4; i++) {
       await new Promise((r) => setTimeout(r, 2000));
       const pollRes = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
         headers: { Authorization: `Bearer ${replicateToken}` },
       });
-      if (!pollRes.ok) break;
+      if (!pollRes.ok) {
+        console.error("[generer-image] Poll request failed:", pollRes.status);
+        break;
+      }
       const poll = await pollRes.json();
+      console.log("[generer-image] Poll", i + 1, "status:", poll.status);
       if (poll.status === "succeeded" && Array.isArray(poll.output)) {
         imageUrl = poll.output[0] ?? null;
         break;
       }
-      if (poll.status === "failed") break;
+      if (poll.status === "failed") {
+        console.error("[generer-image] Prediction failed:", poll.error);
+        break;
+      }
     }
   }
 

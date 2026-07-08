@@ -52,10 +52,15 @@ export async function POST(request: Request) {
     if (retry) return NextResponse.json({ error: "Erreur upload." }, { status: 500 });
   }
 
-  await supabase
+  const { error: dbError } = await supabase
     .from("profiles")
     .update({ photo_profil: path })
     .eq("id", user.id);
+
+  if (dbError) {
+    console.error("[profil/photo] DB update error:", dbError.message, dbError.code);
+    return NextResponse.json({ error: "Erreur lors de la mise à jour du profil." }, { status: 500 });
+  }
 
   updateTag(profileCacheTag(user.id));
   return NextResponse.json({ success: true, path });
