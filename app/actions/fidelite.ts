@@ -14,7 +14,7 @@ import { sendNiveauEmail } from "@/lib/resend/send-niveau";
 import { devError } from "@/lib/log";
 
 // Actions qui ne peuvent être attribuées qu'une seule fois par utilisateur
-const UNIQUE_ACTIONS: ActionFidelite[] = ["profil_complet", "parrainage"];
+const UNIQUE_ACTIONS: ActionFidelite[] = ["profil_complet", "parrainage", "vitrine_complete"];
 
 export type AddPointsResult = {
   pointsAdded: number;

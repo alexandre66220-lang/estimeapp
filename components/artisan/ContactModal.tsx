@@ -6,9 +6,10 @@ import { X, PaperPlaneTilt, Spinner, Check, WarningCircle } from "@phosphor-icon
 type Props = {
   slug: string;
   artisanNom: string;
+  ctaLabel?: string;
 };
 
-export function ContactModal({ slug, artisanNom }: Props) {
+export function ContactModal({ slug, artisanNom, ctaLabel = "Nous contacter" }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -69,7 +70,7 @@ export function ContactModal({ slug, artisanNom }: Props) {
         className="inline-flex items-center gap-2 bg-[#C75D3B] text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-[#B8512F] active:scale-[0.97] transition-all duration-200 shadow-sm"
       >
         <PaperPlaneTilt size={16} weight="bold" aria-hidden="true" />
-        Nous contacter
+        {ctaLabel}
       </button>
 
       {/* Backdrop */}

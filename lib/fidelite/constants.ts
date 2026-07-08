@@ -8,6 +8,7 @@ export const ACTIONS_POINTS = {
   profil_complet:   { label: "Profil complété à 100 %",              points: 50  },
   streak_7_jours:   { label: "7 jours de connexion consécutifs",     points: 25  },
   parrainage:       { label: "Artisan parrainé abonné",              points: 100 },
+  vitrine_complete: { label: "Page vitrine complétée à 100 %",        points: 50  },
 } as const;
 
 export type ActionFidelite = keyof typeof ACTIONS_POINTS;

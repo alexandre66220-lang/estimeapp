@@ -9,6 +9,7 @@ import { ContactModal } from "@/components/artisan/ContactModal";
 import { FadeIn } from "@/components/artisan/FadeIn";
 import { PostGrid } from "@/components/artisan/PostGrid";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/faq";
+import { mergeVitrineConfig } from "@/lib/vitrine/defaults";
 
 export const revalidate = 3600;
 
@@ -81,7 +82,7 @@ export default async function VitrineArtisan({
   // Toutes les requêtes en parallèle
   const { data: profile } = await admin
     .from("profiles")
-    .select("id, prenom, nom, metier, ville, logo_url, company_name, email, photo_profil, presentation, certifications, annees_experience, liens_sociaux, statut_disponibilite, numero_siret, theme_couleur, slug")
+    .select("id, prenom, nom, metier, ville, logo_url, company_name, email, photo_profil, presentation, certifications, annees_experience, liens_sociaux, statut_disponibilite, numero_siret, theme_couleur, slug, vitrine_config")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -158,8 +159,49 @@ export default async function VitrineArtisan({
 
   const VALID_THEME_COLORS = ["#C75D3B", "#385144", "#2D4A6B", "#7B2D3E", "#C8922A", "#3D3D3D"];
   const themeColor = VALID_THEME_COLORS.includes(profile.theme_couleur ?? "") ? profile.theme_couleur! : "#C75D3B";
+
+  // vitrine_config overrides
+  const vitrineConfig = mergeVitrineConfig(profile.vitrine_config ?? {});
+  const vitrineCouleur = /^#[0-9A-Fa-f]{6}$/.test(vitrineConfig.hero.couleur_principale)
+    ? vitrineConfig.hero.couleur_principale
+    : themeColor;
+  const vitrineSlogan = vitrineConfig.hero.slogan;
+  const vitrineCtaTexte = vitrineConfig.hero.cta_texte || "Contactez-moi";
+  const showChantiers = vitrineConfig.sections.chantiers.visible;
+  const showAvis = vitrineConfig.sections.avis.visible;
+  const showCertifications = vitrineConfig.sections.certifications.visible;
+  const showContact = vitrineConfig.sections.contact.visible;
+  const vitrineNombre = vitrineConfig.sections.chantiers.nombre;
+  const vitrineAvisNombre = vitrineConfig.sections.avis.nombre;
+  const vitrineZoneIntervention = vitrineConfig.sections.a_propos.zone_intervention;
+  const vitrineSpecialites = vitrineConfig.sections.a_propos.specialites;
+  const vitrineTarifs = vitrineConfig.sections.tarifs;
+  const vitrineEquipe = vitrineConfig.sections.equipe;
+  const vitrineTemplate = vitrineConfig.mise_en_page.template;
+  const vitrinePolice =
+    vitrineConfig.mise_en_page.police === "serif"
+      ? "'Georgia', serif"
+      : vitrineConfig.mise_en_page.police === "grotesque"
+      ? "'Inter', 'Helvetica Neue', sans-serif"
+      : "'Inter', sans-serif";
+  const cardRadius =
+    vitrineConfig.mise_en_page.style_cards === "carre"
+      ? "rounded-lg"
+      : vitrineConfig.mise_en_page.style_cards === "ombre"
+      ? "rounded-2xl shadow-md"
+      : "rounded-2xl";
+
+  // Limit chantiers and avis counts
+  const chantiersLimited = chantiersWithUrls.slice(0, vitrineNombre);
+  const avisLimited = (avis ?? []).slice(0, vitrineAvisNombre);
   const liens = (profile.liens_sociaux ?? {}) as { instagram?: string; facebook?: string; tiktok?: string };
   const certifs = (profile.certifications ?? []) as string[];
+
+  // Merge certifications: show liste from vitrine_config if non-empty, else fallback to profile.certifications
+  const vitrineCertifListe =
+    vitrineConfig.sections.certifications.liste.length > 0
+      ? vitrineConfig.sections.certifications.liste
+      : certifs;
   const currentYear = new Date().getFullYear();
   const expYears = profile.annees_experience ? currentYear - profile.annees_experience : null;
 
@@ -210,13 +252,20 @@ export default async function VitrineArtisan({
         .vitrine-fadein.vitrine-visible {
           animation: vitrineFadeUp 0.5s ease both;
         }
+        :root {
+          --vitrine-couleur: ${vitrineCouleur};
+          --vitrine-font: ${vitrinePolice};
+        }
       `}</style>
 
-      <div className="min-h-screen bg-[#F8F5F2]" style={{ color: "#2B2521" }}>
+      <div className="min-h-screen bg-[#F8F5F2]" style={{ color: "#2B2521", fontFamily: vitrinePolice }}>
 
         {/* ── Header hero ── */}
-        <header className="relative bg-white border-b border-[#2B2521]/6">
-          <div className="max-w-2xl mx-auto px-5 py-10 sm:py-14 flex flex-col items-center text-center gap-5">
+        <header
+          className="relative bg-white border-b border-[#2B2521]/6"
+          style={vitrineTemplate === "moderne" ? { backgroundColor: `${vitrineCouleur}10` } : {}}
+        >
+          <div className={`max-w-2xl mx-auto px-5 ${vitrineTemplate === "moderne" ? "py-16 sm:py-20" : "py-10 sm:py-14"} flex flex-col items-center text-center gap-5`}>
 
             {/* Photo profil / Logo / initiales */}
             {photoProfilUrl ? (
@@ -244,7 +293,7 @@ export default async function VitrineArtisan({
                 />
               </div>
             ) : (
-              <div className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-sm" style={{ backgroundColor: themeColor }}>
+              <div className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-sm" style={{ backgroundColor: vitrineCouleur }}>
                 <span className="text-white text-2xl font-bold tracking-tight">
                   {initiales(profile.prenom, profile.nom, profile.company_name)}
                 </span>
@@ -284,15 +333,42 @@ export default async function VitrineArtisan({
               )}
             </div>
 
+            {/* Slogan vitrine */}
+            {vitrineSlogan && (
+              <p className="text-base font-semibold max-w-md" style={{ color: vitrineCouleur }}>
+                &ldquo;{vitrineSlogan}&rdquo;
+              </p>
+            )}
+
             {/* Présentation */}
             {profile.presentation && (
               <p className="text-sm text-[#2B2521]/65 max-w-md leading-relaxed">{profile.presentation}</p>
             )}
 
-            {/* Certifications */}
-            {certifs.length > 0 && (
+            {/* Zone d'intervention + spécialités */}
+            {vitrineZoneIntervention && (
+              <p className="text-xs text-[#2B2521]/50">
+                📍 Zone : {vitrineZoneIntervention}
+              </p>
+            )}
+            {vitrineSpecialites.length > 0 && (
               <div className="flex flex-wrap items-center justify-center gap-1.5">
-                {certifs.slice(0, 6).map((c) => (
+                {vitrineSpecialites.map((s) => (
+                  <span
+                    key={s}
+                    className="px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    style={{ backgroundColor: `${vitrineCouleur}15`, color: vitrineCouleur }}
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Certifications */}
+            {showCertifications && vitrineCertifListe.length > 0 && (
+              <div className="flex flex-wrap items-center justify-center gap-1.5">
+                {vitrineCertifListe.slice(0, 6).map((c) => (
                   <span key={c} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#2B2521]/5 text-[#2B2521]/70 border border-[#2B2521]/8">
                     <ShieldCheck size={10} aria-hidden="true" />
                     {c}
@@ -302,12 +378,12 @@ export default async function VitrineArtisan({
             )}
 
             {/* Badge Estime */}
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full border" style={{ backgroundColor: `${themeColor}14`, borderColor: `${themeColor}25` }}>
-              <Medal size={16} weight="fill" aria-hidden="true" style={{ color: themeColor }} />
-              <span className="text-sm font-semibold" style={{ color: themeColor }}>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full border" style={{ backgroundColor: `${vitrineCouleur}14`, borderColor: `${vitrineCouleur}25` }}>
+              <Medal size={16} weight="fill" aria-hidden="true" style={{ color: vitrineCouleur }} />
+              <span className="text-sm font-semibold" style={{ color: vitrineCouleur }}>
                 {niveauInfo.label} Estime
               </span>
-              <span className="text-xs" style={{ color: `${themeColor}99` }}>· {scoreTotal} pts</span>
+              <span className="text-xs" style={{ color: `${vitrineCouleur}99` }}>· {scoreTotal} pts</span>
             </div>
 
             {/* Réseaux sociaux */}
@@ -344,9 +420,6 @@ export default async function VitrineArtisan({
               </a>
             )}
 
-            {/* CTA contact */}
-            <ContactModal slug={slug} artisanNom={artisanNom} />
-
             {/* Note globale */}
             {avgNote !== null && (
               <div className="flex items-center gap-2">
@@ -369,19 +442,21 @@ export default async function VitrineArtisan({
             )}
 
             {/* CTA contact */}
-            <ContactModal slug={slug} artisanNom={artisanNom} />
+            {showContact && (
+              <ContactModal slug={slug} artisanNom={artisanNom} ctaLabel={vitrineCtaTexte} />
+            )}
           </div>
         </header>
 
         <main className="max-w-2xl mx-auto px-5 py-10 space-y-14">
 
           {/* ── Avis Google ── */}
-          {avis && avis.length > 0 && (
+          {showAvis && avisLimited.length > 0 && (
             <FadeIn>
               <section aria-labelledby="section-avis">
                 <SectionTitle id="section-avis" icon="⭐">Avis Google</SectionTitle>
                 <div className="space-y-3 mt-5">
-                  {avis.map((a) => (
+                  {avisLimited.map((a) => (
                     <div
                       key={a.id}
                       className="bg-white rounded-2xl border border-[#2B2521]/6 px-5 py-4"
@@ -416,13 +491,53 @@ export default async function VitrineArtisan({
             </FadeIn>
           )}
 
+          {/* ── Tarifs ── */}
+          {vitrineTarifs.visible && vitrineTarifs.lignes.length > 0 && (
+            <FadeIn>
+              <section aria-labelledby="section-tarifs">
+                <SectionTitle id="section-tarifs" icon="💶">Tarifs</SectionTitle>
+                <div className="space-y-3 mt-5">
+                  {vitrineTarifs.lignes.map((l, i) => (
+                    <div key={i} className="bg-white rounded-2xl border border-[#2B2521]/6 px-5 py-4 flex justify-between items-center gap-4">
+                      <span className="text-sm text-[#2B2521]/70">{l.description}</span>
+                      <span className="text-sm font-semibold shrink-0" style={{ color: vitrineCouleur }}>{l.prix}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </FadeIn>
+          )}
+
+          {/* ── Équipe ── */}
+          {vitrineEquipe.visible && vitrineEquipe.membres.length > 0 && (
+            <FadeIn>
+              <section aria-labelledby="section-equipe">
+                <SectionTitle id="section-equipe" icon="👥">L&apos;équipe</SectionTitle>
+                <div className="flex flex-wrap gap-4 mt-5">
+                  {vitrineEquipe.membres.map((m, i) => (
+                    <div key={i} className="flex flex-col items-center gap-1.5">
+                      <div
+                        className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg"
+                        style={{ backgroundColor: vitrineCouleur }}
+                      >
+                        {m.prenom?.[0]?.toUpperCase() ?? "?"}
+                      </div>
+                      <p className="text-sm font-medium text-[#2B2521]">{m.prenom}</p>
+                      <p className="text-xs text-[#2B2521]/50">{m.role}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </FadeIn>
+          )}
+
           {/* ── Chantiers réalisés ── */}
-          {chantiersWithUrls.length > 0 && (
+          {showChantiers && chantiersLimited.length > 0 && (
             <FadeIn delay={80}>
               <section aria-labelledby="section-chantiers">
                 <SectionTitle id="section-chantiers" icon="🏗️">Réalisations</SectionTitle>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-5">
-                  {chantiersWithUrls.map((c) => {
+                <div className={`mt-5 ${vitrineConfig.sections.chantiers.disposition === "liste" ? "space-y-3" : "grid grid-cols-2 sm:grid-cols-3 gap-3"}`}>
+                  {chantiersLimited.map((c) => {
                     const displayUrl = c.avant_apres_url ?? c.photo_apres_url ?? c.photo_avant_url;
                     if (!displayUrl) return null;
                     return (
