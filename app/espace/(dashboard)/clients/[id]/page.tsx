@@ -46,11 +46,12 @@ export default async function FicheClient({
     { data: notes, error: notesError },
     { data: chantiers, error: chantiersError },
     { data: avis, error: avisError },
+    { data: paiementsClient },
   ] = await Promise.all([
     supabase
       .from("clients")
       .select(
-        "id, prenom, nom, email, telephone, statut, source, est_vip, derniere_interaction, montant_estime, created_at"
+        "id, prenom, nom, email, telephone, statut, source, est_vip, derniere_interaction, montant_estime, created_at, est_mauvais_payeur, delai_moyen_paiement, taux_recouvrement, total_encaisse"
       )
       .eq("id", id)
       .eq("user_id", user.id)
@@ -72,6 +73,12 @@ export default async function FicheClient({
       .from("avis")
       .select("id, note_google")
       .eq("user_id", user.id),
+    supabase
+      .from("paiements_chantier")
+      .select("id, chantier_id, type, montant, statut, date_prevue, date_encaissement")
+      .eq("user_id", user.id)
+      .order("date_encaissement", { ascending: false })
+      .order("created_at", { ascending: false }),
   ]);
 
   if (clientError) {
@@ -130,6 +137,21 @@ export default async function FicheClient({
           </span>
         )}
       </div>
+
+      {/* Alerte mauvais payeur */}
+      {client.est_mauvais_payeur && (
+        <div className="mb-6 flex items-start gap-3 bg-orange-50 border border-orange-200 rounded-2xl px-5 py-4">
+          <WarningCircle size={20} weight="fill" className="text-orange-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-orange-800">
+              Attention : ce client a un historique de retards de paiement
+            </p>
+            <p className="text-xs text-orange-700 mt-0.5">
+              Ce client a été signalé automatiquement suite à plusieurs paiements en retard.
+            </p>
+          </div>
+        </div>
+      )}
 
       {message && (
         <p className="mb-6 flex items-center gap-2 rounded-xl bg-ambre/10 text-braise text-sm px-4 py-3">
@@ -271,6 +293,14 @@ export default async function FicheClient({
           </div>
         )}
 
+        {/* Historique financier */}
+        <HistoriqueFinancier
+          client={client}
+          paiements={paiementsClient ?? []}
+          chantiersIds={(chantiers ?? []).map((c) => c.id)}
+          chantiersMap={Object.fromEntries((chantiers ?? []).map((c) => [c.id, c.titre]))}
+        />
+
         {/* Notes */}
         <NotesClient clientId={client.id} notes={notes ?? []} />
       </div>
@@ -296,6 +326,142 @@ function StatCard({
         {value}
       </p>
       <p className="text-dusk/45 text-xs mt-0.5">{label}</p>
+    </div>
+  );
+}
+
+function HistoriqueFinancier({
+  client,
+  paiements,
+  chantiersIds,
+  chantiersMap,
+}: {
+  client: {
+    total_encaisse?: number | null;
+    taux_recouvrement?: number | null;
+    delai_moyen_paiement?: number | null;
+    est_mauvais_payeur?: boolean | null;
+  };
+  paiements: Array<{
+    id: string;
+    chantier_id: string;
+    type: string;
+    montant: number;
+    statut: string;
+    date_prevue: string | null;
+    date_encaissement: string | null;
+  }>;
+  chantiersIds: string[];
+  chantiersMap: Record<string, string>;
+}) {
+  // Only show payments linked to this client's chantiers
+  const filtered = paiements.filter((p) => chantiersIds.includes(p.chantier_id));
+  if (filtered.length === 0 && !client.total_encaisse) return null;
+
+  const totalEncaisse = filtered
+    .filter((p) => p.statut === "encaisse")
+    .reduce((s, p) => s + (p.montant ?? 0), 0);
+  const nbPayes = filtered.filter((p) => p.statut === "encaisse").length;
+  const nbEnAttente = filtered.filter((p) => p.statut !== "encaisse").length;
+  const nbRetards = filtered.filter((p) => p.statut === "en_retard").length;
+
+  const TYPE_LABELS: Record<string, string> = {
+    acompte: "Acompte",
+    intermediaire: "Intermédiaire",
+    solde: "Solde",
+    autre: "Autre",
+  };
+
+  const STATUT_STYLE: Record<string, { bg: string; text: string; label: string }> = {
+    encaisse: { bg: "bg-green-50", text: "text-green-700", label: "Encaissé" },
+    en_retard: { bg: "bg-red-50", text: "text-red-600", label: "En retard" },
+    en_attente: { bg: "bg-dusk/5", text: "text-dusk/60", label: "En attente" },
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
+      <h2 className="font-display text-lg font-bold text-dusk mb-5">Historique financier</h2>
+
+      {/* Indicateurs */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div className="bg-green-50 rounded-xl p-3">
+          <p className="text-xs text-green-700 mb-1">Total encaissé</p>
+          <p className="text-lg font-bold text-green-700">
+            {totalEncaisse.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €
+          </p>
+        </div>
+        <div className="bg-dust rounded-xl p-3">
+          <p className="text-xs text-dusk/60 mb-1">Payés / En attente</p>
+          <p className="text-lg font-bold text-dusk">
+            {nbPayes} / {nbEnAttente}
+          </p>
+        </div>
+        <div className="bg-dust rounded-xl p-3">
+          <p className="text-xs text-dusk/60 mb-1">Délai moyen paiement</p>
+          <p className="text-lg font-bold text-dusk">
+            {client.delai_moyen_paiement != null
+              ? `${Math.round(client.delai_moyen_paiement)} j`
+              : "—"}
+          </p>
+        </div>
+        <div className="bg-dust rounded-xl p-3">
+          <p className="text-xs text-dusk/60 mb-1">Taux recouvrement</p>
+          <p className="text-lg font-bold text-dusk">
+            {client.taux_recouvrement != null
+              ? `${Math.round(client.taux_recouvrement)}%`
+              : "—"}
+          </p>
+        </div>
+      </div>
+
+      {/* Badges payeur */}
+      <div className="flex flex-wrap gap-2 mb-5">
+        {nbRetards === 0 && nbPayes > 0 && (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-100">
+            ✅ Bon payeur
+          </span>
+        )}
+        {nbRetards >= 2 && (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-100">
+            ⚠️ Mauvais payeur ({nbRetards} retards)
+          </span>
+        )}
+      </div>
+
+      {/* Historique */}
+      {filtered.length > 0 && (
+        <div className="divide-y divide-dusk/6">
+          {filtered.slice(0, 10).map((p) => {
+            const style = STATUT_STYLE[p.statut] ?? STATUT_STYLE.en_attente;
+            return (
+              <div key={p.id} className="flex items-center justify-between gap-3 py-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-dusk truncate">
+                    {chantiersMap[p.chantier_id] ?? "Chantier"} · {TYPE_LABELS[p.type] ?? p.type}
+                  </p>
+                  {p.date_encaissement && (
+                    <p className="text-xs text-dusk/40 mt-0.5">
+                      {new Date(p.date_encaissement).toLocaleDateString("fr-FR", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-sm font-bold text-dusk">
+                    {p.montant.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €
+                  </span>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${style.bg} ${style.text}`}>
+                    {style.label}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

@@ -12,11 +12,13 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getFinancesData } from "@/lib/supabase/finances";
+import { getFinancesEtendues } from "@/lib/supabase/paiements";
 import { ObjectifAnnuelForm } from "@/components/espace/ObjectifAnnuelForm";
 import { MontantChantierForm } from "@/components/espace/MontantChantierForm";
 import { FinancesChartWrapper } from "@/components/espace/FinancesChartWrapper";
 import { FinancesTabs } from "@/components/espace/FinancesTabs";
 import { getRentabiliteAnnuelle } from "@/components/espace/RentabiliteFinances";
+import { SanteFinanciere } from "@/components/espace/SanteFinanciere";
 
 export const metadata: Metadata = { title: "Finances — Estime" };
 
@@ -71,9 +73,10 @@ function encouragement(pct: number) {
 
 export default async function FinancesPage() {
   const { supabase, user } = await getCurrentUser();
-  const [data, rentabiliteAnnuelle] = await Promise.all([
+  const [data, rentabiliteAnnuelle, financesEtendues] = await Promise.all([
     getFinancesData(supabase, user!.id),
     getRentabiliteAnnuelle(supabase, user!.id),
+    getFinancesEtendues(supabase, user!.id),
   ]);
 
   const now = new Date();
@@ -92,7 +95,7 @@ export default async function FinancesPage() {
         <div>
           <h1 className="font-display text-3xl font-bold text-dusk">Finances</h1>
           <p className="text-dusk/50 text-sm mt-1">
-            Suivi simplifié de votre chiffre d&apos;affaires.
+            Suivi de votre chiffre d&apos;affaires et de vos paiements.
           </p>
         </div>
         <a
@@ -105,7 +108,12 @@ export default async function FinancesPage() {
         </a>
       </div>
 
-      <FinancesTabs rentabiliteAnnuelle={rentabiliteAnnuelle}>
+      <FinancesTabs
+        rentabiliteAnnuelle={rentabiliteAnnuelle}
+        impayes={financesEtendues.impayes}
+        previsionnel={financesEtendues.previsionnel}
+        seuilAlerte={1000}
+      >
       {/* État vide */}
       {!data.hasAnyData && (
         <div className="bg-white rounded-2xl border border-dusk/8 py-20 px-6 flex flex-col items-center text-center mb-6">
@@ -129,6 +137,14 @@ export default async function FinancesPage() {
       )}
 
       <div className="space-y-6">
+        {/* SECTION 0 — Santé financière */}
+        <SanteFinanciere
+          tauxRecouvrement={financesEtendues.sante.tauxRecouvrement}
+          delaiMoyenPaiement={financesEtendues.sante.delaiMoyenPaiement}
+          nbFacturesEnRetard={financesEtendues.sante.nbFacturesEnRetard}
+          montantTotalEnRetard={financesEtendues.sante.montantTotalEnRetard}
+        />
+
         {/* SECTION 1 — Mois en cours */}
         <section>
           <h2 className="font-display text-lg font-bold text-dusk mb-4">

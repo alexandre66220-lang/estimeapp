@@ -31,6 +31,10 @@ function emailHtml(prenom: string, moisLabel: string, stats: {
   chantiers: number;
   posts: number;
   avis: number;
+  tauxRecouvrement?: number | null;
+  montantEncaisse?: number | null;
+  montantFacture?: number | null;
+  nbImpayes?: number | null;
 }, pdfUrl: string | null): string {
   const btn = pdfUrl
     ? `<a href="${pdfUrl}" style="display:inline-block;background:#C75D3B;color:#fff;font-weight:700;padding:12px 28px;border-radius:50px;text-decoration:none;font-size:14px;margin-top:24px;">Voir mon rapport complet</a>`
@@ -64,6 +68,28 @@ function emailHtml(prenom: string, moisLabel: string, stats: {
           <p style="margin:4px 0 0;font-size:11px;color:#7A6E6A;text-transform:uppercase;letter-spacing:0.5px;">Avis reçus</p>
         </div>
       </div>
+
+      ${(stats.tauxRecouvrement != null || stats.nbImpayes != null) ? `
+      <div style="background:#FAF7F5;border-radius:12px;padding:20px;margin-bottom:24px;">
+        <p style="margin:0 0 12px;font-size:14px;font-weight:700;color:#2C2C2C;">💰 Santé financière</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          ${stats.tauxRecouvrement != null ? `
+          <div style="flex:1;min-width:120px;background:#fff;border-radius:8px;padding:12px;text-align:center;">
+            <p style="margin:0;font-size:22px;font-weight:700;color:${stats.tauxRecouvrement >= 90 ? "#16A34A" : stats.tauxRecouvrement >= 70 ? "#D97706" : "#DC2626"};">${Math.round(stats.tauxRecouvrement)}%</p>
+            <p style="margin:4px 0 0;font-size:11px;color:#7A6E6A;">Taux de recouvrement</p>
+          </div>` : ""}
+          ${stats.montantEncaisse != null ? `
+          <div style="flex:1;min-width:120px;background:#fff;border-radius:8px;padding:12px;text-align:center;">
+            <p style="margin:0;font-size:22px;font-weight:700;color:#16A34A;">${stats.montantEncaisse.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €</p>
+            <p style="margin:4px 0 0;font-size:11px;color:#7A6E6A;">Encaissé</p>
+          </div>` : ""}
+          ${stats.nbImpayes ? `
+          <div style="flex:1;min-width:120px;background:#FEF2F2;border-radius:8px;padding:12px;text-align:center;">
+            <p style="margin:0;font-size:22px;font-weight:700;color:#DC2626;">${stats.nbImpayes}</p>
+            <p style="margin:4px 0 0;font-size:11px;color:#7F1D1D;">Impayé${stats.nbImpayes > 1 ? "s" : ""}</p>
+          </div>` : ""}
+        </div>
+      </div>` : ""}
 
       <p style="color:#7A6E6A;font-size:13px;margin:0 0 4px;">Votre rapport complet est disponible en pièce jointe et en ligne.</p>
       ${btn}
@@ -118,6 +144,34 @@ export default async function handler() {
         const result = await response.json();
         const { pdfUrl, stats } = result;
 
+        // Fetch financial health stats
+        const [{ data: allPaiements }, { data: retards }] = await Promise.all([
+          admin
+            .from("paiements_chantier")
+            .select("montant, statut")
+            .eq("user_id", artisan.id),
+          admin
+            .from("paiements_chantier")
+            .select("montant")
+            .eq("user_id", artisan.id)
+            .eq("statut", "en_retard"),
+        ]);
+
+        const totalFacture = (allPaiements ?? []).reduce((s, p) => s + (p.montant ?? 0), 0);
+        const totalEncaisse = (allPaiements ?? [])
+          .filter((p) => p.statut === "encaisse")
+          .reduce((s, p) => s + (p.montant ?? 0), 0);
+        const tauxRecouvrement = totalFacture > 0 ? (totalEncaisse / totalFacture) * 100 : null;
+        const nbImpayes = (retards ?? []).length;
+
+        const enrichedStats = {
+          ...stats,
+          tauxRecouvrement,
+          montantEncaisse: totalEncaisse > 0 ? totalEncaisse : null,
+          montantFacture: totalFacture > 0 ? totalFacture : null,
+          nbImpayes: nbImpayes > 0 ? nbImpayes : null,
+        };
+
         // Fetch PDF as buffer for attachment
         let attachments: Array<{ filename: string; content: Buffer }> = [];
         if (pdfUrl) {
@@ -136,7 +190,7 @@ export default async function handler() {
           from: "Estime <rapports@estime-app.com>",
           to: artisan.email,
           subject: `Votre rapport Estime de ${moisLabel} est prêt`,
-          html: emailHtml(artisan.prenom ?? "artisan", moisLabel, stats, pdfUrl),
+          html: emailHtml(artisan.prenom ?? "artisan", moisLabel, enrichedStats, pdfUrl),
           attachments,
         });
 

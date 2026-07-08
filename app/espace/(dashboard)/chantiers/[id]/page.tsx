@@ -21,6 +21,8 @@ import { StoryGenerateur } from "@/components/espace/StoryGenerateur";
 import { NotesChantier } from "@/components/espace/NotesChantier";
 import { RentabiliteChantier } from "@/components/espace/RentabiliteChantier";
 import { ProgrammerPublicationButton } from "@/components/espace/ProgrammerPublicationButton";
+import { SuiviPaiements } from "@/components/espace/SuiviPaiements";
+import { getPaiementsChantier } from "@/lib/supabase/paiements";
 
 export const metadata: Metadata = {
   title: "Chantier - Estime",
@@ -60,10 +62,11 @@ export default async function FicheChantier({
     { data: carnetClients },
     { data: avis },
     { data: notes },
+    paiements,
   ] = await Promise.all([
     supabase
       .from("chantiers")
-      .select("id, titre, photo_avant_url, photo_apres_url, avant_apres_url, statut, client_nom, client_email, termine_at, created_at, montant, depenses, heures_passees, sous_traitance, frais_deplacement, autres_couts, taux_horaire_objectif")
+      .select("id, titre, photo_avant_url, photo_apres_url, avant_apres_url, statut, client_nom, client_email, termine_at, created_at, montant, depenses, heures_passees, sous_traitance, frais_deplacement, autres_couts, taux_horaire_objectif, taux_charges_sociales")
       .eq("id", id)
       .eq("user_id", user.id)
       .maybeSingle(),
@@ -97,6 +100,7 @@ export default async function FicheChantier({
       .eq("chantier_id", id)
       .eq("user_id", user.id)
       .order("created_at", { ascending: false }),
+    getPaiementsChantier(supabase, id, user.id),
   ]);
 
   if (chantierError) {
@@ -336,6 +340,26 @@ export default async function FicheChantier({
           autres_couts: chantier.autres_couts ?? null,
           taux_horaire_objectif: chantier.taux_horaire_objectif ?? null,
         }}
+      />
+
+      <SuiviPaiements
+        chantierId={id}
+        montantHT={chantier.montant ?? null}
+        tauxCharges={chantier.taux_charges_sociales ?? 22.5}
+        totalCouts={
+          (chantier.depenses ?? 0) +
+          (chantier.sous_traitance ?? 0) +
+          (chantier.frais_deplacement ?? 0) +
+          (chantier.autres_couts ?? 0)
+        }
+        paiements={paiements.map((p) => ({
+          id: p.id,
+          type: p.type as "acompte" | "intermediaire" | "solde" | "autre",
+          montant: p.montant,
+          statut: p.statut as "en_attente" | "encaisse" | "en_retard",
+          date_prevue: p.date_prevue,
+          date_encaissement: p.date_encaissement,
+        }))}
       />
 
       <NotesChantier
