@@ -19,6 +19,10 @@
   node_bundler = "esbuild"
   region = "eu-west-1"
 
+# Augmenter le timeout pour le handler Next.js (génération image IA ~15-20s)
+[functions."___netlify-server-handler"]
+  timeout = 30
+
 [functions."rapport-mensuel"]
   schedule = "0 8 1 * *"
 
