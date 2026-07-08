@@ -8,8 +8,16 @@ import { niveauPourScore, NIVEAUX } from "@/lib/score/reputation";
 import { ContactModal } from "@/components/artisan/ContactModal";
 import { FadeIn } from "@/components/artisan/FadeIn";
 import { PostGrid } from "@/components/artisan/PostGrid";
+import { AnimatedCounters } from "@/components/artisan/AnimatedCounters";
+import { FaqAccordion } from "@/components/artisan/FaqAccordion";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/faq";
-import { mergeVitrineConfig } from "@/lib/vitrine/defaults";
+import {
+  mergeVitrineConfig,
+  googleFontsUrl,
+  textureCSS,
+  heroHeightCSS,
+  waveTransitionSVG,
+} from "@/lib/vitrine/defaults";
 
 export const revalidate = 3600;
 
@@ -28,6 +36,17 @@ function initiales(prenom: string | null, nom: string | null, company: string | 
   if (prenom && nom) return `${prenom[0]}${nom[0]}`.toUpperCase();
   if (company) return company.slice(0, 2).toUpperCase();
   return "??";
+}
+
+function parseVideoEmbed(url: string): string | null {
+  if (!url) return null;
+  // YouTube
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+  // Vimeo
+  const viMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (viMatch) return `https://player.vimeo.com/video/${viMatch[1]}`;
+  return null;
 }
 
 // ── Metadata ─────────────────────────────────────────────────────────────────
@@ -79,7 +98,6 @@ export default async function VitrineArtisan({
   const { slug } = await params;
   const admin = createAdminClient();
 
-  // Toutes les requêtes en parallèle
   const { data: profile } = await admin
     .from("profiles")
     .select("id, prenom, nom, metier, ville, logo_url, company_name, email, photo_profil, presentation, certifications, annees_experience, liens_sociaux, statut_disponibilite, numero_siret, theme_couleur, slug, vitrine_config")
@@ -111,7 +129,6 @@ export default async function VitrineArtisan({
     admin.rpc("get_reputation_badge", { p_user_id: userId }),
   ]);
 
-  // Posts : liés via chantier_id, pas user_id directement
   const chantierIds = (chantiers ?? []).map((c) => c.id);
   const { data: posts } =
     chantierIds.length > 0
@@ -123,7 +140,6 @@ export default async function VitrineArtisan({
           .limit(6)
       : { data: [] };
 
-  // Signed URLs pour les photos
   const logoUrl = await signUrl(admin, profile.logo_url);
   const photoProfilUrl = profile.photo_profil
     ? await (async () => {
@@ -160,7 +176,7 @@ export default async function VitrineArtisan({
   const VALID_THEME_COLORS = ["#C75D3B", "#385144", "#2D4A6B", "#7B2D3E", "#C8922A", "#3D3D3D"];
   const themeColor = VALID_THEME_COLORS.includes(profile.theme_couleur ?? "") ? profile.theme_couleur! : "#C75D3B";
 
-  // vitrine_config overrides
+  // vitrine_config
   const vitrineConfig = mergeVitrineConfig(profile.vitrine_config ?? {});
   const vitrineCouleur = /^#[0-9A-Fa-f]{6}$/.test(vitrineConfig.hero.couleur_principale)
     ? vitrineConfig.hero.couleur_principale
@@ -178,12 +194,23 @@ export default async function VitrineArtisan({
   const vitrineTarifs = vitrineConfig.sections.tarifs;
   const vitrineEquipe = vitrineConfig.sections.equipe;
   const vitrineTemplate = vitrineConfig.mise_en_page.template;
+
+  // Typography
+  const policeTitres = vitrineConfig.typographie.police_titres;
+  const tailleTitres = vitrineConfig.typographie.taille_titres;
+  const titleSizeMap = { normal: "text-lg", grand: "text-xl", tres_grand: "text-2xl" };
+  const sectionTitleSize = titleSizeMap[tailleTitres];
+  const fontFamily = `'${policeTitres}', ${policeTitres === "Playfair Display" || policeTitres === "Merriweather" ? "serif" : "sans-serif"}`;
+
+  // Legacy police field
   const vitrinePolice =
     vitrineConfig.mise_en_page.police === "serif"
       ? "'Georgia', serif"
       : vitrineConfig.mise_en_page.police === "grotesque"
       ? "'Inter', 'Helvetica Neue', sans-serif"
       : "'Inter', sans-serif";
+  const bodyFont = policeTitres !== "Inter" ? fontFamily : vitrinePolice;
+
   const cardRadius =
     vitrineConfig.mise_en_page.style_cards === "carre"
       ? "rounded-lg"
@@ -191,19 +218,59 @@ export default async function VitrineArtisan({
       ? "rounded-2xl shadow-md"
       : "rounded-2xl";
 
-  // Limit chantiers and avis counts
+  // Hero
+  const heroHeight = heroHeightCSS(vitrineConfig.hero.style);
+  const heroOverlay = vitrineConfig.hero.overlay_couleur;
+  const heroOpacity = vitrineConfig.hero.overlay_opacite;
+  const overlayColorMap: Record<string, string> = {
+    sombre: `rgba(0,0,0,${heroOpacity / 100})`,
+    colore: `${vitrineCouleur}${Math.round(heroOpacity * 2.55).toString(16).padStart(2, "0")}`,
+    degrade: `linear-gradient(to bottom, transparent, rgba(0,0,0,${heroOpacity / 100}))`,
+    aucun: "transparent",
+  };
+  const overlayStyle = overlayColorMap[heroOverlay] ?? "transparent";
+
+  // Background
+  const fondTexture = textureCSS(vitrineConfig.fond.texture, vitrineCouleur);
+  const decorLaterale = vitrineConfig.fond.decorations_laterales;
+
+  // Hero wave SVG
+  const heroWave = waveTransitionSVG(vitrineConfig.hero.forme_transition, "#F8F5F2");
+  const heroWaveEncoded = heroWave ? `data:image/svg+xml,${encodeURIComponent(heroWave)}` : null;
+
+  // Photo couverture hero
+  const photoCouverture = vitrineConfig.hero.photo_couverture || null;
+
+  // Chiffres clés
+  const chiffres = vitrineConfig.sections.chiffres_cles;
+  const showChiffres = chiffres.visible;
+  const currentYear = new Date().getFullYear();
+  const expYears = profile.annees_experience ? currentYear - profile.annees_experience : null;
+
+  // Témoignage vedette
+  const temoVedette = vitrineConfig.sections.temoignage_vedette;
+
+  // Certification ruban
+  const showRuban = vitrineConfig.sections.certifications_ruban.visible;
+
+  // FAQ
+  const faqSection = vitrineConfig.sections.faq;
+  const showFaq = faqSection.visible && faqSection.items.length > 0;
+
+  // Video
+  const videoSection = vitrineConfig.sections.video;
+  const videoEmbed = videoSection.visible ? parseVideoEmbed(videoSection.url) : null;
+
+  // Limit slices
   const chantiersLimited = chantiersWithUrls.slice(0, vitrineNombre);
   const avisLimited = (avis ?? []).slice(0, vitrineAvisNombre);
   const liens = (profile.liens_sociaux ?? {}) as { instagram?: string; facebook?: string; tiktok?: string };
   const certifs = (profile.certifications ?? []) as string[];
 
-  // Merge certifications: show liste from vitrine_config if non-empty, else fallback to profile.certifications
   const vitrineCertifListe =
     vitrineConfig.sections.certifications.liste.length > 0
       ? vitrineConfig.sections.certifications.liste
       : certifs;
-  const currentYear = new Date().getFullYear();
-  const expYears = profile.annees_experience ? currentYear - profile.annees_experience : null;
 
   const statutInfo = profile.statut_disponibilite === "en_chantier"
     ? { label: "Chantier en cours", color: "#F59E0B" }
@@ -239,10 +306,34 @@ export default async function VitrineArtisan({
       : {}),
   };
 
+  const faqJsonLd = showFaq
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faqSection.items.map((item) => ({
+          "@type": "Question",
+          name: item.question,
+          acceptedAnswer: { "@type": "Answer", text: item.reponse },
+        })),
+      }
+    : null;
+
+  const hasHeroPhoto = !!photoCouverture;
+
   return (
     <>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      {policeTitres !== "Inter" && (
+        <link rel="stylesheet" href={googleFontsUrl(policeTitres)} />
+      )}
+
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      {faqJsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      )}
+
       <style>{`
         @keyframes vitrineFadeUp {
           from { opacity: 0; transform: translateY(20px); }
@@ -252,24 +343,89 @@ export default async function VitrineArtisan({
         .vitrine-fadein.vitrine-visible {
           animation: vitrineFadeUp 0.5s ease both;
         }
+        @keyframes marquee {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-50%); }
+        }
+        .marquee-track {
+          animation: marquee 18s linear infinite;
+          will-change: transform;
+        }
+        h1, h2, h3 {
+          font-family: '${policeTitres}', ${policeTitres === "Playfair Display" || policeTitres === "Merriweather" ? "serif" : "sans-serif"};
+        }
+        .section-title {
+          font-size: ${tailleTitres === "tres_grand" ? "1.25rem" : tailleTitres === "grand" ? "1.125rem" : "1rem"};
+        }
+        ${decorLaterale === "bordure" ? `
+          .vitrine-page::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            width: 4px;
+            background: ${vitrineCouleur};
+            z-index: 50;
+          }
+        ` : ""}
+        ${decorLaterale === "bande" ? `
+          .vitrine-page::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            width: 48px;
+            background: ${vitrineCouleur}12;
+            z-index: 0;
+          }
+        ` : ""}
         :root {
           --vitrine-couleur: ${vitrineCouleur};
-          --vitrine-font: ${vitrinePolice};
+          --vitrine-font: ${bodyFont};
         }
       `}</style>
 
-      <div className="min-h-screen bg-[#F8F5F2]" style={{ color: "#2B2521", fontFamily: vitrinePolice }}>
+      <div
+        className="vitrine-page min-h-screen bg-[#F8F5F2] relative"
+        style={{
+          color: "#2B2521",
+          fontFamily: bodyFont,
+          ...(fondTexture ? { backgroundImage: fondTexture.replace("background-image: ", "").replace(";", "") } : {}),
+        }}
+      >
 
-        {/* ── Header hero ── */}
+        {/* ── Hero ── */}
         <header
-          className="relative bg-white border-b border-[#2B2521]/6"
-          style={vitrineTemplate === "moderne" ? { backgroundColor: `${vitrineCouleur}10` } : {}}
+          className="relative overflow-hidden"
+          style={{
+            ...(hasHeroPhoto ? {
+              backgroundImage: `url(${photoCouverture})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              ...(vitrineConfig.hero.parallaxe ? { backgroundAttachment: "fixed" } : {}),
+            } : { backgroundColor: vitrineTemplate === "moderne" ? `${vitrineCouleur}10` : "white" }),
+            [heroHeight.split(":")[0].trim()]: heroHeight.split(":")[1].trim(),
+            display: "flex",
+            flexDirection: "column",
+          }}
         >
-          <div className={`max-w-2xl mx-auto px-5 ${vitrineTemplate === "moderne" ? "py-16 sm:py-20" : "py-10 sm:py-14"} flex flex-col items-center text-center gap-5`}>
+          {/* Overlay */}
+          {hasHeroPhoto && heroOverlay !== "aucun" && (
+            <div
+              className="absolute inset-0 z-0"
+              style={{
+                background: heroOverlay === "degrade"
+                  ? `linear-gradient(to bottom, transparent, rgba(0,0,0,${heroOpacity / 100}))`
+                  : overlayStyle,
+              }}
+            />
+          )}
+
+          {/* Hero content */}
+          <div className={`relative z-10 flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto w-full px-5 ${hasHeroPhoto ? "py-16 sm:py-24" : "py-10 sm:py-14"} gap-5 text-center`}>
 
             {/* Photo profil / Logo / initiales */}
             {photoProfilUrl ? (
-              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#2B2521]/8 shadow-sm">
+              <div className="w-24 h-24 rounded-full overflow-hidden border-2 shadow-sm"
+                style={{ borderColor: hasHeroPhoto ? "rgba(255,255,255,0.3)" : `${vitrineCouleur}30` }}>
                 <Image
                   src={photoProfilUrl}
                   alt={`Photo de ${artisanNom}`}
@@ -281,7 +437,7 @@ export default async function VitrineArtisan({
                 />
               </div>
             ) : logoUrl ? (
-              <div className="w-20 h-20 rounded-2xl overflow-hidden bg-[#F8F5F2] border border-[#2B2521]/8 flex items-center justify-center shadow-sm">
+              <div className="w-20 h-20 rounded-2xl overflow-hidden bg-white/90 border border-white/20 flex items-center justify-center shadow-sm">
                 <Image
                   src={logoUrl}
                   alt={`Logo ${artisanNom}`}
@@ -302,11 +458,11 @@ export default async function VitrineArtisan({
 
             {/* Nom */}
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#2B2521] leading-tight">
+              <h1 className={`text-2xl sm:text-3xl font-bold leading-tight ${hasHeroPhoto ? "text-white drop-shadow-sm" : "text-[#2B2521]"}`}>
                 {artisanNom}
               </h1>
               {(profile.metier || profile.ville) && (
-                <p className="mt-1.5 flex items-center justify-center gap-1.5 text-sm text-[#2B2521]/55">
+                <p className={`mt-1.5 flex items-center justify-center gap-1.5 text-sm ${hasHeroPhoto ? "text-white/80" : "text-[#2B2521]/55"}`}>
                   {profile.metier && <span>{profile.metier}</span>}
                   {profile.metier && profile.ville && <span>·</span>}
                   {profile.ville && (
@@ -326,7 +482,7 @@ export default async function VitrineArtisan({
                 {statutInfo.label}
               </span>
               {expYears !== null && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#2B2521]/6 text-[#2B2521]/70">
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${hasHeroPhoto ? "bg-white/15 text-white" : "bg-[#2B2521]/6 text-[#2B2521]/70"}`}>
                   <Briefcase size={11} aria-hidden="true" />
                   {expYears} an{expYears > 1 ? "s" : ""} d&apos;expérience
                 </span>
@@ -335,19 +491,22 @@ export default async function VitrineArtisan({
 
             {/* Slogan vitrine */}
             {vitrineSlogan && (
-              <p className="text-base font-semibold max-w-md" style={{ color: vitrineCouleur }}>
+              <p className={`text-base font-semibold max-w-md ${hasHeroPhoto ? "text-white drop-shadow" : ""}`}
+                style={hasHeroPhoto ? {} : { color: vitrineCouleur }}>
                 &ldquo;{vitrineSlogan}&rdquo;
               </p>
             )}
 
             {/* Présentation */}
             {profile.presentation && (
-              <p className="text-sm text-[#2B2521]/65 max-w-md leading-relaxed">{profile.presentation}</p>
+              <p className={`text-sm max-w-md leading-relaxed ${hasHeroPhoto ? "text-white/80" : "text-[#2B2521]/65"}`}>
+                {profile.presentation}
+              </p>
             )}
 
-            {/* Zone d'intervention + spécialités */}
+            {/* Zone + spécialités */}
             {vitrineZoneIntervention && (
-              <p className="text-xs text-[#2B2521]/50">
+              <p className={`text-xs ${hasHeroPhoto ? "text-white/70" : "text-[#2B2521]/50"}`}>
                 📍 Zone : {vitrineZoneIntervention}
               </p>
             )}
@@ -357,7 +516,9 @@ export default async function VitrineArtisan({
                   <span
                     key={s}
                     className="px-2.5 py-0.5 rounded-full text-xs font-medium"
-                    style={{ backgroundColor: `${vitrineCouleur}15`, color: vitrineCouleur }}
+                    style={hasHeroPhoto
+                      ? { backgroundColor: "rgba(255,255,255,0.2)", color: "white" }
+                      : { backgroundColor: `${vitrineCouleur}15`, color: vitrineCouleur }}
                   >
                     {s}
                   </span>
@@ -369,7 +530,8 @@ export default async function VitrineArtisan({
             {showCertifications && vitrineCertifListe.length > 0 && (
               <div className="flex flex-wrap items-center justify-center gap-1.5">
                 {vitrineCertifListe.slice(0, 6).map((c) => (
-                  <span key={c} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#2B2521]/5 text-[#2B2521]/70 border border-[#2B2521]/8">
+                  <span key={c}
+                    className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border ${hasHeroPhoto ? "bg-white/15 text-white border-white/20" : "bg-[#2B2521]/5 text-[#2B2521]/70 border-[#2B2521]/8"}`}>
                     <ShieldCheck size={10} aria-hidden="true" />
                     {c}
                   </span>
@@ -378,29 +540,37 @@ export default async function VitrineArtisan({
             )}
 
             {/* Badge Estime */}
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full border" style={{ backgroundColor: `${vitrineCouleur}14`, borderColor: `${vitrineCouleur}25` }}>
-              <Medal size={16} weight="fill" aria-hidden="true" style={{ color: vitrineCouleur }} />
-              <span className="text-sm font-semibold" style={{ color: vitrineCouleur }}>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full border"
+              style={hasHeroPhoto
+                ? { backgroundColor: "rgba(255,255,255,0.15)", borderColor: "rgba(255,255,255,0.25)" }
+                : { backgroundColor: `${vitrineCouleur}14`, borderColor: `${vitrineCouleur}25` }}>
+              <Medal size={16} weight="fill" aria-hidden="true" style={{ color: hasHeroPhoto ? "white" : vitrineCouleur }} />
+              <span className="text-sm font-semibold" style={{ color: hasHeroPhoto ? "white" : vitrineCouleur }}>
                 {niveauInfo.label} Estime
               </span>
-              <span className="text-xs" style={{ color: `${vitrineCouleur}99` }}>· {scoreTotal} pts</span>
+              <span className="text-xs" style={{ color: hasHeroPhoto ? "rgba(255,255,255,0.7)" : `${vitrineCouleur}99` }}>
+                · {scoreTotal} pts
+              </span>
             </div>
 
             {/* Réseaux sociaux */}
             {(liens.instagram || liens.facebook || liens.tiktok) && (
               <div className="flex items-center gap-3">
                 {liens.instagram && (
-                  <a href={liens.instagram} target="_blank" rel="noopener noreferrer" className="text-[#2B2521]/40 hover:text-[#E1306C] transition-colors">
+                  <a href={liens.instagram} target="_blank" rel="noopener noreferrer"
+                    className={`transition-colors ${hasHeroPhoto ? "text-white/60 hover:text-white" : "text-[#2B2521]/40 hover:text-[#E1306C]"}`}>
                     <InstagramLogo size={20} weight="duotone" />
                   </a>
                 )}
                 {liens.facebook && (
-                  <a href={liens.facebook} target="_blank" rel="noopener noreferrer" className="text-[#2B2521]/40 hover:text-[#1877F2] transition-colors">
+                  <a href={liens.facebook} target="_blank" rel="noopener noreferrer"
+                    className={`transition-colors ${hasHeroPhoto ? "text-white/60 hover:text-white" : "text-[#2B2521]/40 hover:text-[#1877F2]"}`}>
                     <FacebookLogo size={20} weight="duotone" />
                   </a>
                 )}
                 {liens.tiktok && (
-                  <a href={liens.tiktok} target="_blank" rel="noopener noreferrer" className="text-[#2B2521]/40 hover:text-[#2B2521] transition-colors">
+                  <a href={liens.tiktok} target="_blank" rel="noopener noreferrer"
+                    className={`transition-colors ${hasHeroPhoto ? "text-white/60 hover:text-white" : "text-[#2B2521]/40 hover:text-[#2B2521]"}`}>
                     <TiktokLogo size={20} weight="duotone" />
                   </a>
                 )}
@@ -413,7 +583,7 @@ export default async function VitrineArtisan({
                 href={`https://annuaire-entreprises.data.gouv.fr/entreprise/${profile.numero_siret}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-[#2B2521]/40 hover:text-[#2B2521]/70"
+                className={`inline-flex items-center gap-1.5 text-xs ${hasHeroPhoto ? "text-white/50 hover:text-white/80" : "text-[#2B2521]/40 hover:text-[#2B2521]/70"}`}
               >
                 <ShieldCheck size={12} />
                 SIRET {profile.numero_siret}
@@ -429,13 +599,13 @@ export default async function VitrineArtisan({
                       key={v}
                       size={16}
                       weight={v <= Math.round(avgNote) ? "fill" : "regular"}
-                      className={v <= Math.round(avgNote) ? "text-amber-400" : "text-[#2B2521]/15"}
+                      className={v <= Math.round(avgNote) ? "text-amber-400" : (hasHeroPhoto ? "text-white/20" : "text-[#2B2521]/15")}
                       aria-hidden="true"
                     />
                   ))}
                 </span>
-                <span className="text-sm font-semibold text-[#2B2521]">{avgNote}/5</span>
-                <span className="text-sm text-[#2B2521]/45">
+                <span className={`text-sm font-semibold ${hasHeroPhoto ? "text-white" : "text-[#2B2521]"}`}>{avgNote}/5</span>
+                <span className={`text-sm ${hasHeroPhoto ? "text-white/60" : "text-[#2B2521]/45"}`}>
                   ({allAvisCount} avis)
                 </span>
               </div>
@@ -446,7 +616,79 @@ export default async function VitrineArtisan({
               <ContactModal slug={slug} artisanNom={artisanNom} ctaLabel={vitrineCtaTexte} />
             )}
           </div>
+
+          {/* Hero → page wave transition */}
+          {heroWaveEncoded && (
+            <div className="relative z-10 w-full" style={{ height: 60, marginTop: "auto" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={heroWaveEncoded}
+                alt=""
+                aria-hidden="true"
+                className="absolute bottom-0 left-0 w-full"
+                style={{ height: 60 }}
+              />
+            </div>
+          )}
         </header>
+
+        {/* ── Ruban certifications ── */}
+        {showRuban && vitrineCertifListe.length > 0 && (
+          <div className="overflow-hidden border-y border-[#2B2521]/6 bg-white py-3">
+            <div className="flex whitespace-nowrap">
+              <div className="marquee-track flex items-center gap-6 pr-6">
+                {[...vitrineCertifListe, ...vitrineCertifListe].map((c, i) => (
+                  <span key={i} className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full"
+                    style={{ backgroundColor: `${vitrineCouleur}12`, color: vitrineCouleur }}>
+                    <ShieldCheck size={11} weight="fill" />
+                    {c}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Chiffres clés ── */}
+        {showChiffres && (
+          <AnimatedCounters
+            nbChantiers={chantiersWithUrls.length}
+            nbAvis={allAvisCount}
+            expYears={expYears}
+            satisfaction={chiffres.satisfaction}
+            couleur={vitrineCouleur}
+            styleVariant={chiffres.style}
+          />
+        )}
+
+        {/* ── Témoignage vedette ── */}
+        {temoVedette.visible && temoVedette.texte_custom && (
+          <FadeIn>
+            <div className="max-w-2xl mx-auto px-5 py-8">
+              <div
+                className="rounded-3xl px-8 py-8 text-center relative overflow-hidden"
+                style={{ backgroundColor: `${vitrineCouleur}10`, border: `1px solid ${vitrineCouleur}25` }}
+              >
+                <div className="text-5xl font-serif text-center mb-4 leading-none" style={{ color: `${vitrineCouleur}40` }}>
+                  &ldquo;
+                </div>
+                <div className="flex justify-center mb-4">
+                  {Array.from({ length: temoVedette.note }).map((_, i) => (
+                    <Star key={i} size={18} weight="fill" className="text-amber-400" aria-hidden="true" />
+                  ))}
+                </div>
+                <p className="text-base text-[#2B2521] font-medium leading-relaxed italic max-w-lg mx-auto">
+                  {temoVedette.texte_custom}
+                </p>
+                {temoVedette.auteur_custom && (
+                  <p className="mt-4 text-sm font-semibold" style={{ color: vitrineCouleur }}>
+                    — {temoVedette.auteur_custom}
+                  </p>
+                )}
+              </div>
+            </div>
+          </FadeIn>
+        )}
 
         <main className="max-w-2xl mx-auto px-5 py-10 space-y-14">
 
@@ -454,12 +696,12 @@ export default async function VitrineArtisan({
           {showAvis && avisLimited.length > 0 && (
             <FadeIn>
               <section aria-labelledby="section-avis">
-                <SectionTitle id="section-avis" icon="⭐">Avis Google</SectionTitle>
+                <SectionTitle id="section-avis" icon="⭐" sizeClass={sectionTitleSize}>Avis Google</SectionTitle>
                 <div className="space-y-3 mt-5">
                   {avisLimited.map((a) => (
                     <div
                       key={a.id}
-                      className="bg-white rounded-2xl border border-[#2B2521]/6 px-5 py-4"
+                      className={`bg-white ${cardRadius} border border-[#2B2521]/6 px-5 py-4`}
                     >
                       <div className="flex items-center justify-between gap-3 mb-1">
                         <span className="inline-flex gap-0.5">
@@ -491,58 +733,18 @@ export default async function VitrineArtisan({
             </FadeIn>
           )}
 
-          {/* ── Tarifs ── */}
-          {vitrineTarifs.visible && vitrineTarifs.lignes.length > 0 && (
-            <FadeIn>
-              <section aria-labelledby="section-tarifs">
-                <SectionTitle id="section-tarifs" icon="💶">Tarifs</SectionTitle>
-                <div className="space-y-3 mt-5">
-                  {vitrineTarifs.lignes.map((l, i) => (
-                    <div key={i} className="bg-white rounded-2xl border border-[#2B2521]/6 px-5 py-4 flex justify-between items-center gap-4">
-                      <span className="text-sm text-[#2B2521]/70">{l.description}</span>
-                      <span className="text-sm font-semibold shrink-0" style={{ color: vitrineCouleur }}>{l.prix}</span>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            </FadeIn>
-          )}
-
-          {/* ── Équipe ── */}
-          {vitrineEquipe.visible && vitrineEquipe.membres.length > 0 && (
-            <FadeIn>
-              <section aria-labelledby="section-equipe">
-                <SectionTitle id="section-equipe" icon="👥">L&apos;équipe</SectionTitle>
-                <div className="flex flex-wrap gap-4 mt-5">
-                  {vitrineEquipe.membres.map((m, i) => (
-                    <div key={i} className="flex flex-col items-center gap-1.5">
-                      <div
-                        className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg"
-                        style={{ backgroundColor: vitrineCouleur }}
-                      >
-                        {m.prenom?.[0]?.toUpperCase() ?? "?"}
-                      </div>
-                      <p className="text-sm font-medium text-[#2B2521]">{m.prenom}</p>
-                      <p className="text-xs text-[#2B2521]/50">{m.role}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            </FadeIn>
-          )}
-
           {/* ── Chantiers réalisés ── */}
           {showChantiers && chantiersLimited.length > 0 && (
             <FadeIn delay={80}>
               <section aria-labelledby="section-chantiers">
-                <SectionTitle id="section-chantiers" icon="🏗️">Réalisations</SectionTitle>
+                <SectionTitle id="section-chantiers" icon="🏗️" sizeClass={sectionTitleSize}>Réalisations</SectionTitle>
                 <div className={`mt-5 ${vitrineConfig.sections.chantiers.disposition === "liste" ? "space-y-3" : "grid grid-cols-2 sm:grid-cols-3 gap-3"}`}>
                   {chantiersLimited.map((c) => {
                     const displayUrl = c.avant_apres_url ?? c.photo_apres_url ?? c.photo_avant_url;
                     if (!displayUrl) return null;
                     return (
                       <div key={c.id} className="group">
-                        <div className="relative aspect-square rounded-xl overflow-hidden bg-[#E8E0D2]">
+                        <div className={`relative aspect-square ${cardRadius} overflow-hidden bg-[#E8E0D2]`}>
                           <Image
                             src={displayUrl}
                             alt={c.titre}
@@ -563,6 +765,76 @@ export default async function VitrineArtisan({
             </FadeIn>
           )}
 
+          {/* ── Tarifs ── */}
+          {vitrineTarifs.visible && vitrineTarifs.lignes.length > 0 && (
+            <FadeIn>
+              <section aria-labelledby="section-tarifs">
+                <SectionTitle id="section-tarifs" icon="💶" sizeClass={sectionTitleSize}>Tarifs</SectionTitle>
+                <div className="space-y-3 mt-5">
+                  {vitrineTarifs.lignes.map((l, i) => (
+                    <div key={i} className={`bg-white ${cardRadius} border border-[#2B2521]/6 px-5 py-4 flex justify-between items-center gap-4`}>
+                      <span className="text-sm text-[#2B2521]/70">{l.description}</span>
+                      <span className="text-sm font-semibold shrink-0" style={{ color: vitrineCouleur }}>{l.prix}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </FadeIn>
+          )}
+
+          {/* ── Équipe ── */}
+          {vitrineEquipe.visible && vitrineEquipe.membres.length > 0 && (
+            <FadeIn>
+              <section aria-labelledby="section-equipe">
+                <SectionTitle id="section-equipe" icon="👥" sizeClass={sectionTitleSize}>L&apos;équipe</SectionTitle>
+                <div className="flex flex-wrap gap-4 mt-5">
+                  {vitrineEquipe.membres.map((m, i) => (
+                    <div key={i} className="flex flex-col items-center gap-1.5">
+                      <div
+                        className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg"
+                        style={{ backgroundColor: vitrineCouleur }}
+                      >
+                        {m.prenom?.[0]?.toUpperCase() ?? "?"}
+                      </div>
+                      <p className="text-sm font-medium text-[#2B2521]">{m.prenom}</p>
+                      <p className="text-xs text-[#2B2521]/50">{m.role}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </FadeIn>
+          )}
+
+          {/* ── FAQ ── */}
+          {showFaq && (
+            <FadeIn>
+              <section aria-labelledby="section-faq">
+                <SectionTitle id="section-faq" icon="💬" sizeClass={sectionTitleSize}>Questions fréquentes</SectionTitle>
+                <div className="mt-5">
+                  <FaqAccordion items={faqSection.items} couleur={vitrineCouleur} />
+                </div>
+              </section>
+            </FadeIn>
+          )}
+
+          {/* ── Vidéo ── */}
+          {videoEmbed && (
+            <FadeIn>
+              <section aria-labelledby="section-video">
+                <SectionTitle id="section-video" icon="🎬" sizeClass={sectionTitleSize}>Vidéo de présentation</SectionTitle>
+                <div className="mt-5 rounded-2xl overflow-hidden aspect-video bg-black">
+                  <iframe
+                    src={videoEmbed}
+                    title="Vidéo de présentation"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full"
+                  />
+                </div>
+              </section>
+            </FadeIn>
+          )}
+
           {/* ── Posts Instagram ── */}
           {posts && posts.length > 0 && (
             <FadeIn delay={160}>
@@ -571,7 +843,7 @@ export default async function VitrineArtisan({
                   <InstagramLogo size={20} className="text-[#C75D3B]" weight="duotone" aria-hidden="true" />
                   <h2
                     id="section-posts"
-                    className="text-lg font-bold text-[#2B2521]"
+                    className={`font-bold text-[#2B2521] ${sectionTitleSize}`}
                   >
                     Posts Instagram
                   </h2>
@@ -642,17 +914,19 @@ function SectionTitle({
   id,
   icon,
   children,
+  sizeClass,
 }: {
   id: string;
   icon: string;
   children: React.ReactNode;
+  sizeClass: string;
 }) {
   return (
     <div className="flex items-center gap-2">
       <span aria-hidden="true" className="text-lg leading-none">
         {icon}
       </span>
-      <h2 id={id} className="text-lg font-bold text-[#2B2521]">
+      <h2 id={id} className={`font-bold text-[#2B2521] section-title ${sizeClass}`}>
         {children}
       </h2>
     </div>
