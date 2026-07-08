@@ -89,17 +89,33 @@ export async function getConseilSemaine(metier?: string | null): Promise<Article
   const query = metier && metier !== "general"
     ? `*[_type == "article_conseil" && est_conseil_semaine == true && actif == true && ($metier in metier || "general" in metier)] | order(published_at desc)[0] { _id, titre, slug, resume, categorie, metier, temps_lecture, published_at }`
     : CONSEIL_SEMAINE_QUERY;
-  return sanityClient.fetch(query, { metier: metier ?? null });
+  try {
+    return await sanityClient.fetch(query, { metier: metier ?? null });
+  } catch {
+    return null;
+  }
 }
 
 export async function getConseils(metier?: string | null): Promise<ArticleConseil[]> {
-  return sanityClient.fetch(CONSEILS_QUERY, { metier: metier && metier !== "general" ? metier : null });
+  try {
+    return await sanityClient.fetch(CONSEILS_QUERY, { metier: metier && metier !== "general" ? metier : null });
+  } catch {
+    return [];
+  }
 }
 
 export async function getConseil(slug: string): Promise<ArticleConseil | null> {
-  return sanityClient.fetch(CONSEIL_BY_SLUG_QUERY, { slug });
+  try {
+    return await sanityClient.fetch(CONSEIL_BY_SLUG_QUERY, { slug });
+  } catch {
+    return null;
+  }
 }
 
 export async function getConseillsSimilaires(slug: string, metier: string[], categorie: string): Promise<ArticleConseil[]> {
-  return sanityClient.fetch(CONSEILS_SIMILAIRES_QUERY, { slug, metier, categorie });
+  try {
+    return await sanityClient.fetch(CONSEILS_SIMILAIRES_QUERY, { slug, metier, categorie });
+  } catch {
+    return [];
+  }
 }

@@ -22,6 +22,9 @@
 [functions."rapport-mensuel"]
   schedule = "0 8 1 * *"
 
+[functions."planning-notifications"]
+  schedule = "0 * * * *"
+
 [[headers]]
   for = "/_next/static/*"
   [headers.values]
