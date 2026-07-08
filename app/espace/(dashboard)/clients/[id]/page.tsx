@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   ArrowLeft,
   Crown,
   Check,
   WarningCircle,
-  Buildings,
-  MapPin,
 } from "@phosphor-icons/react/dist/ssr";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { updateClientDetails } from "@/app/actions/crm";
@@ -38,12 +36,16 @@ export default async function FicheClient({
   const { message, error } = await searchParams;
   const { supabase, user } = await getCurrentUser();
 
+  if (!user) {
+    redirect("/connexion");
+  }
+
   // Toutes les données en parallèle
   const [
-    { data: client },
-    { data: notes },
-    { data: chantiers },
-    { data: avis },
+    { data: client, error: clientError },
+    { data: notes, error: notesError },
+    { data: chantiers, error: chantiersError },
+    { data: avis, error: avisError },
   ] = await Promise.all([
     supabase
       .from("clients")
@@ -51,26 +53,39 @@ export default async function FicheClient({
         "id, prenom, nom, email, telephone, statut, source, est_vip, derniere_interaction, montant_estime, created_at"
       )
       .eq("id", id)
-      .eq("user_id", user!.id)
+      .eq("user_id", user.id)
       .maybeSingle(),
     supabase
       .from("notes_client")
       .select("id, contenu, created_at")
       .eq("client_id", id)
-      .eq("user_id", user!.id)
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(50),
     supabase
       .from("chantiers")
       .select("id, titre, montant, statut, created_at")
       .eq("client_id", id)
-      .eq("user_id", user!.id)
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false }),
     supabase
       .from("avis")
       .select("id, note_google")
-      .eq("user_id", user!.id),
+      .eq("user_id", user.id),
   ]);
+
+  if (clientError) {
+    console.error("[fiche-client] Erreur clients:", clientError.message, clientError.code);
+  }
+  if (notesError) {
+    console.error("[fiche-client] Erreur notes_client:", notesError.message, notesError.code);
+  }
+  if (chantiersError) {
+    console.error("[fiche-client] Erreur chantiers:", chantiersError.message, chantiersError.code);
+  }
+  if (avisError) {
+    console.error("[fiche-client] Erreur avis:", avisError.message, avisError.code);
+  }
 
   if (!client) notFound();
 
