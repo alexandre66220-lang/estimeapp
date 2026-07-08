@@ -24,6 +24,7 @@ import { PostEditor } from "@/components/espace/PostEditor";
 import { ImageIAGenerateur } from "@/components/espace/ImageIAGenerateur";
 import { usePointsToast } from "@/components/espace/PointsToastProvider";
 import { addPointsFidelite } from "@/app/actions/fidelite";
+import { AlterEgoAlerteBandeau } from "@/components/espace/AlterEgoAlerteBandeau";
 
 const NotationChantier = dynamic<React.ComponentProps<typeof import("@/components/espace/NotationChantier").NotationChantier>>(
   () => import("@/components/espace/NotationChantier").then((mod) => mod.NotationChantier),
@@ -234,6 +235,7 @@ export default function NouveauChantier() {
   const [autresCouts, setAutresCouts] = useState("");
   const [heuresPassees, setHeuresPassees] = useState("");
   const [tauxHoraireObjectif, setTauxHoraireObjectif] = useState("");
+  const [alterEgoAlerte, setAlterEgoAlerte] = useState<string | null>(null);
 
   const isBusy = status === "uploading" || status === "generating";
   const abortRef = useRef<AbortController | null>(null);
@@ -264,6 +266,25 @@ export default function NouveauChantier() {
     }, 2000);
     return () => clearInterval(interval);
   }, [status]);
+
+  async function verifierAlterEgo() {
+    const montantNum = parseNum(montant);
+    if (!montantNum) return;
+    try {
+      const response = await fetch("/api/alter-ego/verifier", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ montant: montantNum }),
+      });
+      if (!response.ok) return;
+      const result = await response.json();
+      if (result?.collision && result?.description) {
+        setAlterEgoAlerte(result.description as string);
+      }
+    } catch {
+      // vérification silencieuse, non bloquante
+    }
+  }
 
   async function handleToggleFavori(tag: string) {
     const next = favoris.includes(tag) ? favoris.filter((t) => t !== tag) : [...favoris, tag];
@@ -719,9 +740,18 @@ export default function NouveauChantier() {
                   disabled={isBusy}
                   value={montant}
                   onChange={(e) => setMontant(e.target.value)}
+                  onBlur={verifierAlterEgo}
                   placeholder="5000"
                   className="w-full px-3 py-2.5 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200 disabled:opacity-60"
                 />
+                {alterEgoAlerte && (
+                  <div className="mt-3">
+                    <AlterEgoAlerteBandeau
+                      description={alterEgoAlerte}
+                      onDismiss={() => setAlterEgoAlerte(null)}
+                    />
+                  </div>
+                )}
               </div>
               <FinancialDetailSection
                 disabled={isBusy}

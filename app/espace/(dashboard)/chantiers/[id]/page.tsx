@@ -23,6 +23,7 @@ import { RentabiliteChantier } from "@/components/espace/RentabiliteChantier";
 import { ProgrammerPublicationButton } from "@/components/espace/ProgrammerPublicationButton";
 import { SuiviPaiements } from "@/components/espace/SuiviPaiements";
 import { getPaiementsChantier } from "@/lib/supabase/paiements";
+import { JournalMateriauxChantier } from "@/components/espace/JournalMateriauxChantier";
 
 export const metadata: Metadata = {
   title: "Chantier - Estime",
@@ -63,6 +64,7 @@ export default async function FicheChantier({
     { data: avis },
     { data: notes },
     paiements,
+    { data: materiauScans },
   ] = await Promise.all([
     supabase
       .from("chantiers")
@@ -101,7 +103,27 @@ export default async function FicheChantier({
       .eq("user_id", user.id)
       .order("created_at", { ascending: false }),
     getPaiementsChantier(supabase, id, user.id),
+    supabase
+      .from("materiau_scans")
+      .select("id, created_at, image_url, analyse_json")
+      .eq("chantier_id", id)
+      .eq("artisan_id", user.id)
+      .order("created_at", { ascending: false }),
   ]);
+
+  const materiauScansAvecUrl = await Promise.all(
+    (materiauScans ?? []).map(async (scan) => {
+      const { data: signed } = await supabase.storage
+        .from("materiau-scans")
+        .createSignedUrl(scan.image_url, 3600);
+      return {
+        id: scan.id,
+        created_at: scan.created_at,
+        analyse_json: scan.analyse_json,
+        imageUrl: signed?.signedUrl ?? null,
+      };
+    })
+  );
 
   if (chantierError) {
     console.error("[FicheChantier] erreur requête chantier:", chantierError.message, "id:", id, "user:", user.id);
@@ -372,6 +394,10 @@ export default async function FicheChantier({
           }))
         }
       />
+
+      <div className="mb-6">
+        <JournalMateriauxChantier chantierId={id} scans={materiauScansAvecUrl as any} />
+      </div>
 
       <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 mb-6">
         <h2 className="font-display text-lg font-bold text-dusk mb-4">

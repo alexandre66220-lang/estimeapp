@@ -9,11 +9,14 @@ import {
   Sparkle,
   PaperPlaneTilt,
   Megaphone,
+  Brain,
+  ShieldCheck,
 } from "@phosphor-icons/react/dist/ssr";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getSignedChantierPhotoUrls } from "@/lib/supabase/storage";
 import ChantierCard from "@/components/espace/ChantierCard";
 import { EtoilesNote } from "@/components/espace/EtoilesNote";
+import { ScannerMateriauModal } from "@/components/espace/ScannerMateriauModal";
 import {
   getDashboardStats,
   getActiviteRecente,
@@ -75,6 +78,33 @@ export default async function TableauDeBord({
         </div>
       </div>
 
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <Link
+          href="/espace/alter-ego"
+          className="flex items-center gap-4 bg-white rounded-2xl border border-dusk/8 p-5 hover:border-braise/30 transition-colors group"
+        >
+          <div className="w-11 h-11 rounded-xl bg-braise/10 flex items-center justify-center shrink-0 group-hover:bg-braise/15 transition-colors">
+            <Brain size={22} className="text-braise" aria-hidden="true" />
+          </div>
+          <div>
+            <p className="font-display text-sm font-bold text-dusk">Alter ego stratégique</p>
+            <p className="text-dusk/45 text-xs mt-0.5">Ton profil comportemental</p>
+          </div>
+        </Link>
+        <Link
+          href="/espace/securite"
+          className="flex items-center gap-4 bg-white rounded-2xl border border-dusk/8 p-5 hover:border-braise/30 transition-colors group"
+        >
+          <div className="w-11 h-11 rounded-xl bg-braise/10 flex items-center justify-center shrink-0 group-hover:bg-braise/15 transition-colors">
+            <ShieldCheck size={22} className="text-braise" aria-hidden="true" />
+          </div>
+          <div>
+            <p className="font-display text-sm font-bold text-dusk">Sécurité matériaux</p>
+            <p className="text-dusk/45 text-xs mt-0.5">Scanner et journal des risques</p>
+          </div>
+        </Link>
+      </div>
+
       <Suspense fallback={<ReputationCardSkeleton />}>
         <ReputationCardSection />
       </Suspense>
@@ -94,6 +124,42 @@ export default async function TableauDeBord({
       <Suspense fallback={<ActiviteRecenteSkeleton />}>
         <ActiviteRecente />
       </Suspense>
+
+      <Suspense fallback={null}>
+        <ScannerFlottantSection />
+      </Suspense>
+    </div>
+  );
+}
+
+async function ScannerFlottantSection() {
+  const { supabase, user } = await getCurrentUser();
+  const { data: chantiersListe } = await supabase
+    .from("chantiers")
+    .select("id, titre")
+    .eq("user_id", user!.id)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  const chantiers = (chantiersListe ?? []).map((c: { id: string; titre: string | null }) => ({
+    id: c.id,
+    titre: c.titre ?? "Chantier sans titre",
+  }));
+
+  return (
+    <div className="fixed bottom-6 right-6 z-40">
+      <ScannerMateriauModal
+        chantiers={chantiers}
+        trigger={
+          <button
+            type="button"
+            className="w-14 h-14 rounded-full bg-braise text-white shadow-lg flex items-center justify-center hover:bg-ambre active:scale-95 transition-all duration-200"
+            aria-label="Scanner un matériau"
+          >
+            <Camera size={22} weight="bold" />
+          </button>
+        }
+      />
     </div>
   );
 }
