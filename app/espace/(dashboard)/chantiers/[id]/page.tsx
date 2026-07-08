@@ -49,11 +49,11 @@ export default async function FicheChantier({
 
   const { supabase, user } = await getCurrentUser();
 
-  // Seule la requête `chantier` doit attendre (notFound() en dépend) ; les
-  // autres ne dépendent que de `id`/`user.id`, déjà connus, donc elles
-  // partent en parallèle plutôt qu'après coup.
+  // Guard redondant avec le layout, mais évite les assertions user! partout
+  if (!user) redirect("/connexion");
+
   const [
-    { data: chantier },
+    { data: chantier, error: chantierError },
     { data: profile },
     { data: posts },
     { data: relances },
@@ -63,16 +63,14 @@ export default async function FicheChantier({
   ] = await Promise.all([
     supabase
       .from("chantiers")
-      .select(
-        "id, titre, photo_avant_url, photo_apres_url, avant_apres_url, statut, client_nom, client_email, termine_at, created_at, montant, depenses, heures_passees, sous_traitance, frais_deplacement, autres_couts, taux_horaire_objectif"
-      )
+      .select("id, titre, photo_avant_url, photo_apres_url, avant_apres_url, statut, client_nom, client_email, termine_at, created_at, montant, depenses, heures_passees, sous_traitance, frais_deplacement, autres_couts, taux_horaire_objectif")
       .eq("id", id)
-      .eq("user_id", user!.id)
+      .eq("user_id", user.id)
       .maybeSingle(),
     supabase
       .from("profiles")
       .select("lien_avis_google")
-      .eq("id", user!.id)
+      .eq("id", user.id)
       .maybeSingle(),
     supabase
       .from("posts")
@@ -87,7 +85,7 @@ export default async function FicheChantier({
     supabase
       .from("clients")
       .select("prenom, nom, email")
-      .eq("user_id", user!.id),
+      .eq("user_id", user.id),
     supabase
       .from("avis")
       .select("id, note_google, date_avis")
@@ -97,9 +95,13 @@ export default async function FicheChantier({
       .from("notes_chantier")
       .select("id, contenu, created_at")
       .eq("chantier_id", id)
-      .eq("user_id", user!.id)
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false }),
   ]);
+
+  if (chantierError) {
+    console.error("[FicheChantier] erreur requête chantier:", chantierError.message, "id:", id, "user:", user.id);
+  }
 
   if (!chantier) {
     redirect("/espace/mes-chantiers");
