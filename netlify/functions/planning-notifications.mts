@@ -7,8 +7,8 @@
  *   APP_URL (ex: https://estime-app.com)
  */
 import type { Config } from "@netlify/functions";
-import { createClient } from "@supabase/supabase-js";
 import { withErrorNotification } from "./_utils/notify-error";
+import { createSupabaseAdmin } from "./_utils/supabase-admin";
 
 export const config: Config = {
   schedule: "0 * * * *",
@@ -23,9 +23,7 @@ async function handler() {
     return;
   }
 
-  const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  const supabase = createSupabaseAdmin(supabaseUrl, supabaseServiceKey);
 
   // Trouver les posts dont la date_publication est dans la dernière heure
   const now = new Date();

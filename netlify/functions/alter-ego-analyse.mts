@@ -9,8 +9,8 @@
  *   ANTHROPIC_API_KEY
  */
 import type { Config } from "@netlify/functions";
-import { createClient } from "@supabase/supabase-js";
 import { withErrorNotification } from "./_utils/notify-error";
+import { createSupabaseAdmin } from "./_utils/supabase-admin";
 
 export const config: Config = {
   schedule: "0 5 * * 1",
@@ -24,7 +24,7 @@ async function handler() {
   const secret = process.env.RAPPORT_SECRET_KEY!;
   const appUrl = process.env.APP_URL ?? process.env.URL ?? "https://estime-app.com";
 
-  const admin = createClient(supabaseUrl, supabaseKey);
+  const admin = createSupabaseAdmin(supabaseUrl, supabaseKey);
 
   const { data: artisans, error } = await admin.from("profiles").select("id");
 

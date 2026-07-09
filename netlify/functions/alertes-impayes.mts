@@ -8,9 +8,9 @@
  *   APP_URL (ex: https://estime-app.com)
  */
 import type { Config } from "@netlify/functions";
-import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import { withErrorNotification } from "./_utils/notify-error";
+import { createSupabaseAdmin } from "./_utils/supabase-admin";
 
 export const config: Config = {
   schedule: "0 8 * * *",
@@ -26,9 +26,7 @@ async function handler() {
     return;
   }
 
-  const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  const supabase = createSupabaseAdmin(supabaseUrl, supabaseServiceKey);
 
   const resend = resendKey ? new Resend(resendKey) : null;
 

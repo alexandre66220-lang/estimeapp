@@ -18,13 +18,13 @@
  * Function n'est pas une Scheduled Function (pas de config.schedule) mais
  * journalise ses erreurs avec le même utilitaire notifyFunctionError.
  */
-import { createClient } from "@supabase/supabase-js";
 import Anthropic from "@anthropic-ai/sdk";
 import {
   SYSTEM_PROMPT_MATERIAU,
   parseAnalyseMateriau,
 } from "../../lib/anthropic/analyze-materiau";
 import { notifyFunctionError } from "./_utils/notify-error";
+import { createSupabaseAdmin } from "./_utils/supabase-admin";
 
 type Payload = {
   scanId: string;
@@ -35,7 +35,7 @@ type Payload = {
 export default async (req: Request) => {
   const supabaseUrl = process.env.SUPABASE_URL!;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-  const admin = createClient(supabaseUrl, supabaseKey);
+  const admin = createSupabaseAdmin(supabaseUrl, supabaseKey);
 
   let scanId: string | null = null;
 
