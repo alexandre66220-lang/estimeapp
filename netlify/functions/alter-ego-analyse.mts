@@ -10,6 +10,7 @@
  */
 import type { Config } from "@netlify/functions";
 import { createClient } from "@supabase/supabase-js";
+import { withErrorNotification } from "./_utils/notify-error";
 
 export const config: Config = {
   schedule: "0 5 * * 1",
@@ -17,7 +18,7 @@ export const config: Config = {
 
 const MOIS_MINIMUM_DONNEES = 3;
 
-export default async function handler() {
+async function handler() {
   const supabaseUrl = process.env.SUPABASE_URL!;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   const secret = process.env.RAPPORT_SECRET_KEY!;
@@ -86,3 +87,5 @@ export default async function handler() {
     body: JSON.stringify({ analysés, ignorés, erreurs }),
   };
 }
+
+export default withErrorNotification("alter-ego-analyse", handler);

@@ -11,6 +11,7 @@
 import type { Config } from "@netlify/functions";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
+import { withErrorNotification } from "./_utils/notify-error";
 
 export const config: Config = {
   schedule: "0 8 1 * *",
@@ -102,7 +103,7 @@ function emailHtml(prenom: string, moisLabel: string, stats: {
 </html>`;
 }
 
-export default async function handler() {
+async function handler() {
   const supabaseUrl = process.env.SUPABASE_URL!;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   const secret = process.env.RAPPORT_SECRET_KEY!;
@@ -235,3 +236,5 @@ export default async function handler() {
     body: JSON.stringify({ total: results.length, successes, failures }),
   };
 }
+
+export default withErrorNotification("rapport-mensuel", handler);
