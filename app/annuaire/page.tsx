@@ -21,6 +21,7 @@ export const metadata: Metadata = {
     url: "https://estime-app.com/annuaire",
     siteName: "Estime",
     type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Annuaire artisans BTP, Estime" }],
   },
   alternates: {
     canonical: "https://estime-app.com/annuaire",

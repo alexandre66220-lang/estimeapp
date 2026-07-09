@@ -77,7 +77,11 @@ export async function generateMetadata({
     openGraph: {
       title: titleParts,
       description: `${name} utilise Estime pour partager ses chantiers et collecter des avis clients.`,
-      ...(logoUrl ? { images: [{ url: logoUrl }] } : {}),
+      url: `https://estime-app.com/artisan/${slug}`,
+      type: "profile",
+      images: logoUrl
+        ? [{ url: logoUrl, width: 400, height: 400, alt: name }]
+        : [{ url: "/og-image.png", width: 1200, height: 630, alt: name }],
     },
     alternates: {
       canonical: `https://estime-app.com/artisan/${slug}`,

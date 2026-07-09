@@ -18,6 +18,7 @@ export const metadata: Metadata = {
       "Conseils pratiques pour artisans BTP : gestion de chantiers, réputation, marketing, rentabilité.",
     url: "https://estime-app.com/blog",
     type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Blog Estime, conseils pour artisans BTP" }],
   },
 };
 

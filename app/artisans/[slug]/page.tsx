@@ -23,19 +23,43 @@ export async function generateMetadata({
   const ville = findVille(slug);
 
   if (metier) {
+    const title = `${metier.labelPluriel} certifiés Estime, artisans BTP en France | Estime`;
+    const description = `Trouvez un ${metier.label.toLowerCase()} certifié Estime près de chez vous. ${metier.labelPluriel} évalués par leurs clients avec score de réputation et avis Google vérifiés.`;
+    const url = `https://estime-app.com/artisans/${slug}`;
+    const ogImageUrl = `https://estime-app.com/api/og?type=artisans&metier=${encodeURIComponent(metier.label)}`;
     return {
-      title: `${metier.labelPluriel} certifiés Estime, artisans BTP en France | Estime`,
-      description: `Trouvez un ${metier.label.toLowerCase()} certifié Estime près de chez vous. ${metier.labelPluriel} évalués par leurs clients avec score de réputation et avis Google vérifiés.`,
-      alternates: { canonical: `https://estime-app.com/artisans/${slug}` },
+      title,
+      description,
+      alternates: { canonical: url },
       robots: { index: true, follow: true },
+      openGraph: {
+        title: `${metier.labelPluriel} certifiés Estime, artisans BTP en France`,
+        description,
+        url,
+        type: "website",
+        images: [{ url: ogImageUrl, width: 1200, height: 630, alt: title }],
+      },
+      twitter: { card: "summary_large_image", images: [ogImageUrl] },
     };
   }
   if (ville) {
+    const title = `Artisans BTP à ${ville.label}, professionnels certifiés | Estime`;
+    const description = `Peintres, plombiers, électriciens, maçons à ${ville.label} (${ville.departement}). Artisans évalués et certifiés par Estime.`;
+    const url = `https://estime-app.com/artisans/${slug}`;
+    const ogImageUrl = `https://estime-app.com/api/og?type=artisans&ville=${encodeURIComponent(ville.label)}`;
     return {
-      title: `Artisans BTP à ${ville.label}, professionnels certifiés | Estime`,
-      description: `Peintres, plombiers, électriciens, maçons à ${ville.label} (${ville.departement}). Artisans évalués et certifiés par Estime.`,
-      alternates: { canonical: `https://estime-app.com/artisans/${slug}` },
+      title,
+      description,
+      alternates: { canonical: url },
       robots: { index: true, follow: true },
+      openGraph: {
+        title: `Artisans BTP à ${ville.label}, professionnels certifiés`,
+        description,
+        url,
+        type: "website",
+        images: [{ url: ogImageUrl, width: 1200, height: 630, alt: title }],
+      },
+      twitter: { card: "summary_large_image", images: [ogImageUrl] },
     };
   }
   return {};
