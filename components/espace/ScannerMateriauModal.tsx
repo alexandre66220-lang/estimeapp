@@ -8,6 +8,36 @@ import type { AnalyseMateriau } from "@/lib/anthropic/analyze-materiau";
 
 type Chantier = { id: string; titre: string };
 
+const TAILLE_MAX_PX = 1200;
+const QUALITE_COMPRESSION = 0.85;
+
+async function compresserImage(file: File): Promise<File> {
+  try {
+    const bitmap = await createImageBitmap(file);
+    const ratio = Math.min(1, TAILLE_MAX_PX / Math.max(bitmap.width, bitmap.height));
+    const largeur = Math.round(bitmap.width * ratio);
+    const hauteur = Math.round(bitmap.height * ratio);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = largeur;
+    canvas.height = hauteur;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+
+    ctx.drawImage(bitmap, 0, 0, largeur, hauteur);
+
+    const blob: Blob | null = await new Promise((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", QUALITE_COMPRESSION)
+    );
+    if (!blob) return file;
+
+    return new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" });
+  } catch {
+    // En cas d'échec de compression (navigateur incompatible…), on envoie l'original
+    return file;
+  }
+}
+
 export function ScannerMateriauModal({
   chantierId,
   chantiers,
@@ -46,13 +76,14 @@ export function ScannerMateriauModal({
     reset();
   }
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return;
-    setFile(f);
     setError(null);
     setAnalyse(null);
-    setPreview(URL.createObjectURL(f));
+    const compressed = await compresserImage(f);
+    setFile(compressed);
+    setPreview(URL.createObjectURL(compressed));
   }
 
   function handleAnalyser() {

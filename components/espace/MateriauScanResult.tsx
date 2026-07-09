@@ -1,6 +1,6 @@
 "use client";
 
-import { Warning, ShieldWarning, CheckCircle } from "@phosphor-icons/react";
+import { Warning, ShieldWarning, CheckCircle, Info, Lightbulb } from "@phosphor-icons/react";
 import type { AnalyseMateriau, RisqueMateriau } from "@/lib/anthropic/analyze-materiau";
 
 const NIVEAU_STYLES: Record<RisqueMateriau["niveau_risque"], string> = {
@@ -50,9 +50,35 @@ export function MateriauScanResult({
       )}
 
       <div>
-        <p className="text-xs text-dusk/45 mb-1">Matériau identifié</p>
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <p className="text-xs text-dusk/45">Matériau identifié</p>
+          <span
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
+              analyse.niveau_certitude >= 80
+                ? "bg-green-50 text-green-700"
+                : analyse.niveau_certitude >= 60
+                ? "bg-orange-50 text-orange-600"
+                : "bg-red-50 text-red-600"
+            }`}
+          >
+            Identification fiable {analyse.niveau_certitude}%
+          </span>
+        </div>
         <p className="font-display text-lg font-bold text-dusk">{analyse.nom_materiau}</p>
       </div>
+
+      {analyse.niveau_certitude < 60 && (
+        <div className="flex items-start gap-2 bg-orange-50 border border-orange-200 rounded-xl p-3">
+          <Info size={16} weight="fill" className="text-orange-500 shrink-0 mt-0.5" />
+          <p className="text-xs text-orange-700 leading-relaxed">
+            Identification incertaine.
+            {analyse.materiau_alternatif
+              ? ` Voici une alternative possible : ${analyse.materiau_alternatif}.`
+              : ""}{" "}
+            En cas de doute sur un matériau dangereux, fais appel à un diagnostiqueur certifié.
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -105,6 +131,16 @@ export function MateriauScanResult({
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {analyse.conseils_pro && (
+        <div className="flex items-start gap-2 bg-braise/5 border border-braise/20 rounded-xl p-3">
+          <Lightbulb size={16} weight="fill" className="text-braise shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-semibold text-dusk mb-0.5">Conseil pro</p>
+            <p className="text-xs text-dusk/70 leading-relaxed">{analyse.conseils_pro}</p>
+          </div>
         </div>
       )}
 
