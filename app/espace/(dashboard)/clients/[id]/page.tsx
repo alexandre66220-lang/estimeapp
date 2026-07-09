@@ -46,7 +46,7 @@ export default async function FicheClient({
     { data: notes, error: notesError },
     { data: chantiers, error: chantiersError },
     { data: avis, error: avisError },
-    { data: paiementsClient },
+    { data: paiementsClient, error: paiementsError },
   ] = await Promise.all([
     supabase
       .from("clients")
@@ -92,6 +92,9 @@ export default async function FicheClient({
   }
   if (avisError) {
     console.error("[fiche-client] Erreur avis:", avisError.message, avisError.code);
+  }
+  if (paiementsError) {
+    console.error("[fiche-client] Erreur paiements_chantier:", paiementsError.message, paiementsError.code);
   }
 
   if (!client) notFound();
@@ -229,9 +232,6 @@ export default async function FicheClient({
                   value="true"
                   defaultChecked={client.est_vip}
                   className="sr-only peer"
-                  onChange={(e) => {
-                    // Le formulaire sera soumis manuellement — pas besoin d'action ici
-                  }}
                 />
                 <div className="w-10 h-6 bg-dusk/20 peer-focus:ring-2 peer-focus:ring-ambre/30 rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-ambre" />
               </label>
@@ -346,7 +346,7 @@ function HistoriqueFinancier({
     id: string;
     chantier_id: string;
     type: string;
-    montant: number;
+    montant: number | null;
     statut: string;
     date_prevue: string | null;
     date_encaissement: string | null;
@@ -451,7 +451,7 @@ function HistoriqueFinancier({
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-sm font-bold text-dusk">
-                    {p.montant.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €
+                    {(p.montant ?? 0).toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €
                   </span>
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${style.bg} ${style.text}`}>
                     {style.label}
