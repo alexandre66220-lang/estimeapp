@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { analyserMateriau, type AnalyseMateriau } from "@/lib/anthropic/analyze-materiau";
 
 const MAX_BYTES = 10 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
@@ -15,9 +14,19 @@ async function getUser() {
   return { supabase, user };
 }
 
-export async function analyserPhotoMateriau(formData: FormData): Promise<{
+/**
+ * Démarre un scan matériau en tâche de fond.
+ *
+ * L'image est uploadée et une ligne materiau_scans est créée immédiatement
+ * avec analyse_status = "pending", puis l'id est retourné au client. La
+ * Netlify Background Function analyze-material-background prend ensuite le
+ * relais pour appeler Anthropic Vision sans contrainte de timeout (jusqu'à
+ * 15 minutes), et met à jour la ligne (analyse_status, analyse_json) une
+ * fois terminée. Le client poll /api/scan-status/[id] pour connaître le
+ * résultat.
+ */
+export async function demarrerScanMateriau(formData: FormData): Promise<{
   error?: string;
-  analyse?: AnalyseMateriau;
   scanId?: string;
 }> {
   const { supabase, user } = await getUser();
@@ -37,15 +46,6 @@ export async function analyserPhotoMateriau(formData: FormData): Promise<{
   const buffer = Buffer.from(arrayBuffer);
   const base64 = buffer.toString("base64");
 
-  const { data: analyse, error: analyseError } = await analyserMateriau(
-    base64,
-    file.type as "image/jpeg" | "image/png" | "image/webp"
-  );
-
-  if (analyseError || !analyse) {
-    return { error: analyseError ?? "Analyse impossible." };
-  }
-
   // Upload image to private bucket
   const ext = file.type.split("/")[1] ?? "jpg";
   const path = `${user.id}/${Date.now()}.${ext}`;
@@ -63,19 +63,41 @@ export async function analyserPhotoMateriau(formData: FormData): Promise<{
       artisan_id: user.id,
       chantier_id: chantierId,
       image_url: path,
-      analyse_json: analyse,
+      analyse_status: "pending",
+      analyse_json: null,
     })
     .select("id")
     .single();
 
-  if (insertError) {
-    return { error: "Analyse effectuée mais l'enregistrement a échoué." };
+  if (insertError || !inserted) {
+    return { error: "Impossible de démarrer l'analyse." };
+  }
+
+  const scanId = inserted.id as string;
+  const appUrl = process.env.APP_URL ?? process.env.URL ?? "https://estime-app.com";
+
+  try {
+    await fetch(`${appUrl}/.netlify/functions/analyze-material-background`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        scanId,
+        imageBase64: base64,
+        mediaType: file.type,
+      }),
+    });
+  } catch {
+    await supabase
+      .from("materiau_scans")
+      .update({ analyse_status: "error" })
+      .eq("id", scanId);
+    return { error: "Impossible de démarrer l'analyse." };
   }
 
   if (chantierId) revalidatePath(`/espace/chantiers/${chantierId}`);
   revalidatePath("/espace/securite");
 
-  return { analyse, scanId: inserted.id };
+  return { scanId };
 }
 
 export async function associerScanMateriau(

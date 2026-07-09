@@ -1,16 +1,11 @@
-import "server-only";
-import Anthropic from "@anthropic-ai/sdk";
-import { notifyError } from "@/lib/resend/notify-error";
-
-const MODEL = "claude-sonnet-4-6";
-const TIMEOUT_MS = 60000;
-const MAX_TENTATIVES = 2;
-const DELAI_ENTRE_TENTATIVES_MS = 3000;
-
-const MESSAGE_ECHEC_UTILISATEUR =
-  "L'analyse n'a pas pu aboutir. Essaie avec une photo plus nette et bien éclairée, prise à 30-50 cm du matériau.";
-
-const client = new Anthropic();
+/**
+ * Logique partagée d'analyse matériau (prompt + parsing du JSON retourné par
+ * Claude Vision). Ce module ne fait AUCUN appel réseau et n'importe rien de
+ * spécifique à Next.js (pas de "server-only") : il est utilisé à la fois par
+ * l'app Next (pour les types côté UI) et par la Netlify Background Function
+ * netlify/functions/analyze-material-background.mts, qui elle seule
+ * effectue désormais l'appel à l'API Anthropic.
+ */
 
 export type RisqueMateriau = {
   substance: string;
@@ -32,7 +27,7 @@ export type AnalyseMateriau = {
   conseils_pro: string | null;
 };
 
-const SYSTEM_PROMPT = `Tu es un expert en matériaux du bâtiment avec 30 ans d'expérience en BTP français. Tu identifies les matériaux de construction, revêtements, isolants, enduits, peintures, canalisations et structures à partir de photos de chantier.
+export const SYSTEM_PROMPT_MATERIAU = `Tu es un expert en matériaux du bâtiment avec 30 ans d'expérience en BTP français. Tu identifies les matériaux de construction, revêtements, isolants, enduits, peintures, canalisations et structures à partir de photos de chantier.
 
 Analyse cette photo avec précision. Prends en compte la texture, la couleur, le grain, les reflets, l'état de dégradation visible et le contexte environnant pour affiner ton identification. Si plusieurs matériaux sont visibles, identifie le matériau principal au premier plan.
 
@@ -53,6 +48,9 @@ Retourne uniquement un JSON valide sans aucun texte autour, avec exactement cett
   conseils_pro: string (conseil pratique court de professionnel BTP pour travailler avec ce matériau)
 }`;
 
+export const MESSAGE_ECHEC_ANALYSE_MATERIAU =
+  "L'analyse n'a pas pu aboutir. Essaie avec une photo plus nette et bien éclairée, prise à 30-50 cm du matériau.";
+
 function normaliserNiveau(niveau: unknown): RisqueMateriau["niveau_risque"] {
   const n = String(niveau ?? "").toLowerCase();
   if (n.includes("critique")) return "critique";
@@ -67,7 +65,11 @@ function normaliserCertitude(valeur: unknown): number {
   return Math.max(0, Math.min(100, Math.round(n)));
 }
 
-function parseAnalyse(text: string): AnalyseMateriau {
+/**
+ * Parse le texte brut retourné par Claude en AnalyseMateriau.
+ * Lève une SyntaxError si le JSON est absent, illisible ou incomplet.
+ */
+export function parseAnalyseMateriau(text: string): AnalyseMateriau {
   const match = text.match(/\{[\s\S]*\}/);
   if (!match) throw new SyntaxError("Aucun JSON trouvé dans la réponse.");
 
@@ -102,63 +104,4 @@ function parseAnalyse(text: string): AnalyseMateriau {
     message_urgence: json.message_urgence ? String(json.message_urgence) : null,
     conseils_pro: json.conseils_pro ? String(json.conseils_pro) : null,
   };
-}
-
-function attendre(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-export async function analyserMateriau(
-  imageBase64: string,
-  mediaType: "image/jpeg" | "image/png" | "image/webp"
-): Promise<{ data?: AnalyseMateriau; error?: string }> {
-  let derniereErreur: unknown = null;
-
-  for (let tentative = 1; tentative <= MAX_TENTATIVES; tentative++) {
-    try {
-      const response = await client.messages.create(
-        {
-          model: MODEL,
-          max_tokens: 1400,
-          system: SYSTEM_PROMPT,
-          messages: [
-            {
-              role: "user",
-              content: [
-                {
-                  type: "image",
-                  source: { type: "base64", media_type: mediaType, data: imageBase64 },
-                },
-                {
-                  type: "text",
-                  text: "Analyse ce matériau et retourne le JSON demandé.",
-                },
-              ],
-            },
-          ],
-        },
-        { timeout: TIMEOUT_MS }
-      );
-
-      const block = response.content[0];
-      const text = block.type === "text" ? block.text : "";
-      const analyse = parseAnalyse(text);
-
-      return { data: analyse };
-    } catch (err) {
-      derniereErreur = err;
-
-      if (tentative < MAX_TENTATIVES) {
-        await attendre(DELAI_ENTRE_TENTATIVES_MS);
-        continue;
-      }
-    }
-  }
-
-  const message = derniereErreur instanceof Error ? derniereErreur.message : String(derniereErreur);
-  const stack = derniereErreur instanceof Error ? derniereErreur.stack : undefined;
-
-  await notifyError("scanner-materiau", message, stack);
-
-  return { error: MESSAGE_ECHEC_UTILISATEUR };
 }

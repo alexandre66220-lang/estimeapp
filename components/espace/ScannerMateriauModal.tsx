@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
-import { X, Camera, Warning, Check } from "@phosphor-icons/react";
-import { analyserPhotoMateriau, associerScanMateriau } from "@/app/actions/materiau";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { X, Camera, Warning, Check, CircleNotch } from "@phosphor-icons/react";
+import { demarrerScanMateriau, associerScanMateriau } from "@/app/actions/materiau";
 import { MateriauScanResult } from "./MateriauScanResult";
 import type { AnalyseMateriau } from "@/lib/anthropic/analyze-materiau";
 
@@ -10,6 +10,10 @@ type Chantier = { id: string; titre: string };
 
 const TAILLE_MAX_PX = 1200;
 const QUALITE_COMPRESSION = 0.85;
+const INTERVALLE_POLLING_MS = 3000;
+const TIMEOUT_POLLING_MS = 90000;
+const MESSAGE_ECHEC =
+  "L'analyse n'a pas pu aboutir. Essaie avec une photo plus nette et bien éclairée, prise à 30-50 cm du matériau.";
 
 async function compresserImage(file: File): Promise<File> {
   try {
@@ -38,6 +42,8 @@ async function compresserImage(file: File): Promise<File> {
   }
 }
 
+type Statut = "idle" | "envoi" | "analyse" | "succes" | "erreur";
+
 export function ScannerMateriauModal({
   chantierId,
   chantiers,
@@ -50,6 +56,7 @@ export function ScannerMateriauModal({
   const [open, setOpen] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [statut, setStatut] = useState<Statut>("idle");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [analyse, setAnalyse] = useState<AnalyseMateriau | null>(null);
@@ -58,12 +65,23 @@ export function ScannerMateriauModal({
   const [associationSauvegardee, setAssociationSauvegardee] = useState(false);
   const [isAssociating, startAssociating] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const debutPollingRef = useRef<number>(0);
 
   const chantierPreselectionne = Boolean(chantierId);
 
+  function arreterPolling() {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+  }
+
   function reset() {
+    arreterPolling();
     setPreview(null);
     setFile(null);
+    setStatut("idle");
     setError(null);
     setAnalyse(null);
     setScanId(null);
@@ -76,6 +94,10 @@ export function ScannerMateriauModal({
     reset();
   }
 
+  useEffect(() => {
+    return () => arreterPolling();
+  }, []);
+
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return;
@@ -86,24 +108,63 @@ export function ScannerMateriauModal({
     setPreview(URL.createObjectURL(compressed));
   }
 
+  function demarrerPolling(id: string) {
+    setStatut("analyse");
+    debutPollingRef.current = Date.now();
+
+    pollingRef.current = setInterval(async () => {
+      if (Date.now() - debutPollingRef.current >= TIMEOUT_POLLING_MS) {
+        arreterPolling();
+        setError(MESSAGE_ECHEC);
+        setStatut("erreur");
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/scan-status/${id}`, { cache: "no-store" });
+        if (!res.ok) return;
+        const json = await res.json();
+
+        if (json.analyse_status === "success" && json.analyse_json) {
+          arreterPolling();
+          setAnalyse(json.analyse_json as AnalyseMateriau);
+          setStatut("succes");
+        } else if (json.analyse_status === "error") {
+          arreterPolling();
+          setError(MESSAGE_ECHEC);
+          setStatut("erreur");
+        }
+      } catch {
+        // Erreur réseau ponctuelle : on continue le polling jusqu'au timeout
+      }
+    }, INTERVALLE_POLLING_MS);
+  }
+
   function handleAnalyser() {
     if (!file) return;
     setError(null);
+    setStatut("envoi");
     const formData = new FormData();
     formData.set("image", file);
     if (chantierId) formData.set("chantier_id", chantierId);
 
     startTransition(async () => {
-      const result = await analyserPhotoMateriau(formData);
-      if (result.error) {
-        setError(result.error);
+      const result = await demarrerScanMateriau(formData);
+      if (result.error || !result.scanId) {
+        setError(result.error ?? MESSAGE_ECHEC);
+        setStatut("erreur");
         return;
       }
-      if (result.analyse) {
-        setAnalyse(result.analyse);
-        setScanId(result.scanId ?? null);
-      }
+      setScanId(result.scanId);
+      demarrerPolling(result.scanId);
     });
+  }
+
+  function handleReessayer() {
+    arreterPolling();
+    setStatut("idle");
+    setError(null);
+    setScanId(null);
   }
 
   function handleAssocier() {
@@ -113,6 +174,8 @@ export function ScannerMateriauModal({
       if (!result.error) setAssociationSauvegardee(true);
     });
   }
+
+  const enCoursAnalyse = statut === "envoi" || statut === "analyse";
 
   return (
     <>
@@ -149,7 +212,7 @@ export function ScannerMateriauModal({
             </div>
 
             <div className="p-6 overflow-y-auto space-y-4">
-              {!analyse && (
+              {statut === "idle" && (
                 <>
                   <input
                     ref={inputRef}
@@ -186,20 +249,13 @@ export function ScannerMateriauModal({
                     </button>
                   )}
 
-                  {error && (
-                    <p className="text-sm text-red-500 flex items-center gap-1.5">
-                      <Warning size={14} weight="fill" />
-                      {error}
-                    </p>
-                  )}
-
                   <button
                     type="button"
                     onClick={handleAnalyser}
                     disabled={!file || isPending}
                     className="w-full py-3 bg-braise text-white text-sm font-semibold rounded-full hover:bg-ambre transition-colors disabled:opacity-50"
                   >
-                    {isPending ? "Analyse en cours…" : "Analyser le matériau"}
+                    Analyser le matériau
                   </button>
 
                   <p className="text-xs text-dusk/35 text-center">
@@ -208,7 +264,41 @@ export function ScannerMateriauModal({
                 </>
               )}
 
-              {analyse && (
+              {enCoursAnalyse && (
+                <div className="flex flex-col items-center justify-center gap-4 py-10">
+                  {preview && (
+                    <div className="w-full rounded-xl overflow-hidden border border-dusk/10 opacity-60">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={preview} alt="Aperçu du matériau" className="w-full h-40 object-cover" />
+                    </div>
+                  )}
+                  <CircleNotch size={32} className="text-braise animate-spin" />
+                  <p className="text-sm font-medium text-dusk text-center">
+                    Analyse en cours, identification du matériau…
+                  </p>
+                  <p className="text-xs text-dusk/40 text-center">
+                    Cela peut prendre jusqu&apos;à une minute pour une identification précise.
+                  </p>
+                </div>
+              )}
+
+              {statut === "erreur" && (
+                <div className="space-y-4">
+                  <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl p-4">
+                    <Warning size={18} weight="fill" className="text-red-500 shrink-0 mt-0.5" />
+                    <p className="text-sm text-red-600">{error}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleReessayer}
+                    className="w-full py-3 bg-braise text-white text-sm font-semibold rounded-full hover:bg-ambre transition-colors"
+                  >
+                    Réessayer
+                  </button>
+                </div>
+              )}
+
+              {statut === "succes" && analyse && (
                 <MateriauScanResult
                   analyse={analyse}
                   imagePreview={preview}

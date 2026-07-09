@@ -43,6 +43,7 @@ export default async function SecuritePage() {
       .from("materiau_scans")
       .select("id, created_at, image_url, analyse_json, chantier_id, chantiers(titre)")
       .eq("artisan_id", user!.id)
+      .eq("analyse_status", "success")
       .order("created_at", { ascending: false }),
     supabase
       .from("chantiers")

@@ -110,6 +110,7 @@ export default async function FicheChantier({
       .select("id, created_at, image_url, analyse_json")
       .eq("chantier_id", id)
       .eq("artisan_id", user.id)
+      .eq("analyse_status", "success")
       .order("created_at", { ascending: false }),
     supabase
       .from("notes_vocales")
