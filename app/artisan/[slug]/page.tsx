@@ -808,7 +808,7 @@ export default async function VitrineArtisan({
           >
             <div className="overflow-hidden border-y border-[#2B2521]/6 bg-white py-3">
               <div className="flex whitespace-nowrap">
-                <div className="marquee-track flex items-center gap-6 pr-6">
+                <div className="marquee-track flex items-center gap-6">
                   {[...vitrineCertifListe, ...vitrineCertifListe].map((c, i) => (
                     <span key={i} className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full"
                       style={{ backgroundColor: `${vitrineCouleur}12`, color: vitrineCouleur }}>
