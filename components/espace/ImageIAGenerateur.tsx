@@ -496,7 +496,7 @@ export function ImageIAGenerateur({ metier, ville, onUseImage }: Props) {
 
             {/* Créneaux recommandés */}
             <div className="mb-5">
-              <p className="text-xs font-medium text-dusk/60 mb-2">Créneaux recommandés — {RESEAU_META[reseau].label}</p>
+              <p className="text-xs font-medium text-dusk/60 mb-2">Créneaux recommandés ({RESEAU_META[reseau].label})</p>
               <div className="flex flex-wrap gap-2">
                 {creneaux.map((c) => (
                   <button

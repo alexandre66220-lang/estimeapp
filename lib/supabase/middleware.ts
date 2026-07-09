@@ -129,7 +129,7 @@ export async function updateSession(request: NextRequest) {
       ]);
 
       if (profileResult === null) {
-        console.error("[middleware] timeout requête profiles (2s) — laisse passer");
+        console.error("[middleware] timeout requête profiles (2s), laisse passer");
         return applyCookie(supabaseResponse);
       }
 

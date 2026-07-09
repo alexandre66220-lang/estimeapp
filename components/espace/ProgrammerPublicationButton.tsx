@@ -123,7 +123,7 @@ export function ProgrammerPublicationButton({ chantierId, postId, textePost, has
 
             {/* Créneaux recommandés */}
             <div>
-              <p className="text-xs font-medium text-dusk/60 mb-2">Créneaux recommandés — {RESEAU_META[reseau].label}</p>
+              <p className="text-xs font-medium text-dusk/60 mb-2">Créneaux recommandés ({RESEAU_META[reseau].label})</p>
               <div className="flex flex-wrap gap-2">
                 {creneaux.map((c) => (
                   <button

@@ -62,17 +62,17 @@ export async function generateMetadata({
     .eq("slug", slug)
     .maybeSingle();
 
-  if (!profile) return { title: "Artisan — Estime" };
+  if (!profile) return { title: "Artisan, Estime" };
 
   const name = [profile.prenom, profile.nom].filter(Boolean).join(" ") || "Artisan";
   const titleParts = [name, profile.metier && `${profile.metier}`, profile.ville && `à ${profile.ville}`]
     .filter(Boolean)
-    .join(" — ");
+    .join(", ");
 
   const logoUrl = await signUrl(admin, profile.logo_url);
 
   return {
-    title: titleParts || `${name} — Estime`,
+    title: titleParts || `${name}, Estime`,
     description: `Découvrez les réalisations de ${name}${profile.metier ? `, ${profile.metier}` : ""}${profile.ville ? ` à ${profile.ville}` : ""}. Consultez ses avis Google et contactez-le directement.`,
     openGraph: {
       title: titleParts,
@@ -1083,8 +1083,8 @@ export default async function VitrineArtisan({
                 className="font-semibold text-[#C75D3B] hover:underline"
               >
                 Estime
-              </Link>{" "}
-              — L&apos;outil de réputation des artisans
+              </Link>
+              , l&apos;outil de réputation des artisans
             </p>
             <Link
               href="https://estime-app.com"

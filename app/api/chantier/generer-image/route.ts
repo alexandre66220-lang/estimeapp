@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 const DAILY_LIMIT = 5;
 
 export async function POST(request: Request) {
-  console.log("[generer-image] START — REPLICATE_API_TOKEN défini:", !!process.env.REPLICATE_API_TOKEN);
+  console.log("[generer-image] START, REPLICATE_API_TOKEN défini:", !!process.env.REPLICATE_API_TOKEN);
 
   const supabase = await createClient();
   const {
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
   }
 
   const finalPrompt = `${prompt}, style photographique professionnel, qualité commerciale, lumière naturelle, net et propre, haute résolution`;
-  console.log("[generer-image] Appel Replicate — prompt:", finalPrompt.slice(0, 80));
+  console.log("[generer-image] Appel Replicate, prompt:", finalPrompt.slice(0, 80));
 
   // Appel Replicate avec Prefer: wait (réponse synchrone si prête dans le délai)
   let predictionRes: Response;
@@ -114,7 +114,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Réponse invalide du service. Réessayez." }, { status: 500 });
   }
 
-  console.log("[generer-image] Réponse Replicate — status:", prediction.status, "id:", prediction.id);
+  console.log("[generer-image] Réponse Replicate, status:", prediction.status, "id:", prediction.id);
 
   let imageUrl: string | null = null;
 
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
   } else if (prediction.status === "failed") {
     console.error("[generer-image] Replicate prediction failed:", prediction.error);
   } else if (prediction.id) {
-    // Prefer: wait a expiré côté Replicate — polling court (3 × 3s = 9s max)
+    // Prefer: wait a expiré côté Replicate (polling court : 3 × 3s = 9s max)
     console.log("[generer-image] Polling prediction", prediction.id);
     for (let i = 0; i < 3; i++) {
       await new Promise((r) => setTimeout(r, 3000));
@@ -140,7 +140,7 @@ export async function POST(request: Request) {
           break;
         }
         const poll = await pollRes.json() as { status: string; output?: unknown; error?: string };
-        console.log("[generer-image] Poll", i + 1, "— status:", poll.status);
+        console.log("[generer-image] Poll", i + 1, "status:", poll.status);
         if (poll.status === "succeeded" && Array.isArray(poll.output)) {
           imageUrl = (poll.output[0] as string) ?? null;
           break;
@@ -157,7 +157,7 @@ export async function POST(request: Request) {
   }
 
   if (!imageUrl) {
-    console.error("[generer-image] Aucune URL d'image obtenue — status final:", prediction.status);
+    console.error("[generer-image] Aucune URL d'image obtenue, status final:", prediction.status);
     return NextResponse.json(
       { error: "La génération d'image a échoué ou a expiré. Réessayez." },
       { status: 500 }

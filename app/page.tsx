@@ -14,7 +14,7 @@ import { FAQ_LANDING, buildFaqJsonLd } from "@/lib/seo/faq";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Estime — L'app Instagram et avis Google pour artisans BTP",
+  title: "Estime, l'app Instagram et avis Google pour artisans BTP",
   description:
     "Prenez une photo de chantier, Estime génère votre post Instagram en 10 secondes et envoie la demande d'avis Google à votre client. 14 jours gratuits.",
   alternates: { canonical: "https://estime-app.com" },

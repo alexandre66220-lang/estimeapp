@@ -121,7 +121,7 @@ function PageHeader({ moisLabel }: { moisLabel: string }) {
 function PageFooter({ page }: { page: string }) {
   return (
     <View style={styles.footer}>
-      <Text style={styles.footerText}>Créé par AlcalSpark — alcalspark.com</Text>
+      <Text style={styles.footerText}>Créé par AlcalSpark (alcalspark.com)</Text>
       <Text style={styles.footerText}>{page}</Text>
     </View>
   );
@@ -146,7 +146,7 @@ export function RapportMensuelPDF({
 
   return (
     <Document
-      title={`Rapport Estime — ${artisan.prenom} ${artisan.nom} — ${moisLabel}`}
+      title={`Rapport Estime, ${artisan.prenom} ${artisan.nom} (${moisLabel})`}
       author="Estime"
     >
       {/* ── PAGE 1 : COUVERTURE ───────────────────────────────────────────── */}
@@ -169,7 +169,7 @@ export function RapportMensuelPDF({
           <View style={[styles.coverFooter]}>
             <Text style={styles.coverFooterText}>Généré le {today}</Text>
             <Text style={[styles.coverFooterText, { marginTop: 4 }]}>
-              Créé par AlcalSpark — alcalspark.com
+              Créé par AlcalSpark (alcalspark.com)
             </Text>
           </View>
         </View>
@@ -316,7 +316,7 @@ export function RapportMensuelPDF({
 
           <View style={styles.noteBox}>
             <Text style={styles.noteBig}>
-              {avisData.noteMoyenne !== null ? avisData.noteMoyenne.toFixed(1) : "—"}
+              {avisData.noteMoyenne !== null ? avisData.noteMoyenne.toFixed(1) : "-"}
             </Text>
             <View>
               {avisData.noteMoyenne !== null && (

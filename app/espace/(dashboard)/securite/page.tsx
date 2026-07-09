@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/supabase/server";
 import { ScannerMateriauModal } from "@/components/espace/ScannerMateriauModal";
 import type { AnalyseMateriau, RisqueMateriau } from "@/lib/anthropic/analyze-materiau";
 
-export const metadata: Metadata = { title: "Sécurité — Estime" };
+export const metadata: Metadata = { title: "Sécurité, Estime" };
 
 const NIVEAU_BADGE: Record<RisqueMateriau["niveau_risque"], string> = {
   faible: "bg-green-50 text-green-700",

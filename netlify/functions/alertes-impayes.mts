@@ -1,5 +1,5 @@
 /**
- * Netlify Scheduled Function — alertes impayés quotidiennes
+ * Netlify Scheduled Function : alertes impayés quotidiennes
  * Se déclenche chaque matin à 08h00 UTC
  *
  * Variables d'environnement requises :
@@ -132,7 +132,7 @@ async function handler() {
       await resend.emails.send({
         from: "Estime <alertes@estime-app.com>",
         to: profile.email,
-        subject: `⚠️ ${stats.count} paiement${stats.count > 1 ? "s" : ""} en retard — ${total} €`,
+        subject: `⚠️ ${stats.count} paiement${stats.count > 1 ? "s" : ""} en retard, ${total} €`,
         html: `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>

@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
               {metier && ville ? `${metier} à ${ville}` : metier || ville || "Artisans BTP certifiés"}
             </span>
             <span style={{ fontSize: 22, color: "rgba(248,245,242,0.5)", marginTop: 12 }}>
-              Artisans certifiés Estime — Score de réputation vérifié
+              Artisans certifiés Estime, score de réputation vérifié
             </span>
           </div>
 

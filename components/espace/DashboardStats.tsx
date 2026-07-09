@@ -28,11 +28,11 @@ export function DashboardStatsCards({ stats }: { stats: DashboardStats }) {
             {key === "noteMoyenne"
               ? stats.noteMoyenne !== null
                 ? stats.noteMoyenne.toFixed(1)
-                : "—"
+                : "-"
               : key === "tauxConversion"
                 ? stats.tauxConversion !== null
                   ? `${stats.tauxConversion}%`
-                  : "—"
+                  : "-"
                 : stats[key]}
           </p>
           <p className="text-dusk/45 text-xs mt-1.5">{label}</p>

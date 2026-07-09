@@ -7,7 +7,7 @@ import { getAvisStats, getAvisListe, getAvisParMois } from "@/lib/supabase/avis-
 import { EtoilesNote } from "@/components/espace/EtoilesNote";
 
 export const metadata: Metadata = {
-  title: "Mes avis - Estime",
+  title: "Mes avis, Estime",
 };
 
 const MOIS_LABELS = [
@@ -67,14 +67,14 @@ async function AvisSection() {
         <div className="bg-white rounded-2xl border border-dusk/8 p-5 lg:p-6">
           <Star size={20} weight="fill" className="text-ambre" aria-hidden="true" />
           <p className="font-display text-3xl font-bold text-dusk leading-none mt-3">
-            {stats.noteMoyenne !== null ? stats.noteMoyenne.toFixed(1) : "—"}
+            {stats.noteMoyenne !== null ? stats.noteMoyenne.toFixed(1) : "-"}
           </p>
           <p className="text-dusk/45 text-xs mt-1.5">Note moyenne Google</p>
         </div>
         <div className="bg-white rounded-2xl border border-dusk/8 p-5 lg:p-6">
           <ChatCircleText size={20} className="text-ambre" aria-hidden="true" />
           <p className="font-display text-3xl font-bold text-dusk leading-none mt-3">
-            {stats.tauxConversion !== null ? `${stats.tauxConversion}%` : "—"}
+            {stats.tauxConversion !== null ? `${stats.tauxConversion}%` : "-"}
           </p>
           <p className="text-dusk/45 text-xs mt-1.5">Taux de conversion</p>
         </div>

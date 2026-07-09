@@ -35,7 +35,7 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL("https://estime-app.com"),
   title: {
-    default: "Estime — L'app de réputation pour les artisans BTP",
+    default: "Estime, l'app de réputation pour les artisans BTP",
     template: "%s | Estime",
   },
   description:
@@ -58,14 +58,14 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: "https://estime-app.com",
     siteName: "Estime",
-    title: "Estime — L'app de réputation pour les artisans BTP",
+    title: "Estime, l'app de réputation pour les artisans BTP",
     description:
       "Générez des posts Instagram et automatisez vos demandes d'avis Google. 14 jours gratuits sans carte bancaire.",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Estime — App artisans BTP" }],
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Estime, app artisans BTP" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Estime — L'app de réputation pour les artisans BTP",
+    title: "Estime, l'app de réputation pour les artisans BTP",
     description: "Générez des posts Instagram et automatisez vos demandes d'avis Google.",
     images: ["/og-image.png"],
   },

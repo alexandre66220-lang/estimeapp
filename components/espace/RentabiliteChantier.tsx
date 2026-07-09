@@ -143,7 +143,7 @@ export function RentabiliteChantier({
           {h > 0 && (
             <div className="flex justify-between text-sm">
               <span className="text-dusk/60">Taux horaire réel</span>
-              <span className="font-semibold text-dusk">{tauxHoraire !== null ? fmtEur(tauxHoraire) + "/h" : "—"}</span>
+              <span className="font-semibold text-dusk">{tauxHoraire !== null ? fmtEur(tauxHoraire) + "/h" : "-"}</span>
             </div>
           )}
           <div className="flex justify-between text-sm border-t border-dusk/8 pt-2 mt-2">
@@ -152,7 +152,7 @@ export function RentabiliteChantier({
           </div>
           {tauxMarge < 30 && m > 0 && (
             <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2 mt-1">
-              ⚠️ Taux de marge inférieur à 30% — pensez à revoir vos tarifs ou à réduire les dépenses.
+              ⚠️ Taux de marge inférieur à 30 %, pensez à revoir vos tarifs ou à réduire les dépenses.
             </p>
           )}
         </div>

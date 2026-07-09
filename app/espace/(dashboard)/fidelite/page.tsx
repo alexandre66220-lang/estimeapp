@@ -8,7 +8,7 @@ import {
   type ActionFidelite,
 } from "@/lib/fidelite/constants";
 
-export const metadata: Metadata = { title: "Fidélité — Estime" };
+export const metadata: Metadata = { title: "Fidélité, Estime" };
 
 const BADGE_STYLE: Record<NiveauFidelite, string> = {
   apprenti: "bg-gray-100 text-gray-500 border-gray-200",
@@ -99,7 +99,7 @@ export default async function FidelitePage({
         </p>
       </div>
 
-      {/* SECTION 1 — Niveau actuel */}
+      {/* SECTION 1 : Niveau actuel */}
       <section className="bg-dusk rounded-2xl p-6 lg:p-8">
         <div className="flex items-start justify-between gap-4 mb-5 flex-wrap">
           <div>
@@ -141,7 +141,7 @@ export default async function FidelitePage({
         )}
       </section>
 
-      {/* SECTION 2 — Comment gagner des points */}
+      {/* SECTION 2 : Comment gagner des points */}
       <section>
         <h2 className="font-display text-lg font-bold text-dusk mb-4">Comment gagner des points</h2>
         <div className="bg-white rounded-2xl border border-dusk/8 divide-y divide-dusk/8">
@@ -170,7 +170,7 @@ export default async function FidelitePage({
         </div>
       </section>
 
-      {/* SECTION 3 — Historique */}
+      {/* SECTION 3 : Historique */}
       <section>
         <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
           <h2 className="font-display text-lg font-bold text-dusk">Historique</h2>
@@ -222,7 +222,7 @@ export default async function FidelitePage({
         )}
       </section>
 
-      {/* SECTION 4 — Récompenses */}
+      {/* SECTION 4 : Récompenses */}
       <section>
         <h2 className="font-display text-lg font-bold text-dusk mb-4">Récompenses</h2>
         <div className="space-y-3">

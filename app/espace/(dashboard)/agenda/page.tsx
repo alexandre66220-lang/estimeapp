@@ -3,7 +3,7 @@ import { getCurrentUser } from "@/lib/supabase/server";
 import { AgendaCalendar, type AgendaChantier } from "@/components/espace/AgendaCalendar";
 
 export const metadata: Metadata = {
-  title: "Agenda - Estime",
+  title: "Agenda, Estime",
 };
 
 export default async function AgendaPage() {

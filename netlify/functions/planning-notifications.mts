@@ -1,5 +1,5 @@
 /**
- * Netlify Scheduled Function — notifications push planning éditorial
+ * Netlify Scheduled Function : notifications push planning éditorial
  * Se déclenche toutes les heures
  *
  * Variables d'environnement requises :

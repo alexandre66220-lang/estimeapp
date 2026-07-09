@@ -21,7 +21,7 @@ export default function Hero() {
           <Link
             href="/"
             className="font-landing-display text-xl font-semibold text-dust tracking-tight hover:text-dust/80 transition-colors duration-200"
-            aria-label="Estime - Retour à l'accueil"
+            aria-label="Estime, retour à l'accueil"
           >
             Estime
           </Link>

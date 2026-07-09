@@ -120,7 +120,7 @@ export function WidgetInstallGuide({ userId }: { userId: string }) {
       </div>
 
       <p className="text-dusk/35 text-xs mt-3 text-center">
-        Ce script est lié à votre compte — ne le partagez pas.
+        Ce script est lié à votre compte, ne le partagez pas.
       </p>
     </div>
   );

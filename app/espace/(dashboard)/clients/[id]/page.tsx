@@ -72,7 +72,7 @@ export default function FicheClient() {
   const [paiementsClient, setPaiementsClient] = useState<Paiement[]>([]);
 
   useEffect(() => {
-    document.title = "Fiche client — Estime";
+    document.title = "Fiche client, Estime";
   }, []);
 
   useEffect(() => {
@@ -316,7 +316,7 @@ export default function FicheClient() {
                 defaultValue={client.source ?? ""}
                 className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all"
               >
-                <option value="">— Non renseigné —</option>
+                <option value="">(Non renseigné)</option>
                 {SOURCES.map((s) => (
                   <option key={s} value={s}>{s}</option>
                 ))}
@@ -374,8 +374,8 @@ export default function FicheClient() {
         <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
           <h2 className="font-display text-lg font-bold text-dusk mb-5">Statistiques</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <StatCard emoji="💶" label="CA total" value={totalCA > 0 ? `${totalCA.toLocaleString("fr-FR")} €` : "—"} />
-            <StatCard emoji="🏗️" label="Chantiers" value={nbChantiers > 0 ? String(nbChantiers) : "—"} />
+            <StatCard emoji="💶" label="CA total" value={totalCA > 0 ? `${totalCA.toLocaleString("fr-FR")} €` : "-"} />
+            <StatCard emoji="🏗️" label="Chantiers" value={nbChantiers > 0 ? String(nbChantiers) : "-"} />
             <StatCard emoji="⭐" label="Avis Google" value={String(avisCount)} />
             {premierChantier && (
               <StatCard emoji="📅" label="1er chantier" value={fmt(premierChantier)} small />
@@ -538,7 +538,7 @@ function HistoriqueFinancier({
           <p className="text-lg font-bold text-dusk">
             {client.delai_moyen_paiement != null
               ? `${Math.round(client.delai_moyen_paiement)} j`
-              : "—"}
+              : "-"}
           </p>
         </div>
         <div className="bg-dust rounded-xl p-3">
@@ -546,7 +546,7 @@ function HistoriqueFinancier({
           <p className="text-lg font-bold text-dusk">
             {client.taux_recouvrement != null
               ? `${Math.round(client.taux_recouvrement)}%`
-              : "—"}
+              : "-"}
           </p>
         </div>
       </div>

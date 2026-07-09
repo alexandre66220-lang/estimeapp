@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/lib/supabase/server";
 import { MateriauScanResult } from "@/components/espace/MateriauScanResult";
 import type { AnalyseMateriau } from "@/lib/anthropic/analyze-materiau";
 
-export const metadata: Metadata = { title: "Fiche matériau — Estime" };
+export const metadata: Metadata = { title: "Fiche matériau, Estime" };
 
 export default async function FicheMateriauPage({
   params,

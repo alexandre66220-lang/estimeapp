@@ -33,7 +33,7 @@ export async function generateMetadata({
 
   const ogImageUrl = `${BASE}/api/og?type=artisans&metier=${encodeURIComponent(metier.label)}&ville=${encodeURIComponent(ville.label)}`;
   return {
-    title: `${metier.label} à ${ville.label} — Artisans certifiés Estime | Estime`,
+    title: `${metier.label} à ${ville.label}, artisans certifiés Estime | Estime`,
     description: `Trouvez un ${metier.label.toLowerCase()} de confiance à ${ville.label}. Artisans évalués par leurs clients, avec score de réputation et avis Google vérifiés.`,
     alternates: {
       canonical: `${BASE}/artisans/${slug}/${villeSlug}`,
@@ -41,7 +41,7 @@ export async function generateMetadata({
     },
     robots: { index: true, follow: true },
     openGraph: {
-      title: `${metier.label} à ${ville.label} — Artisans certifiés Estime`,
+      title: `${metier.label} à ${ville.label}, artisans certifiés Estime`,
       description: `Trouvez un ${metier.label.toLowerCase()} de confiance à ${ville.label} (${ville.departement}).`,
       url: `${BASE}/artisans/${slug}/${villeSlug}`,
       type: "website",
@@ -124,7 +124,7 @@ export default async function ArtisansMetierVillePage({
         {/* Header */}
         <div>
           <h1 className="font-landing-display text-4xl lg:text-5xl font-semibold text-[#2B2521] leading-tight mb-3">
-            {metier.label} à {ville.label}<br className="hidden sm:block" /> — Trouvez un artisan certifié Estime
+            {metier.label} à {ville.label}<br className="hidden sm:block" />, trouvez un artisan certifié Estime
           </h1>
           <p className="text-[#2B2521]/55 text-lg max-w-[60ch]">
             Découvrez les {metier.labelPluriel.toLowerCase()} de {ville.label} présents sur Estime, évalués et recommandés par leurs clients.
@@ -187,7 +187,7 @@ export default async function ArtisansMetierVillePage({
 
         {/* FAQ */}
         <div style={{ background: "#ffffff", border: "1px solid #E8E2DC" }} className="rounded-2xl p-6 lg:p-8">
-          <FaqAccordion items={faqItems} title={`FAQ — ${metier.label} à ${ville.label}`} />
+          <FaqAccordion items={faqItems} title={`FAQ : ${metier.label} à ${ville.label}`} />
         </div>
 
         <JoinCta metierLabel={metier.label} villeLabel={ville.label} />

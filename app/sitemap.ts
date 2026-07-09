@@ -38,7 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
   } catch { /* env vars absentes au build */ }
 
-  // Articles conseils (Sanity) — blog public + espace
+  // Articles conseils (Sanity), blog public + espace
   try {
     const { sanityClient } = await import("@/lib/sanity/client");
     const articles = await sanityClient.fetch<{ slug: string; published_at: string | null }[]>(

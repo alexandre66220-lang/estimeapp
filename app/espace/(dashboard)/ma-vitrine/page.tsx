@@ -5,7 +5,7 @@ import { getCachedProfile } from "@/lib/supabase/profile";
 import { mergeVitrineConfig } from "@/lib/vitrine/defaults";
 import { VitrineEditor } from "@/components/espace/VitrineEditor";
 
-export const metadata: Metadata = { title: "Ma vitrine — Estime" };
+export const metadata: Metadata = { title: "Ma vitrine, Estime" };
 
 export default async function MaVitrinePage() {
   const { supabase, user } = await getCurrentUser();

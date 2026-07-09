@@ -130,17 +130,17 @@ export function RentabiliteTab({ data, tauxImposition }: { data: RentabiliteAnnu
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {[
           { label: "Marge brute totale", value: fmtEur(data.margeBruteTotale), color: data.margeBruteTotale >= 0 ? "text-green-600" : "text-red-500" },
-          { label: "Taux de marge moyen", value: data.tauxMargeMoyen !== null ? `${data.tauxMargeMoyen.toFixed(1)} %` : "—", color: data.tauxMargeMoyen !== null && data.tauxMargeMoyen >= 30 ? "text-green-600" : "text-red-500" },
-          { label: "Taux horaire moyen", value: data.tauxHoraireMoyen !== null ? `${data.tauxHoraireMoyen.toFixed(0)} €/h` : "—", color: "text-dusk" },
+          { label: "Taux de marge moyen", value: data.tauxMargeMoyen !== null ? `${data.tauxMargeMoyen.toFixed(1)} %` : "-", color: data.tauxMargeMoyen !== null && data.tauxMargeMoyen >= 30 ? "text-green-600" : "text-red-500" },
+          { label: "Taux horaire moyen", value: data.tauxHoraireMoyen !== null ? `${data.tauxHoraireMoyen.toFixed(0)} €/h` : "-", color: "text-dusk" },
           tauxImposition !== null
             ? { label: "Résultat net après impôt (estimé)", value: fmtEur(data.margeBruteTotale * (1 - tauxImposition / 100)), color: data.margeBruteTotale >= 0 ? "text-green-600" : "text-red-500" }
             : { label: "Résultat net après impôt", value: "Définir dans profil", color: "text-dusk/30" },
           data.meilleureChantier
             ? { label: "Meilleur chantier", value: `${data.meilleureChantier.titre.slice(0, 20)} · ${data.meilleureChantier.taux.toFixed(0)}%`, color: "text-green-600" }
-            : { label: "Meilleur chantier", value: "—", color: "text-dusk/40" },
+            : { label: "Meilleur chantier", value: "-", color: "text-dusk/40" },
           data.moinsRentable
             ? { label: "À optimiser", value: `${data.moinsRentable.titre.slice(0, 20)} · ${data.moinsRentable.taux.toFixed(0)}%`, color: "text-orange-500" }
-            : { label: "À optimiser", value: "—", color: "text-dusk/40" },
+            : { label: "À optimiser", value: "-", color: "text-dusk/40" },
         ].map(({ label, value, color }) => (
           <div key={label} className="bg-white rounded-xl border border-dusk/8 p-4">
             <p className="text-xs text-dusk/45 mb-1">{label}</p>
@@ -151,7 +151,7 @@ export function RentabiliteTab({ data, tauxImposition }: { data: RentabiliteAnnu
 
       {/* Tableau des chantiers */}
       <div className="bg-white rounded-2xl border border-dusk/8 p-6">
-        <h2 className="font-display text-base font-bold text-dusk mb-4">Chantiers {year} — Détail financier</h2>
+        <h2 className="font-display text-base font-bold text-dusk mb-4">Chantiers {year}, détail financier</h2>
         <div className="overflow-x-auto -mx-2">
           <table className="w-full text-sm">
             <thead>
@@ -173,20 +173,20 @@ export function RentabiliteTab({ data, tauxImposition }: { data: RentabiliteAnnu
                   <tr key={r.id} className={`transition-colors hover:bg-dust/30 ${!hasData ? "opacity-50" : ""}`}>
                     <td className="px-3 py-3">
                       <Link href={`/espace/chantiers/${r.id}`} className="text-dusk hover:text-braise transition-colors font-medium line-clamp-1">
-                        {r.titre ?? "—"}
+                        {r.titre ?? "-"}
                       </Link>
                       <p className="text-xs text-dusk/40">
                         {new Date(r.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
                       </p>
                     </td>
-                    <td className="px-3 py-3 text-right text-dusk/70 whitespace-nowrap">{hasData ? fmtEur(m) : "—"}</td>
-                    <td className="px-3 py-3 text-right text-dusk/70 whitespace-nowrap">{couts > 0 ? fmtEur(couts) : "—"}</td>
+                    <td className="px-3 py-3 text-right text-dusk/70 whitespace-nowrap">{hasData ? fmtEur(m) : "-"}</td>
+                    <td className="px-3 py-3 text-right text-dusk/70 whitespace-nowrap">{couts > 0 ? fmtEur(couts) : "-"}</td>
                     <td className="px-3 py-3 text-right font-semibold whitespace-nowrap">
-                      {hasData ? <span className={marge >= 0 ? "text-green-600" : "text-red-500"}>{fmtEur(marge)}</span> : "—"}
+                      {hasData ? <span className={marge >= 0 ? "text-green-600" : "text-red-500"}>{fmtEur(marge)}</span> : "-"}
                     </td>
-                    <td className="px-3 py-3 text-right">{hasData ? <MargeBadge taux={taux} /> : "—"}</td>
-                    <td className="px-3 py-3 text-right text-dusk/70">{r.heures_passees ? `${r.heures_passees}h` : "—"}</td>
-                    <td className="px-3 py-3 text-right text-dusk/70 whitespace-nowrap">{tauxHoraire !== null ? `${tauxHoraire.toFixed(0)} €/h` : "—"}</td>
+                    <td className="px-3 py-3 text-right">{hasData ? <MargeBadge taux={taux} /> : "-"}</td>
+                    <td className="px-3 py-3 text-right text-dusk/70">{r.heures_passees ? `${r.heures_passees}h` : "-"}</td>
+                    <td className="px-3 py-3 text-right text-dusk/70 whitespace-nowrap">{tauxHoraire !== null ? `${tauxHoraire.toFixed(0)} €/h` : "-"}</td>
                   </tr>
                 );
               })}

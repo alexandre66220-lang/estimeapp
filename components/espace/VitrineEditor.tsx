@@ -421,15 +421,15 @@ function VitrinePreview({
                 {["🏗️", "⭐", "✅"].map((icon) => (
                   <div key={icon} className="text-center">
                     <span>{icon}</span>
-                    <p className="text-lg font-bold text-white tabular-nums">—</p>
-                    <p className="text-[9px] text-white/70">—</p>
+                    <p className="text-lg font-bold text-white tabular-nums">-</p>
+                    <p className="text-[9px] text-white/70">-</p>
                   </div>
                 ))}
               </div>
             ) : (
               ["🏗️ Chantiers", "⭐ Avis", "✅ Satisfaits", "📅 Ans"].map((l) => (
                 <div key={l} className="bg-white rounded-xl p-3 text-center border border-[#2B2521]/5">
-                  <p className="text-xs font-bold tabular-nums" style={{ color: couleur }}>—</p>
+                  <p className="text-xs font-bold tabular-nums" style={{ color: couleur }}>-</p>
                   <p className="text-[9px] text-[#2B2521]/50">{l}</p>
                 </div>
               ))

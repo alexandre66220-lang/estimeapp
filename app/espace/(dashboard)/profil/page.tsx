@@ -15,7 +15,7 @@ import { TresorerieForm } from "@/components/espace/TresorerieForm";
 import { StatutJuridiqueForm } from "@/components/espace/StatutJuridiqueForm";
 
 export const metadata: Metadata = {
-  title: "Mon profil - Estime",
+  title: "Mon profil, Estime",
 };
 
 export default async function Profil({

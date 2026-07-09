@@ -6,7 +6,7 @@ import { ConnexionForm } from "@/components/ConnexionForm";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Connexion — Estime",
+  title: "Connexion, Estime",
   description:
     "Connectez-vous à votre espace artisan Estime pour gérer vos chantiers et votre réputation en ligne.",
   alternates: {

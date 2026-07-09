@@ -18,7 +18,7 @@ export async function sendNiveauEmail(params: {
 
   const recompenses: Partial<Record<NiveauFidelite, string>> = {
     confirme: "Vous avez désormais accès en avant-première aux nouvelles fonctionnalités d'Estime.",
-    expert:   "Un mois d'abonnement vous est offert — il sera appliqué automatiquement sur votre prochain renouvellement.",
+    expert:   "Un mois d'abonnement vous est offert, il sera appliqué automatiquement sur votre prochain renouvellement.",
     maitre:   "Le badge « Artisan Expert Estime » apparaît maintenant sur votre page vitrine publique.",
     legende:  "Deux mois d'abonnement vous sont offerts et votre nom apparaîtra sur la landing page d'Estime parmi nos meilleurs artisans.",
   };

@@ -6,7 +6,7 @@ import { InscriptionForm } from "@/components/InscriptionForm";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Inscription gratuite — Estime",
+  title: "Inscription gratuite, Estime",
   description:
     "Créez votre compte Estime gratuitement. 14 jours d'essai sans carte bancaire.",
   alternates: {

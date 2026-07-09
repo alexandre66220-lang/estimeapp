@@ -7,7 +7,7 @@ import { updateLienAvisGoogle } from "@/app/actions/profile";
 import { TemplateEmailForm } from "@/components/espace/TemplateEmailForm";
 
 export const metadata: Metadata = {
-  title: "Paramètres - Estime",
+  title: "Paramètres, Estime",
 };
 
 export default async function Parametres({

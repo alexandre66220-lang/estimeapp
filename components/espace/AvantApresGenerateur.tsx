@@ -49,7 +49,7 @@ export function AvantApresGenerateur({ chantierId, existingUrl }: Props) {
       const blob = await fetch(imageUrl).then((r) => r.blob());
       const file = new File([blob], "avant-apres.jpg", { type: "image/jpeg" });
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: "Avant/Après chantier — Estime" });
+        await navigator.share({ files: [file], title: "Avant/Après chantier, Estime" });
         return;
       }
     } catch {

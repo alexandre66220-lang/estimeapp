@@ -10,7 +10,7 @@ const CopierParrainage = dynamic(() =>
 );
 
 export const metadata: Metadata = {
-  title: "Parrainage - Estime",
+  title: "Parrainage, Estime",
 };
 
 const STATUT_LABELS: Record<string, string> = {
@@ -40,7 +40,7 @@ async function ParrainageSection() {
   const { supabase, user } = await getCurrentUser();
   const stats = await getParrainageStats(supabase, user!.id);
 
-  const code = stats.code ?? "—";
+  const code = stats.code ?? "-";
   const lien = stats.code
     ? `https://estime-app.com/inscription?ref=${stats.code}`
     : null;

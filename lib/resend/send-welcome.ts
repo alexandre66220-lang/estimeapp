@@ -58,7 +58,7 @@ L'équipe Estime`;
   const { error } = await resend.emails.send({
     from: FROM,
     to: params.email,
-    subject: "Bienvenue sur Estime — votre essai de 14 jours commence maintenant",
+    subject: "Bienvenue sur Estime, votre essai de 14 jours commence maintenant",
     html,
     text,
   });

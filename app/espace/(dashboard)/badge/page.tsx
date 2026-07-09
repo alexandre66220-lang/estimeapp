@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/lib/supabase/server";
 import { CopierBadge } from "@/components/espace/CopierBadge";
 
 export const metadata: Metadata = {
-  title: "Mon badge - Estime",
+  title: "Mon badge, Estime",
 };
 
 const SITE_URL = "https://estime-app.com";

@@ -8,7 +8,7 @@ import { ClientsManager } from "@/components/espace/ClientsManager";
 import { PipelineClient } from "@/components/espace/PipelineClient";
 
 export const metadata: Metadata = {
-  title: "Mes clients — Estime",
+  title: "Mes clients, Estime",
 };
 
 export default async function Clients({

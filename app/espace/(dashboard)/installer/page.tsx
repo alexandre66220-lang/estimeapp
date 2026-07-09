@@ -5,7 +5,7 @@ import { PlanningNotifBanner } from "@/components/espace/PlanningNotifBanner";
 import { getCurrentUser } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Installer Estime - Espace artisan",
+  title: "Installer Estime, espace artisan",
   robots: { index: false },
 };
 

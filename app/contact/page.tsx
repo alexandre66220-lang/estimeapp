@@ -5,7 +5,7 @@ import PageShell from "@/components/PageShell";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Contact - Estime",
+  title: "Contact, Estime",
   description: "Contactez l'équipe Estime pour toute question sur le service.",
   alternates: {
     canonical: "/contact",

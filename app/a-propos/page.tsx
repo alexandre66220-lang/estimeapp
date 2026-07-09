@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "À propos d'Estime — L'app de réputation pour les artisans BTP",
+  title: "À propos d'Estime, l'app de réputation pour les artisans BTP",
   description:
     "Découvrez l'histoire d'Estime, le SaaS créé pour aider les artisans du BTP à développer leur réputation en ligne automatiquement.",
   alternates: { canonical: "https://estime-app.com/a-propos" },
@@ -18,7 +18,7 @@ const organizationJsonLd = {
   name: "Estime",
   url: "https://estime-app.com",
   description:
-    "SaaS B2B pour les artisans du BTP — génération de posts Instagram et demandes d'avis Google automatiques",
+    "SaaS B2B pour les artisans du BTP : génération de posts Instagram et demandes d'avis Google automatiques",
   founder: {
     "@type": "Person",
     name: "Alexandre",
@@ -51,7 +51,7 @@ const METIERS = [
   {
     metier: "Électriciens",
     probleme:
-      "Métier technique avec peu de visuel attrayant — Estime aide à valoriser les installations et à collecter les avis qui rassurent les clients.",
+      "Métier technique avec peu de visuel attrayant : Estime aide à valoriser les installations et à collecter les avis qui rassurent les clients.",
   },
   {
     metier: "Maçons",
@@ -66,7 +66,7 @@ const METIERS = [
   {
     metier: "Couvreurs",
     probleme:
-      "Travaux souvent peu visibles du grand public, mais une réputation locale essentielle — les avis Google sont leur meilleur vecteur de croissance.",
+      "Travaux souvent peu visibles du grand public, mais une réputation locale essentielle : les avis Google sont leur meilleur vecteur de croissance.",
   },
   {
     metier: "Menuisiers",
@@ -121,7 +121,7 @@ export default function APropos() {
                 clients face à des concurrents moins qualifiés mais mieux référencés.
               </p>
               <p>
-                Notre conviction est simple — un artisan qui fait du bon travail mérite d&apos;être
+                Notre conviction est simple : un artisan qui fait du bon travail mérite d&apos;être
                 reconnu. Estime automatise tout ce qui est chronophage et technique pour qu&apos;ils
                 puissent se concentrer sur leur cœur de métier, tout en construisant une réputation
                 digitale solide.
@@ -215,7 +215,7 @@ export default function APropos() {
               </p>
               <p className="text-dusk/75 leading-relaxed">
                 Passionné de développement produit, il a conçu Estime pour que chaque fonctionnalité
-                réponde à un vrai besoin terrain — sans complexité inutile.
+                réponde à un vrai besoin terrain, sans complexité inutile.
               </p>
             </div>
           </section>

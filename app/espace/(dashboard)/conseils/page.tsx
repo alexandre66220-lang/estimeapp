@@ -9,7 +9,7 @@ import type { ArticleConseil, ConseilMetier } from "@/lib/sanity/queries";
 import { ConseilsMetierFilter } from "@/components/espace/ConseilsMetierFilter";
 
 export const metadata: Metadata = {
-  title: "Conseils et astuces - Estime",
+  title: "Conseils et astuces, Estime",
 };
 
 const METIERS: { value: ConseilMetier | "general"; label: string }[] = [

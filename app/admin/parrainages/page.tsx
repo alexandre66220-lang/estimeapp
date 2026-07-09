@@ -8,7 +8,7 @@ import { marquerConverti } from "@/app/actions/parrainage";
 const ADMIN_EMAIL = "alcalspark@icloud.com";
 
 export const metadata: Metadata = {
-  title: "Admin - Parrainages",
+  title: "Admin, Parrainages",
 };
 
 export default async function AdminParrainages() {

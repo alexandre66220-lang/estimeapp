@@ -54,7 +54,7 @@ export function RelanceImpayeModal({
   const [corps, setCorps] = useState(
     TEMPLATES[niveauSuggere](clientPrenom, chantiertTitre, montantEnRetard, joursRetard)
   );
-  const [sujet, setSujet] = useState(`Relance paiement — ${chantiertTitre}`);
+  const [sujet, setSujet] = useState(`Relance paiement (${chantiertTitre})`);
   const [status, setStatus] = useState<"idle" | "ok" | "error">("idle");
   const [pending, startTransition] = useTransition();
 

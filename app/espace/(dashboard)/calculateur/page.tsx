@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CalculateurSurface } from "@/components/espace/CalculateurSurface";
 
 export const metadata: Metadata = {
-  title: "Calculateur de surface — Estime",
+  title: "Calculateur de surface, Estime",
 };
 
 export default function CalculateurPage() {

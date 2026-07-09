@@ -10,7 +10,7 @@ import { getCurrentUser } from "@/lib/supabase/server";
 import { getRapportLogs } from "@/lib/supabase/rapports";
 import { GenererRapportButton } from "@/components/espace/GenererRapportButton";
 
-export const metadata: Metadata = { title: "Mes rapports — Estime" };
+export const metadata: Metadata = { title: "Mes rapports, Estime" };
 
 const MOIS_FR = [
   "janvier", "février", "mars", "avril", "mai", "juin",

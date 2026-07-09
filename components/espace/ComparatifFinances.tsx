@@ -53,7 +53,7 @@ function fmtEur(n: number) {
 function EcartCell({ a, b, isEur = true }: { a: number; b: number; isEur?: boolean }) {
   const diff = b - a;
   const pct = a !== 0 ? ((diff / Math.abs(a)) * 100).toFixed(0) : null;
-  if (diff === 0) return <span className="text-dusk/40 flex items-center gap-1"><Minus size={12} /> —</span>;
+  if (diff === 0) return <span className="text-dusk/40 flex items-center gap-1"><Minus size={12} /> -</span>;
   const up = diff > 0;
   return (
     <span className={`flex items-center gap-1 font-semibold text-sm ${up ? "text-green-600" : "text-red-500"}`}>

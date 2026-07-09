@@ -7,7 +7,7 @@ import { devError } from "@/lib/log";
 import SubscribeButton from "@/components/espace/SubscribeButton";
 
 export const metadata: Metadata = {
-  title: "Abonnement - Estime",
+  title: "Abonnement, Estime",
 };
 
 const CUSTOMER_PORTAL_URL = process.env.NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_URL;

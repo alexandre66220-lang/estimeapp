@@ -21,7 +21,7 @@ import { getRentabiliteAnnuelle } from "@/components/espace/RentabiliteFinances"
 import { SanteFinanciere } from "@/components/espace/SanteFinanciere";
 import { AjouterDonneeFinanciereModal } from "@/components/espace/AjouterDonneeFinanciereModal";
 
-export const metadata: Metadata = { title: "Finances — Estime" };
+export const metadata: Metadata = { title: "Finances, Estime" };
 
 function fmt(n: number) {
   return n.toLocaleString("fr-FR", { maximumFractionDigits: 0 });
@@ -158,7 +158,7 @@ export default async function FinancesPage() {
       )}
 
       <div className="space-y-6">
-        {/* SECTION 0 — Santé financière */}
+        {/* SECTION 0 : Santé financière */}
         <SanteFinanciere
           tauxRecouvrement={financesEtendues.sante.tauxRecouvrement}
           delaiMoyenPaiement={financesEtendues.sante.delaiMoyenPaiement}
@@ -166,7 +166,7 @@ export default async function FinancesPage() {
           montantTotalEnRetard={financesEtendues.sante.montantTotalEnRetard}
         />
 
-        {/* SECTION 1 — Mois en cours */}
+        {/* SECTION 1 : Mois en cours */}
         <section>
           <h2 className="font-display text-lg font-bold text-dusk mb-4">
             {new Date(currentYear, now.getMonth(), 1).toLocaleDateString("fr-FR", {
@@ -188,7 +188,7 @@ export default async function FinancesPage() {
             <StatCard
               icon={<ChartBar size={20} />}
               label="Montant moyen"
-              value={data.chantiersMoisCourant > 0 ? `${fmt(data.moyenneMoisCourant)} €` : "—"}
+              value={data.chantiersMoisCourant > 0 ? `${fmt(data.moyenneMoisCourant)} €` : "-"}
             />
             <StatCard
               icon={
@@ -202,7 +202,7 @@ export default async function FinancesPage() {
               value={
                 data.variationPct !== null
                   ? `${data.variationPct >= 0 ? "+" : ""}${Math.round(data.variationPct)} %`
-                  : "—"
+                  : "-"
               }
               sub={
                 data.variationPct !== null ? (
@@ -219,7 +219,7 @@ export default async function FinancesPage() {
           </div>
         </section>
 
-        {/* SECTION 2 — Graphique 12 mois */}
+        {/* SECTION 2 : Graphique 12 mois */}
         <section className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
           <h2 className="font-display text-lg font-bold text-dusk mb-1">
             Évolution mensuelle
@@ -228,7 +228,7 @@ export default async function FinancesPage() {
           <FinancesChartWrapper data={data.monthly} currentMonth={currentMonthKey} />
         </section>
 
-        {/* SECTION 3 — Année */}
+        {/* SECTION 3 : Année */}
         <section>
           <h2 className="font-display text-lg font-bold text-dusk mb-4">
             Année {currentYear}
@@ -245,7 +245,7 @@ export default async function FinancesPage() {
               value={
                 data.meilleurMois
                   ? `${data.meilleurMois.label} · ${fmt(data.meilleurMois.ca)} €`
-                  : "—"
+                  : "-"
               }
             />
             <div className="bg-white rounded-2xl border border-dusk/8 p-5 lg:p-6">
@@ -279,7 +279,7 @@ export default async function FinancesPage() {
           </div>
         </section>
 
-        {/* SECTION 4 — Derniers chantiers */}
+        {/* SECTION 4 : Derniers chantiers */}
         {data.dernierChantiers.length > 0 && (
           <section className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
             <h2 className="font-display text-lg font-bold text-dusk mb-5">

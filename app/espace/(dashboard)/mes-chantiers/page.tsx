@@ -7,7 +7,7 @@ import { getSignedChantierPhotoUrls } from "@/lib/supabase/storage";
 import ChantierCard from "@/components/espace/ChantierCard";
 
 export const metadata: Metadata = {
-  title: "Mes chantiers - Estime",
+  title: "Mes chantiers, Estime",
 };
 
 export default function MesChantiers({

@@ -143,7 +143,7 @@ async function applyStripeCredit(
   await stripe.customers.createBalanceTransaction(profile.stripe_customer_id, {
     amount: -amountCents,
     currency: "eur",
-    description: `Récompense fidélité Estime — niveau ${NIVEAUX_FIDELITE[niveau].label}`,
+    description: `Récompense fidélité Estime, niveau ${NIVEAUX_FIDELITE[niveau].label}`,
   });
 }
 

@@ -44,7 +44,7 @@ export default function Footer() {
 
         <div className="mt-8 pt-6 border-t border-white/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <p className="text-dust/25 text-xs">
-            © 2026 Estime —{" "}
+            © 2026 Estime,{" "}
             <a
               href="https://alcalspark.com"
               target="_blank"
@@ -60,7 +60,7 @@ export default function Footer() {
             rel="noopener noreferrer"
           >
             <Image
-              alt="Estime - Reputation on autopilot for tradespeople | Product Hunt"
+              alt="Estime, Reputation on autopilot for tradespeople | Product Hunt"
               width={250}
               height={54}
               src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1189422&theme=light&t=1783348237784"

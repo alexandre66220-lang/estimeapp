@@ -3,7 +3,7 @@ import { Brain } from "@phosphor-icons/react/dist/ssr";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { RecalculerAlterEgoButton } from "@/components/espace/RecalculerAlterEgoButton";
 
-export const metadata: Metadata = { title: "Alter ego stratégique — Estime" };
+export const metadata: Metadata = { title: "Alter ego stratégique, Estime" };
 
 const NIVEAU_COULEUR = (score: number) => {
   if (score >= 70) return "text-red-600 bg-red-50";

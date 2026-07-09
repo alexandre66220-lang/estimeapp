@@ -1,5 +1,5 @@
 /**
- * Netlify Scheduled Function — analyse comportementale alter ego
+ * Netlify Scheduled Function : analyse comportementale alter ego
  * Se déclenche une fois par semaine, le lundi à 05h00 UTC
  *
  * Variables d'environnement requises :

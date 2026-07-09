@@ -5,7 +5,7 @@ import { PlanningNotifBanner } from "@/components/espace/PlanningNotifBanner";
 import type { ReseauSocial } from "@/lib/planning/creneaux";
 
 export const metadata: Metadata = {
-  title: "Planning éditorial - Estime",
+  title: "Planning éditorial, Estime",
 };
 
 export default async function PlanningPage() {

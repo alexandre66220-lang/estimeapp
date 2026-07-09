@@ -12,11 +12,11 @@ const TOP_VILLES = VILLES_SEO.slice(0, 5);
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Annuaire artisans BTP — Trouvez un artisan de confiance | Estime",
+  title: "Annuaire artisans BTP, trouvez un artisan de confiance | Estime",
   description:
     "Trouvez un peintre, plombier, électricien ou maçon certifié près de chez vous. Tous les artisans Estime sont évalués par leurs clients.",
   openGraph: {
-    title: "Annuaire artisans BTP — Estime",
+    title: "Annuaire artisans BTP, Estime",
     description: "Trouvez un artisan certifié Estime près de chez vous.",
     url: "https://estime-app.com/annuaire",
     siteName: "Estime",
@@ -125,7 +125,7 @@ export default async function AnnuairePage({
         </Suspense>
       </main>
 
-      {/* Maillage interne — combinaisons métier/ville */}
+      {/* Maillage interne : combinaisons métier/ville */}
       <section className="mt-16 border-t border-[#2B2521]/8 pt-10">
         <h2 className="text-base font-semibold text-[#2B2521] mb-6">Recherches fréquentes</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -152,7 +152,7 @@ export default async function AnnuairePage({
       {/* Footer */}
       <footer className="mt-16 bg-[#1A1410] py-8 px-6 text-center">
         <p className="text-[#F2EDE4]/25 text-xs">
-          © 2026 Estime — <Link href="/" className="hover:text-[#F2EDE4]/50 transition-colors">estime-app.com</Link>
+          © 2026 Estime, <Link href="/" className="hover:text-[#F2EDE4]/50 transition-colors">estime-app.com</Link>
         </p>
       </footer>
     </div>

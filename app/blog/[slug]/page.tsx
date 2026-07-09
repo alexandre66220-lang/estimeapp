@@ -40,7 +40,7 @@ export async function generateMetadata({
   const ogImageUrl = `${BASE}/api/og?type=blog&slug=${encodeURIComponent(slug)}&titre=${encodeURIComponent(article.titre)}&categorie=${encodeURIComponent(article.categorie)}`;
 
   return {
-    title: `${article.titre} — Blog Estime`,
+    title: `${article.titre}, Blog Estime`,
     description: article.resume,
     alternates: {
       canonical: `${BASE}/blog/${slug}`,

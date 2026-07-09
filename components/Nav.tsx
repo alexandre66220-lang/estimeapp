@@ -7,7 +7,7 @@ export default function Nav() {
         <Link
           href="/"
           className="font-display text-xl font-bold text-dusk tracking-tight hover:text-ambre transition-colors duration-200"
-          aria-label="Estime - Retour à l'accueil"
+          aria-label="Estime, retour à l'accueil"
         >
           Estime
         </Link>

@@ -1,5 +1,5 @@
 /**
- * Netlify Background Function — analyse matériau via Anthropic Vision
+ * Netlify Background Function : analyse matériau via Anthropic Vision
  * Invoquée par app/actions/materiau.ts (demarrerScanMateriau) juste après la
  * création de la ligne materiau_scans (analyse_status = "pending").
  *

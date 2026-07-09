@@ -4,7 +4,7 @@ import LegalPageShell from "@/components/LegalPageShell";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Politique de confidentialité — Estime",
+  title: "Politique de confidentialité, Estime",
   description: "Politique de confidentialité et de protection des données du service Estime.",
   alternates: {
     canonical: "/politique-confidentialite",

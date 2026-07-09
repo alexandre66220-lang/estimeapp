@@ -34,7 +34,7 @@ import PaymentSuccessToast from "@/components/espace/PaymentSuccessToast";
 import { InstallBanner } from "@/components/espace/InstallBanner";
 
 export const metadata: Metadata = {
-  title: "Tableau de bord - Estime",
+  title: "Tableau de bord, Estime",
 };
 
 const ONBOARDING_STEPS = [

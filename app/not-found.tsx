@@ -3,7 +3,7 @@ import { HouseSimple, MagnifyingGlass } from "@phosphor-icons/react/dist/ssr";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Page introuvable - Estime",
+  title: "Page introuvable, Estime",
   robots: { index: false, follow: false },
 };
 

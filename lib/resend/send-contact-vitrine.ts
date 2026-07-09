@@ -21,7 +21,7 @@ export async function sendContactVitrine(params: {
     from: FROM,
     to: params.artisanEmail,
     replyTo: params.email,
-    subject: `Nouveau message de ${params.prenom} ${params.nom} — Estime`,
+    subject: `Nouveau message de ${params.prenom} ${params.nom} (Estime)`,
     html: `
 <!DOCTYPE html>
 <html lang="fr">
@@ -32,7 +32,7 @@ export async function sendContactVitrine(params: {
       <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#fff;border-radius:16px;overflow:hidden;">
         <tr>
           <td style="background:#C75D3B;padding:32px 40px;">
-            <p style="margin:0;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;">Estime — Nouveau message</p>
+            <p style="margin:0;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;">Estime, nouveau message</p>
             <h1 style="margin:8px 0 0;color:#fff;font-size:22px;font-weight:700;">Vous avez reçu un message</h1>
           </td>
         </tr>
@@ -68,7 +68,7 @@ export async function sendContactVitrine(params: {
         <tr>
           <td style="padding:24px 40px;border-top:1px solid #f0ebe4;">
             <p style="margin:0;font-size:12px;color:#a89e98;">
-              Message reçu via <a href="https://estime-app.com" style="color:#C75D3B;">Estime</a> — Votre outil de réputation artisan.
+              Message reçu via <a href="https://estime-app.com" style="color:#C75D3B;">Estime</a>, votre outil de réputation artisan.
             </p>
           </td>
         </tr>

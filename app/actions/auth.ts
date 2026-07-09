@@ -67,7 +67,7 @@ export async function signup(formData: FormData) {
 
   // Le code de parrainage est mémorisé dès maintenant (avant même la
   // confirmation d'email), pour être traité de façon fiable à la première
-  // visite de /espace dans app/espace/layout.tsx — même si la confirmation
+  // visite de /espace dans app/espace/layout.tsx, même si la confirmation
   // d'email est activée et qu'aucune session n'est encore ouverte ici.
   if (data.user && ref) {
     const admin = createAdminClient();

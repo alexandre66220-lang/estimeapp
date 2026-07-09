@@ -7,13 +7,13 @@ import { BlogFilters } from "./BlogFilters";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Blog Estime — Conseils pour artisans BTP",
+  title: "Blog Estime, conseils pour artisans BTP",
   description:
     "Conseils pratiques pour artisans BTP : gestion de chantiers, réputation, marketing sur les réseaux sociaux, rentabilité. Rédigés par des experts du bâtiment.",
   alternates: { canonical: "https://estime-app.com/blog" },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Blog Estime — Conseils pour artisans BTP",
+    title: "Blog Estime, conseils pour artisans BTP",
     description:
       "Conseils pratiques pour artisans BTP : gestion de chantiers, réputation, marketing, rentabilité.",
     url: "https://estime-app.com/blog",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
 };
 
-// Badge colors for similar articles card in FeaturedCard (dark bg — keep light)
+// Badge colors for similar articles card in FeaturedCard (dark bg, keep light)
 export const BADGE_COLORS_LIGHT: Record<string, { bg: string; text: string }> = {
   Technique:  { bg: "#2D6A8F", text: "#ffffff" },
   Marketing:  { bg: "#2D7A4F", text: "#ffffff" },

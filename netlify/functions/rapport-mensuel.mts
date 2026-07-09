@@ -1,5 +1,5 @@
 /**
- * Netlify Scheduled Function — rapport mensuel artisans
+ * Netlify Scheduled Function : rapport mensuel artisans
  * Se déclenche le 1er de chaque mois à 08h00 UTC
  *
  * Variables d'environnement requises :

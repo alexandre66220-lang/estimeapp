@@ -72,7 +72,7 @@ function getCustomerId(subscription: Stripe.Subscription) {
  * Cherche le profil dans l'ordre de fiabilité décroissant :
  * 1. metadata.user_id de la subscription (= client_reference_id de la
  *    Checkout Session, propagé via subscription_data.metadata à la
- *    création) — identifiant fiable, indépendant de l'email saisi sur
+ *    création), identifiant fiable, indépendant de l'email saisi sur
  *    Stripe.
  * 2. stripe_customer_id déjà enregistré (événements suivants pour ce
  *    client, une fois le matching initial fait).

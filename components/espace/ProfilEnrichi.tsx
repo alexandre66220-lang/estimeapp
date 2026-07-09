@@ -323,7 +323,7 @@ function ExperienceStatutSection({ data, lang }: { data: ProfilEnrichiData; lang
               onChange={(e) => setAnneeDebut(e.target.value ? Number(e.target.value) : null)}
               className="rounded-xl border border-dusk/15 bg-dust/40 px-3 py-2.5 text-sm text-dusk focus:outline-none focus:ring-2 focus:ring-[var(--color-accent,#C75D3B)]/25"
             >
-              <option value="">—</option>
+              <option value="">-</option>
               {years.map((y) => <option key={y} value={y}>{y}</option>)}
             </select>
             {exp !== null && (

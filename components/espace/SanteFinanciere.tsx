@@ -64,7 +64,7 @@ export function SanteFinanciere({
             <div className="bg-white/70 rounded-xl p-3">
               <p className="text-xs text-dusk/50 mb-0.5">Délai moyen paiement</p>
               <p className="text-lg font-bold text-dusk">
-                {delaiMoyenPaiement !== null ? `${Math.round(delaiMoyenPaiement)} j` : "—"}
+                {delaiMoyenPaiement !== null ? `${Math.round(delaiMoyenPaiement)} j` : "-"}
               </p>
             </div>
             <div className={`rounded-xl p-3 ${nbFacturesEnRetard > 0 ? "bg-red-100" : "bg-white/70"}`}>

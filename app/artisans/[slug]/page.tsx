@@ -24,7 +24,7 @@ export async function generateMetadata({
 
   if (metier) {
     return {
-      title: `${metier.labelPluriel} certifiés Estime — Artisans BTP en France | Estime`,
+      title: `${metier.labelPluriel} certifiés Estime, artisans BTP en France | Estime`,
       description: `Trouvez un ${metier.label.toLowerCase()} certifié Estime près de chez vous. ${metier.labelPluriel} évalués par leurs clients avec score de réputation et avis Google vérifiés.`,
       alternates: { canonical: `https://estime-app.com/artisans/${slug}` },
       robots: { index: true, follow: true },
@@ -32,7 +32,7 @@ export async function generateMetadata({
   }
   if (ville) {
     return {
-      title: `Artisans BTP à ${ville.label} — Professionnels certifiés | Estime`,
+      title: `Artisans BTP à ${ville.label}, professionnels certifiés | Estime`,
       description: `Peintres, plombiers, électriciens, maçons à ${ville.label} (${ville.departement}). Artisans évalués et certifiés par Estime.`,
       alternates: { canonical: `https://estime-app.com/artisans/${slug}` },
       robots: { index: true, follow: true },
@@ -79,7 +79,7 @@ async function MetierPage({ metier }: { metier: (typeof METIERS_SEO)[number] }) 
         {/* Header */}
         <div>
           <h1 className="font-landing-display text-4xl lg:text-5xl font-semibold text-[#2B2521] leading-tight mb-3">
-            Trouver un {metier.label} certifié<br className="hidden sm:block" /> — Artisans Estime en France
+            Trouver un {metier.label} certifié<br className="hidden sm:block" />, artisans Estime en France
           </h1>
           <p className="text-[#2B2521]/55 text-lg max-w-[60ch]">
             {metier.labelPluriel} présents sur Estime, évalués et recommandés par leurs clients en {metier.description}.

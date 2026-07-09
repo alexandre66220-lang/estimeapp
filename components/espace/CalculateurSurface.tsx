@@ -70,10 +70,10 @@ const FIELDS: Record<Forme, { key: string; label: string }[]> = {
     { key: "largeur", label: "Largeur (m)" },
   ],
   l_shape: [
-    { key: "a_longueur", label: "Partie A — Longueur (m)" },
-    { key: "a_largeur", label: "Partie A — Largeur (m)" },
-    { key: "b_longueur", label: "Partie B — Longueur (m)" },
-    { key: "b_largeur", label: "Partie B — Largeur (m)" },
+    { key: "a_longueur", label: "Partie A, longueur (m)" },
+    { key: "a_largeur", label: "Partie A, largeur (m)" },
+    { key: "b_longueur", label: "Partie B, longueur (m)" },
+    { key: "b_largeur", label: "Partie B, largeur (m)" },
   ],
   triangle: [
     { key: "base", label: "Base (m)" },
@@ -125,7 +125,7 @@ export function CalculateurSurface({
   const saveToHistory = useCallback(() => {
     if (surface <= 0) return;
     const entry: HistoryEntry = {
-      label: `${FORMES.find((f) => f.value === forme)?.label} — ${surface.toFixed(2)} m²`,
+      label: `${FORMES.find((f) => f.value === forme)?.label} (${surface.toFixed(2)} m²)`,
       surface,
       ts: Date.now(),
     };

@@ -128,7 +128,7 @@ async function buildStory({
 }): Promise<Buffer> {
   const overlays: OverlayOptions[] = [];
 
-  // 1. Photo de fond — cover 9:16
+  // 1. Photo de fond (cover 9:16)
   const photoBuf = await downloadBuffer(photoUrl);
   const base = await sharp(photoBuf)
     .resize(W, H, { fit: "cover", position: "centre" })

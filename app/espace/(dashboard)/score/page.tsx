@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/lib/supabase/server";
 import { computeReputationScore, NIVEAUX } from "@/lib/score/reputation";
 
 export const metadata: Metadata = {
-  title: "Score de réputation - Estime",
+  title: "Score de réputation, Estime",
 };
 
 export default function Score() {

@@ -27,7 +27,7 @@ import { JournalMateriauxChantier } from "@/components/espace/JournalMateriauxCh
 import { NotesVocalesChantier } from "@/components/espace/NotesVocalesChantier";
 
 export const metadata: Metadata = {
-  title: "Chantier - Estime",
+  title: "Chantier, Estime",
 };
 
 const RELANCE_LABELS: Record<string, string> = {
@@ -240,7 +240,7 @@ export default async function FicheChantier({
         </div>
       )}
 
-      {/* Visuel avant/après — visible seulement si au moins une photo */}
+      {/* Visuel avant/après : visible seulement si au moins une photo */}
       {hasPhoto && (
         <div className="mb-6">
           <AvantApresGenerateur
@@ -250,7 +250,7 @@ export default async function FicheChantier({
         </div>
       )}
 
-      {/* Story Instagram — visible seulement si au moins une photo */}
+      {/* Story Instagram : visible seulement si au moins une photo */}
       {hasPhoto && (
         <div className="mb-6">
           <StoryGenerateur

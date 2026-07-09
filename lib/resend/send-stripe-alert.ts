@@ -30,7 +30,7 @@ Aucun profil Supabase n'a pu être identifié pour cet événement : l'abonnemen
   const { error } = await resend.emails.send({
     from: FROM,
     to: ALERT_TO,
-    subject: `[Estime] Échec matching webhook Stripe — ${params.eventType}`,
+    subject: `[Estime] Échec matching webhook Stripe (${params.eventType})`,
     text,
   });
 

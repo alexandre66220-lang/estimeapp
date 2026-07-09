@@ -45,7 +45,7 @@ function IosSteps() {
         <div>
           <p className={STEP_TITLE}>Appuyez sur Partager</p>
           <p className={STEP_DESC}>
-            Le bouton <strong className={STEP_STRONG}>partager</strong> se trouve en bas de l&apos;écran Safari — c&apos;est un carré avec une flèche vers le haut.
+            Le bouton <strong className={STEP_STRONG}>partager</strong> se trouve en bas de l&apos;écran Safari, c&apos;est un carré avec une flèche vers le haut.
           </p>
         </div>
         <span className="text-3xl ml-auto">⬆️</span>
@@ -219,11 +219,11 @@ export function InstallGuide() {
       <div className="bg-dusk/4 dark:bg-[#2A2520] rounded-2xl p-5 flex items-center gap-3 border border-transparent dark:border-white/6">
         <span className="text-2xl">🎉</span>
         <p className="text-sm text-dusk/70 dark:text-[#C8C0B8]">
-          <strong className="text-dusk dark:text-[#F8F5F2]">Résultat :</strong> Estime apparaît sur votre écran d&apos;accueil comme une vraie application — en plein écran, sans barre de navigation du navigateur.
+          <strong className="text-dusk dark:text-[#F8F5F2]">Résultat :</strong> Estime apparaît sur votre écran d&apos;accueil comme une vraie application, en plein écran, sans barre de navigation du navigateur.
         </p>
       </div>
 
-      {/* Shortcuts section — iOS only */}
+      {/* Shortcuts section (iOS only) */}
       {(platform === "ios" || platform === "unknown") && (
         <div className="bg-white rounded-2xl border border-dusk/8 p-6">
           <div className="flex items-center gap-2 mb-1">

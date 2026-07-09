@@ -16,7 +16,7 @@ const METIERS = [
   { value: "general_only", label: "Général" },
 ] as const;
 
-// Badge colors per category — solid hex to bypass dark-mode CSS overrides
+// Badge colors per category (solid hex to bypass dark-mode CSS overrides)
 const BADGE_COLORS: Record<string, { bg: string; text: string }> = {
   Technique:  { bg: "#2D6A8F", text: "#ffffff" },
   Marketing:  { bg: "#2D7A4F", text: "#ffffff" },

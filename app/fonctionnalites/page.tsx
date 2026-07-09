@@ -7,7 +7,7 @@ import { FAQ_FONCTIONNALITES, buildFaqJsonLd } from "@/lib/seo/faq";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Toutes les fonctionnalités — Estime",
+  title: "Toutes les fonctionnalités, Estime",
   description:
     "Posts Instagram IA, gestion clients, tableau de bord financier, page vitrine publique, score de réputation comparatif. Découvrez tout ce qu'Estime fait pour vous.",
   alternates: { canonical: "https://estime-app.com/fonctionnalites" },

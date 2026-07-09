@@ -5,7 +5,7 @@ import { getCachedClients } from "@/lib/supabase/clients";
 import { PipelineClient } from "@/components/espace/PipelineClient";
 
 export const metadata: Metadata = {
-  title: "Pipeline — Estime",
+  title: "Pipeline, Estime",
 };
 
 export default async function Pipeline({

@@ -49,8 +49,8 @@ type ProfileBootstrap = {
 /**
  * Crée le profil si besoin et retourne son état (mis en cache 5 minutes).
  * Le booléen first_login_processed renvoyé permet à l'appelant de ne
- * déclencher processFirstLogin() — qui fait un aller-retour Supabase
- * d'écriture — que la toute première fois, au lieu de le faire à chaque
+ * déclencher processFirstLogin(), qui fait un aller-retour Supabase
+ * d'écriture que la toute première fois, au lieu de le faire à chaque
  * navigation sous /espace/*.
  */
 export async function ensureProfile(

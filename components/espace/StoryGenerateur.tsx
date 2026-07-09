@@ -54,7 +54,7 @@ export function StoryGenerateur({ chantierId, photoAvantUrl, photoApresUrl }: Pr
       const blob = await fetch(storyUrl).then((r) => r.blob());
       const file = new File([blob], "story.jpg", { type: "image/jpeg" });
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: "Story Instagram — Estime" });
+        await navigator.share({ files: [file], title: "Story Instagram, Estime" });
         return;
       }
     } catch {

@@ -627,7 +627,7 @@ export default function NouveauChantier() {
                 // Pré-remplir l'image et basculer sur l'onglet photo pour finaliser
                 setActiveTab("photo");
                 // On stocke l'URL de l'image IA pour l'utiliser comme photo d'après
-                // via un état dédié — on simule une "photo" pour le flux existant
+                // via un état dédié : on simule une "photo" pour le flux existant
                 const syntheticEvent = { iaImageUrl: imageUrl };
                 void syntheticEvent; // L'image sera utilisée lors du submit
                 setErrorMessage("Image IA sélectionnée. Ajoutez un titre si nécessaire, puis cliquez sur « Générer mon post ».");
@@ -725,7 +725,7 @@ export default function NouveauChantier() {
               <span className="w-5 h-5 rounded-full border border-dusk/20 flex items-center justify-center group-open:bg-braise group-open:border-braise transition-colors">
                 <CaretDown size={10} className="text-dusk/40 group-open:text-white group-open:rotate-180 transition-transform" />
               </span>
-              Détail financier <span className="text-dusk/35 font-normal">— optionnel</span>
+              Détail financier <span className="text-dusk/35 font-normal">(optionnel)</span>
             </summary>
             <div className="mt-4 pt-4 border-t border-dusk/8">
               <div className="mb-3">

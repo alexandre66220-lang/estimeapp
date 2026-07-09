@@ -120,7 +120,7 @@ export async function envoyerRelanceImpaye(data: {
       html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#2C2C2C;">
         ${data.corps.split("\n").map((l) => `<p style="margin:0 0 12px;">${l}</p>`).join("")}
         <hr style="border:none;border-top:1px solid #E8E0D2;margin:24px 0;" />
-        <p style="font-size:12px;color:#9A8F8B;">Envoyé via Estime — La plateforme des artisans</p>
+        <p style="font-size:12px;color:#9A8F8B;">Envoyé via Estime, la plateforme des artisans</p>
       </div>`,
     }),
   });

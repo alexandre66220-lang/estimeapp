@@ -1,5 +1,5 @@
 /**
- * Utilitaire partagé — alerte email en cas d'échec d'une Netlify Scheduled Function.
+ * Utilitaire partagé, alerte email en cas d'échec d'une Netlify Scheduled Function.
  *
  * Toute nouvelle Scheduled Function doit envelopper son handler avec
  * `withErrorNotification(nomFonction, handler)` (voir ci-dessous) afin qu'une

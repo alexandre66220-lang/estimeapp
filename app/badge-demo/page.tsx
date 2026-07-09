@@ -37,7 +37,7 @@ export default async function BadgeDemo({
       </main>
 
       <footer className="border-t border-dusk/10 px-6 py-10 max-w-4xl mx-auto flex flex-col items-start gap-4">
-        <p className="text-dusk/40 text-xs">© Dupont Rénovation — tous droits réservés</p>
+        <p className="text-dusk/40 text-xs">© Dupont Rénovation, tous droits réservés</p>
         {svgUrl ? (
           <a href="https://estime-app.com" target="_blank" rel="noopener noreferrer">
             <Image src={svgUrl} alt="Badge Estime" width={320} height={120} unoptimized />

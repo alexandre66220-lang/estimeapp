@@ -47,7 +47,7 @@ export function FinancesTabs({
 
   return (
     <div>
-      {/* Tab bar — scrollable on mobile */}
+      {/* Tab bar (scrollable on mobile) */}
       <div className="overflow-x-auto pb-1 mb-6">
         <div className="flex gap-1 bg-dust/50 rounded-xl p-1 min-w-max">
           {TABS.map(([t, label]) => (
