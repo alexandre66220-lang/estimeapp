@@ -70,94 +70,67 @@ export default async function FicheClient({
 }) {
   const { id } = await params;
   const { message, error } = await searchParams;
-  const { supabase, user } = await getCurrentUser();
 
-  if (!user) {
-    redirect("/connexion");
-  }
-
-  console.error("[fiche-client] DEBUG: début des requêtes Supabase pour id=", id, "user=", user.id);
-
-  // Toutes les données en parallèle
-  let client, clientError, notes, notesError, chantiers, chantiersError, avis, avisError, paiementsClient, paiementsError;
   try {
-    const [
-      clientRes,
-      notesRes,
-      chantiersRes,
-      avisRes,
-      paiementsRes,
-    ] = await Promise.all([
-      supabase
-        .from("clients")
-        .select(
-          "id, prenom, nom, email, telephone, statut, source, est_vip, derniere_interaction, montant_estime, created_at, est_mauvais_payeur, delai_moyen_paiement, taux_recouvrement, total_encaisse"
-        )
-        .eq("id", id)
-        .eq("user_id", user.id)
-        .maybeSingle(),
-      supabase
-        .from("notes_client")
-        .select("id, contenu, created_at")
-        .eq("client_id", id)
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(50),
-      supabase
-        .from("chantiers")
-        .select("id, titre, montant, statut, created_at")
-        .eq("client_id", id)
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("avis")
-        .select("id, note_google")
-        .eq("user_id", user.id),
-      supabase
-        .from("paiements_chantier")
-        .select("id, chantier_id, type, montant, statut, date_prevue, date_encaissement")
-        .eq("user_id", user.id)
-        .order("date_encaissement", { ascending: false })
-        .order("created_at", { ascending: false }),
-    ]);
-    client = clientRes.data;
-    clientError = clientRes.error;
-    notes = notesRes.data;
-    notesError = notesRes.error;
-    chantiers = chantiersRes.data;
-    chantiersError = chantiersRes.error;
-    avis = avisRes.data;
-    avisError = avisRes.error;
-    paiementsClient = paiementsRes.data;
-    paiementsError = paiementsRes.error;
-  } catch (thrown) {
-    console.error("[fiche-client] DEBUG: le Promise.all a levé une exception (pas juste une erreur Supabase) :", thrown);
-    throw thrown;
-  }
+    const { supabase, user } = await getCurrentUser();
 
-  console.error("[fiche-client] DEBUG: requête clients ->", { data: client, error: clientError });
-  console.error("[fiche-client] DEBUG: requête notes_client ->", { count: notes?.length, error: notesError });
-  console.error("[fiche-client] DEBUG: requête chantiers ->", { count: chantiers?.length, error: chantiersError });
-  console.error("[fiche-client] DEBUG: requête avis ->", { count: avis?.length, error: avisError });
-  console.error("[fiche-client] DEBUG: requête paiements_chantier ->", { count: paiementsClient?.length, error: paiementsError });
+    if (!user) {
+      redirect("/connexion");
+    }
 
-  if (clientError) {
-    console.error("[fiche-client] Erreur clients:", clientError.message, clientError.code, clientError.details, clientError.hint);
-  }
-  if (notesError) {
-    console.error("[fiche-client] Erreur notes_client:", notesError.message, notesError.code, notesError.details, notesError.hint);
-  }
-  if (chantiersError) {
-    console.error("[fiche-client] Erreur chantiers:", chantiersError.message, chantiersError.code, chantiersError.details, chantiersError.hint);
-  }
-  if (avisError) {
-    console.error("[fiche-client] Erreur avis:", avisError.message, avisError.code, avisError.details, avisError.hint);
-  }
-  if (paiementsError) {
-    console.error("[fiche-client] Erreur paiements_chantier:", paiementsError.message, paiementsError.code, paiementsError.details, paiementsError.hint);
-  }
+    console.log("FETCH clients...");
+    const clientRes = await supabase
+      .from("clients")
+      .select(
+        "id, prenom, nom, email, telephone, statut, source, est_vip, derniere_interaction, montant_estime, created_at, est_mauvais_payeur, delai_moyen_paiement, taux_recouvrement, total_encaisse"
+      )
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    console.log("RESULT clients:", JSON.stringify(clientRes.error));
 
-  if (!client) notFound();
+    console.log("FETCH notes_client...");
+    const notesRes = await supabase
+      .from("notes_client")
+      .select("id, contenu, created_at")
+      .eq("client_id", id)
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    console.log("RESULT notes_client:", JSON.stringify(notesRes.error));
+
+    console.log("FETCH chantiers...");
+    const chantiersRes = await supabase
+      .from("chantiers")
+      .select("id, titre, montant, statut, created_at")
+      .eq("client_id", id)
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+    console.log("RESULT chantiers:", JSON.stringify(chantiersRes.error));
+
+    console.log("FETCH avis...");
+    const avisRes = await supabase
+      .from("avis")
+      .select("id, note_google")
+      .eq("user_id", user.id);
+    console.log("RESULT avis:", JSON.stringify(avisRes.error));
+
+    console.log("FETCH paiements_chantier...");
+    const paiementsRes = await supabase
+      .from("paiements_chantier")
+      .select("id, chantier_id, type, montant, statut, date_prevue, date_encaissement")
+      .eq("user_id", user.id)
+      .order("date_encaissement", { ascending: false })
+      .order("created_at", { ascending: false });
+    console.log("RESULT paiements_chantier:", JSON.stringify(paiementsRes.error));
+
+    const client = clientRes.data;
+    const notes = notesRes.data;
+    const chantiers = chantiersRes.data;
+    const avis = avisRes.data;
+    const paiementsClient = paiementsRes.data;
+
+    if (!client) notFound();
 
   const col = COLONNES.find((c) => c.statut === client.statut);
   const totalCA = (chantiers ?? []).reduce((s, c) => s + (c.montant ?? 0), 0);
@@ -381,6 +354,14 @@ export default async function FicheClient({
       </div>
     </div>
   );
+  } catch (error) {
+    const digest = (error as { digest?: string })?.digest ?? "";
+    const isNextControlFlow = digest.startsWith("NEXT_REDIRECT") || digest.startsWith("NEXT_HTTP_ERROR_FALLBACK");
+    if (!isNextControlFlow) {
+      console.error("DETAIL CLIENT ERROR:", error);
+    }
+    throw error;
+  }
 }
 
 function StatCard({
