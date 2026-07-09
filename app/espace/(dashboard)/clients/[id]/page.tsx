@@ -16,42 +16,6 @@ import type { ClientStatut } from "@/lib/supabase/clients";
 
 export const metadata: Metadata = { title: "Fiche client — Estime" };
 
-/**
- * DEBUG TEMPORAIRE : exécute render() dans un try/catch et affiche l'erreur
- * brute (nom du bloc + message + stack) au lieu de faire planter toute la
- * page si ce bloc précis lève une exception au rendu.
- */
-function SafeBlock({
-  nom,
-  render,
-}: {
-  nom: string;
-  render: () => React.ReactNode;
-}) {
-  try {
-    return <>{render()}</>;
-  } catch (err) {
-    console.error(`[fiche-client] DEBUG: exception dans le bloc "${nom}" :`, err);
-    const message = err instanceof Error ? err.message : String(err);
-    const stack = err instanceof Error ? err.stack : undefined;
-    return (
-      <div className="bg-white border-2 border-red-400 rounded-2xl p-6">
-        <p className="text-red-600 font-bold mb-2">
-          DEBUG — Erreur dans le bloc « {nom} »
-        </p>
-        <pre className="text-red-600 whitespace-pre-wrap break-words text-sm mb-2">
-          {message}
-        </pre>
-        {stack && (
-          <pre className="text-red-600 whitespace-pre-wrap break-words text-xs">
-            {stack}
-          </pre>
-        )}
-      </div>
-    );
-  }
-}
-
 const SOURCES = [
   "Bouche à oreille",
   "Google",
@@ -70,67 +34,70 @@ export default async function FicheClient({
 }) {
   const { id } = await params;
   const { message, error } = await searchParams;
+  const { supabase, user } = await getCurrentUser();
 
-  try {
-    const { supabase, user } = await getCurrentUser();
+  if (!user) {
+    redirect("/connexion");
+  }
 
-    if (!user) {
-      redirect("/connexion");
-    }
-
-    console.log("FETCH clients...");
-    const clientRes = await supabase
+  // Toutes les données en parallèle
+  const [
+    { data: client, error: clientError },
+    { data: notes, error: notesError },
+    { data: chantiers, error: chantiersError },
+    { data: avis, error: avisError },
+    { data: paiementsClient, error: paiementsError },
+  ] = await Promise.all([
+    supabase
       .from("clients")
       .select(
         "id, prenom, nom, email, telephone, statut, source, est_vip, derniere_interaction, montant_estime, created_at, est_mauvais_payeur, delai_moyen_paiement, taux_recouvrement, total_encaisse"
       )
       .eq("id", id)
       .eq("user_id", user.id)
-      .maybeSingle();
-    console.log("RESULT clients:", JSON.stringify(clientRes.error));
-
-    console.log("FETCH notes_client...");
-    const notesRes = await supabase
+      .maybeSingle(),
+    supabase
       .from("notes_client")
       .select("id, contenu, created_at")
       .eq("client_id", id)
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
-      .limit(50);
-    console.log("RESULT notes_client:", JSON.stringify(notesRes.error));
-
-    console.log("FETCH chantiers...");
-    const chantiersRes = await supabase
+      .limit(50),
+    supabase
       .from("chantiers")
       .select("id, titre, montant, statut, created_at")
       .eq("client_id", id)
       .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-    console.log("RESULT chantiers:", JSON.stringify(chantiersRes.error));
-
-    console.log("FETCH avis...");
-    const avisRes = await supabase
+      .order("created_at", { ascending: false }),
+    supabase
       .from("avis")
       .select("id, note_google")
-      .eq("user_id", user.id);
-    console.log("RESULT avis:", JSON.stringify(avisRes.error));
-
-    console.log("FETCH paiements_chantier...");
-    const paiementsRes = await supabase
+      .eq("user_id", user.id),
+    supabase
       .from("paiements_chantier")
       .select("id, chantier_id, type, montant, statut, date_prevue, date_encaissement")
       .eq("user_id", user.id)
       .order("date_encaissement", { ascending: false })
-      .order("created_at", { ascending: false });
-    console.log("RESULT paiements_chantier:", JSON.stringify(paiementsRes.error));
+      .order("created_at", { ascending: false }),
+  ]);
 
-    const client = clientRes.data;
-    const notes = notesRes.data;
-    const chantiers = chantiersRes.data;
-    const avis = avisRes.data;
-    const paiementsClient = paiementsRes.data;
+  if (clientError) {
+    console.error("[fiche-client] Erreur clients:", clientError.message, clientError.code);
+  }
+  if (notesError) {
+    console.error("[fiche-client] Erreur notes_client:", notesError.message, notesError.code);
+  }
+  if (chantiersError) {
+    console.error("[fiche-client] Erreur chantiers:", chantiersError.message, chantiersError.code);
+  }
+  if (avisError) {
+    console.error("[fiche-client] Erreur avis:", avisError.message, avisError.code);
+  }
+  if (paiementsError) {
+    console.error("[fiche-client] Erreur paiements_chantier:", paiementsError.message, paiementsError.code);
+  }
 
-    if (!client) notFound();
+  if (!client) notFound();
 
   const col = COLONNES.find((c) => c.statut === client.statut);
   const totalCA = (chantiers ?? []).reduce((s, c) => s + (c.montant ?? 0), 0);
@@ -281,72 +248,57 @@ export default async function FicheClient({
         </div>
 
         {/* Statistiques */}
-        <SafeBlock
-          nom="Statistiques client"
-          render={() => (
-            <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
-              <h2 className="font-display text-lg font-bold text-dusk mb-5">Statistiques</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                <StatCard emoji="💶" label="CA total" value={totalCA > 0 ? `${totalCA.toLocaleString("fr-FR")} €` : "—"} />
-                <StatCard emoji="🏗️" label="Chantiers" value={nbChantiers > 0 ? String(nbChantiers) : "—"} />
-                <StatCard emoji="⭐" label="Avis Google" value={String(avis?.length ?? 0)} />
-                {premierChantier && (
-                  <StatCard emoji="📅" label="1er chantier" value={fmt(premierChantier)} small />
-                )}
-                {dernierChantier && dernierChantier !== premierChantier && (
-                  <StatCard emoji="🔄" label="Dernier chantier" value={fmt(dernierChantier)} small />
-                )}
-                {client.created_at && (
-                  <StatCard emoji="👤" label="Client depuis" value={fmt(client.created_at)} small />
-                )}
-              </div>
-            </div>
-          )}
-        />
+        <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
+          <h2 className="font-display text-lg font-bold text-dusk mb-5">Statistiques</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <StatCard emoji="💶" label="CA total" value={totalCA > 0 ? `${totalCA.toLocaleString("fr-FR")} €` : "—"} />
+            <StatCard emoji="🏗️" label="Chantiers" value={nbChantiers > 0 ? String(nbChantiers) : "—"} />
+            <StatCard emoji="⭐" label="Avis Google" value={String(avis?.length ?? 0)} />
+            {premierChantier && (
+              <StatCard emoji="📅" label="1er chantier" value={fmt(premierChantier)} small />
+            )}
+            {dernierChantier && dernierChantier !== premierChantier && (
+              <StatCard emoji="🔄" label="Dernier chantier" value={fmt(dernierChantier)} small />
+            )}
+            {client.created_at && (
+              <StatCard emoji="👤" label="Client depuis" value={fmt(client.created_at)} small />
+            )}
+          </div>
+        </div>
 
         {/* Chantiers liés */}
-        <SafeBlock
-          nom="Chantiers liés"
-          render={() =>
-            (chantiers ?? []).length > 0 && (
-              <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
-                <h2 className="font-display text-lg font-bold text-dusk mb-4">Chantiers réalisés</h2>
-                <ul className="divide-y divide-dusk/8">
-                  {(chantiers ?? []).map((c) => (
-                    <li key={c.id} className="flex items-center justify-between gap-4 py-3">
-                      <div>
-                        <Link
-                          href={`/espace/chantiers/${c.id}`}
-                          className="text-sm font-medium text-dusk hover:text-braise transition-colors"
-                        >
-                          {c.titre}
-                        </Link>
-                        <p className="text-xs text-dusk/40 mt-0.5">{fmt(c.created_at)}</p>
-                      </div>
-                      {c.montant && (
-                        <span className="text-sm font-semibold text-dusk/70 shrink-0">
-                          {c.montant.toLocaleString("fr-FR")} €
-                        </span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )
-          }
-        />
+        {(chantiers ?? []).length > 0 && (
+          <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
+            <h2 className="font-display text-lg font-bold text-dusk mb-4">Chantiers réalisés</h2>
+            <ul className="divide-y divide-dusk/8">
+              {(chantiers ?? []).map((c) => (
+                <li key={c.id} className="flex items-center justify-between gap-4 py-3">
+                  <div>
+                    <Link
+                      href={`/espace/chantiers/${c.id}`}
+                      className="text-sm font-medium text-dusk hover:text-braise transition-colors"
+                    >
+                      {c.titre}
+                    </Link>
+                    <p className="text-xs text-dusk/40 mt-0.5">{fmt(c.created_at)}</p>
+                  </div>
+                  {c.montant && (
+                    <span className="text-sm font-semibold text-dusk/70 shrink-0">
+                      {c.montant.toLocaleString("fr-FR")} €
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-        {/* Historique financier + indicateurs financiers + badge payeur */}
-        <SafeBlock
-          nom="Historique financier / indicateurs financiers / badge payeur"
-          render={() => (
-            <HistoriqueFinancier
-              client={client}
-              paiements={paiementsClient ?? []}
-              chantiersIds={(chantiers ?? []).map((c) => c.id)}
-              chantiersMap={Object.fromEntries((chantiers ?? []).map((c) => [c.id, c.titre]))}
-            />
-          )}
+        {/* Historique financier */}
+        <HistoriqueFinancier
+          client={client}
+          paiements={paiementsClient ?? []}
+          chantiersIds={(chantiers ?? []).map((c) => c.id)}
+          chantiersMap={Object.fromEntries((chantiers ?? []).map((c) => [c.id, c.titre]))}
         />
 
         {/* Notes */}
@@ -354,14 +306,6 @@ export default async function FicheClient({
       </div>
     </div>
   );
-  } catch (error) {
-    const digest = (error as { digest?: string })?.digest ?? "";
-    const isNextControlFlow = digest.startsWith("NEXT_REDIRECT") || digest.startsWith("NEXT_HTTP_ERROR_FALLBACK");
-    if (!isNextControlFlow) {
-      console.error("DETAIL CLIENT ERROR:", error);
-    }
-    throw error;
-  }
 }
 
 function StatCard({
@@ -439,100 +383,85 @@ function HistoriqueFinancier({
       <h2 className="font-display text-lg font-bold text-dusk mb-5">Historique financier</h2>
 
       {/* Indicateurs financiers */}
-      <SafeBlock
-        nom="Indicateurs financiers"
-        render={() => (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-            <div className="bg-green-50 rounded-xl p-3">
-              <p className="text-xs text-green-700 mb-1">Total encaissé</p>
-              <p className="text-lg font-bold text-green-700">
-                {totalEncaisse.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €
-              </p>
-            </div>
-            <div className="bg-dust rounded-xl p-3">
-              <p className="text-xs text-dusk/60 mb-1">Payés / En attente</p>
-              <p className="text-lg font-bold text-dusk">
-                {nbPayes} / {nbEnAttente}
-              </p>
-            </div>
-            <div className="bg-dust rounded-xl p-3">
-              <p className="text-xs text-dusk/60 mb-1">Délai moyen paiement</p>
-              <p className="text-lg font-bold text-dusk">
-                {client.delai_moyen_paiement != null
-                  ? `${Math.round(client.delai_moyen_paiement)} j`
-                  : "—"}
-              </p>
-            </div>
-            <div className="bg-dust rounded-xl p-3">
-              <p className="text-xs text-dusk/60 mb-1">Taux recouvrement</p>
-              <p className="text-lg font-bold text-dusk">
-                {client.taux_recouvrement != null
-                  ? `${Math.round(client.taux_recouvrement)}%`
-                  : "—"}
-              </p>
-            </div>
-          </div>
-        )}
-      />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div className="bg-green-50 rounded-xl p-3">
+          <p className="text-xs text-green-700 mb-1">Total encaissé</p>
+          <p className="text-lg font-bold text-green-700">
+            {totalEncaisse.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €
+          </p>
+        </div>
+        <div className="bg-dust rounded-xl p-3">
+          <p className="text-xs text-dusk/60 mb-1">Payés / En attente</p>
+          <p className="text-lg font-bold text-dusk">
+            {nbPayes} / {nbEnAttente}
+          </p>
+        </div>
+        <div className="bg-dust rounded-xl p-3">
+          <p className="text-xs text-dusk/60 mb-1">Délai moyen paiement</p>
+          <p className="text-lg font-bold text-dusk">
+            {client.delai_moyen_paiement != null
+              ? `${Math.round(client.delai_moyen_paiement)} j`
+              : "—"}
+          </p>
+        </div>
+        <div className="bg-dust rounded-xl p-3">
+          <p className="text-xs text-dusk/60 mb-1">Taux recouvrement</p>
+          <p className="text-lg font-bold text-dusk">
+            {client.taux_recouvrement != null
+              ? `${Math.round(client.taux_recouvrement)}%`
+              : "—"}
+          </p>
+        </div>
+      </div>
 
       {/* Badge payeur */}
-      <SafeBlock
-        nom="Badge bon/mauvais payeur"
-        render={() => (
-          <div className="flex flex-wrap gap-2 mb-5">
-            {nbRetards === 0 && nbPayes > 0 && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-100">
-                ✅ Bon payeur
-              </span>
-            )}
-            {nbRetards >= 2 && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-100">
-                ⚠️ Mauvais payeur ({nbRetards} retards)
-              </span>
-            )}
-          </div>
+      <div className="flex flex-wrap gap-2 mb-5">
+        {nbRetards === 0 && nbPayes > 0 && (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-100">
+            ✅ Bon payeur
+          </span>
         )}
-      />
+        {nbRetards >= 2 && (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-100">
+            ⚠️ Mauvais payeur ({nbRetards} retards)
+          </span>
+        )}
+      </div>
 
       {/* Historique paiements */}
-      <SafeBlock
-        nom="Historique paiements"
-        render={() =>
-          filtered.length > 0 && (
-            <div className="divide-y divide-dusk/6">
-              {filtered.slice(0, 10).map((p) => {
-                const style = STATUT_STYLE[p.statut] ?? STATUT_STYLE.en_attente;
-                return (
-                  <div key={p.id} className="flex items-center justify-between gap-3 py-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-dusk truncate">
-                        {chantiersMap[p.chantier_id] ?? "Chantier"} · {TYPE_LABELS[p.type] ?? p.type}
-                      </p>
-                      {p.date_encaissement && (
-                        <p className="text-xs text-dusk/40 mt-0.5">
-                          {new Date(p.date_encaissement).toLocaleDateString("fr-FR", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-sm font-bold text-dusk">
-                        {(p.montant ?? 0).toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €
-                      </span>
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${style.bg} ${style.text}`}>
-                        {style.label}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )
-        }
-      />
+      {filtered.length > 0 && (
+        <div className="divide-y divide-dusk/6">
+          {filtered.slice(0, 10).map((p) => {
+            const style = STATUT_STYLE[p.statut] ?? STATUT_STYLE.en_attente;
+            return (
+              <div key={p.id} className="flex items-center justify-between gap-3 py-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-dusk truncate">
+                    {chantiersMap[p.chantier_id] ?? "Chantier"} · {TYPE_LABELS[p.type] ?? p.type}
+                  </p>
+                  {p.date_encaissement && (
+                    <p className="text-xs text-dusk/40 mt-0.5">
+                      {new Date(p.date_encaissement).toLocaleDateString("fr-FR", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-sm font-bold text-dusk">
+                    {(p.montant ?? 0).toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €
+                  </span>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${style.bg} ${style.text}`}>
+                    {style.label}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
