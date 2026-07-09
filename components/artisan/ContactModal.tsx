@@ -1,15 +1,23 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { X, PaperPlaneTilt, Spinner, Check, WarningCircle } from "@phosphor-icons/react";
+import { X, PaperPlaneTilt, Spinner, Check, WarningCircle, ArrowRight } from "@phosphor-icons/react";
+import { boutonRadiusCSS, boutonTailleCSS, boutonStyleCSS, type BoutonForme, type BoutonStyle, type BoutonTaille } from "@/lib/vitrine/defaults";
 
 type Props = {
   slug: string;
   artisanNom: string;
   ctaLabel?: string;
+  ctaStyle?: {
+    forme: BoutonForme;
+    style: BoutonStyle;
+    taille: BoutonTaille;
+    icone: boolean;
+    couleur: string;
+  };
 };
 
-export function ContactModal({ slug, artisanNom, ctaLabel = "Nous contacter" }: Props) {
+export function ContactModal({ slug, artisanNom, ctaLabel = "Nous contacter", ctaStyle }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -64,14 +72,30 @@ export function ContactModal({ slug, artisanNom, ctaLabel = "Nous contacter" }: 
 
   return (
     <>
-      <button
-        type="button"
-        onClick={openModal}
-        className="inline-flex items-center gap-2 bg-[#C75D3B] text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-[#B8512F] active:scale-[0.97] transition-all duration-200 shadow-sm"
-      >
-        <PaperPlaneTilt size={16} weight="bold" aria-hidden="true" />
-        {ctaLabel}
-      </button>
+      {ctaStyle ? (
+        <button
+          type="button"
+          onClick={openModal}
+          className="inline-flex items-center justify-center gap-2 font-semibold active:scale-[0.97] transition-all duration-200"
+          style={{
+            borderRadius: boutonRadiusCSS(ctaStyle.forme),
+            ...boutonTailleCSS(ctaStyle.taille),
+            ...boutonStyleCSS(ctaStyle.style, ctaStyle.couleur),
+          }}
+        >
+          {ctaLabel}
+          {ctaStyle.icone && <ArrowRight size={16} weight="bold" aria-hidden="true" />}
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={openModal}
+          className="inline-flex items-center gap-2 bg-[#C75D3B] text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-[#B8512F] active:scale-[0.97] transition-all duration-200 shadow-sm"
+        >
+          <PaperPlaneTilt size={16} weight="bold" aria-hidden="true" />
+          {ctaLabel}
+        </button>
+      )}
 
       {/* Backdrop */}
       {open && (

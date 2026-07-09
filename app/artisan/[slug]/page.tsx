@@ -10,6 +10,7 @@ import { FadeIn } from "@/components/artisan/FadeIn";
 import { PostGrid } from "@/components/artisan/PostGrid";
 import { AnimatedCounters } from "@/components/artisan/AnimatedCounters";
 import { FaqAccordion } from "@/components/artisan/FaqAccordion";
+import { ScrollReveal } from "@/components/artisan/ScrollReveal";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/faq";
 import {
   mergeVitrineConfig,
@@ -18,6 +19,12 @@ import {
   heroHeightCSS,
   waveTransitionSVG,
   separateurSVG,
+  parseVideoEmbedUrl,
+  ombreCSS,
+  boutonRadiusCSS,
+  boutonTailleCSS,
+  boutonStyleCSS,
+  ANIM_KEYFRAMES_CSS,
 } from "@/lib/vitrine/defaults";
 
 export const revalidate = 3600;
@@ -37,17 +44,6 @@ function initiales(prenom: string | null, nom: string | null, company: string | 
   if (prenom && nom) return `${prenom[0]}${nom[0]}`.toUpperCase();
   if (company) return company.slice(0, 2).toUpperCase();
   return "??";
-}
-
-function parseVideoEmbed(url: string): string | null {
-  if (!url) return null;
-  // YouTube
-  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
-  // Vimeo
-  const viMatch = url.match(/vimeo\.com\/(\d+)/);
-  if (viMatch) return `https://player.vimeo.com/video/${viMatch[1]}`;
-  return null;
 }
 
 // ── Metadata ─────────────────────────────────────────────────────────────────
@@ -179,9 +175,26 @@ export default async function VitrineArtisan({
 
   // vitrine_config
   const vitrineConfig = mergeVitrineConfig(profile.vitrine_config ?? {});
-  const vitrineCouleur = /^#[0-9A-Fa-f]{6}$/.test(vitrineConfig.hero.couleur_principale)
+  const themeColorFallback = /^#[0-9A-Fa-f]{6}$/.test(vitrineConfig.hero.couleur_principale)
     ? vitrineConfig.hero.couleur_principale
     : themeColor;
+
+  // Palette personnalisée (couleurs.principale/secondaire/accent) : devient la source de vérité
+  // pour tout le rendu existant qui référence vitrineCouleur (CTA, titres, séparateurs, icônes, bordures).
+  const vitrineCouleur =
+    /^#[0-9A-Fa-f]{6}$/.test(vitrineConfig.couleurs.principale)
+      ? vitrineConfig.couleurs.principale
+      : themeColorFallback;
+  const couleurPrincipale = vitrineCouleur;
+  const couleurSecondaire =
+    /^#[0-9A-Fa-f]{6}$/.test(vitrineConfig.couleurs.secondaire) ? vitrineConfig.couleurs.secondaire : "#2B2521";
+  const couleurAccent =
+    /^#[0-9A-Fa-f]{6}$/.test(vitrineConfig.couleurs.accent) ? vitrineConfig.couleurs.accent : couleurPrincipale;
+  const couleurFond =
+    vitrineConfig.couleurs.fond && /^#[0-9A-Fa-f]{6}$/.test(vitrineConfig.couleurs.fond)
+      ? vitrineConfig.couleurs.fond
+      : "#F8F5F2";
+
   const vitrineSlogan = vitrineConfig.hero.slogan;
   const vitrineCtaTexte = vitrineConfig.hero.cta_texte || "Contactez-moi";
   const showChantiers = vitrineConfig.sections.chantiers.visible;
@@ -219,17 +232,56 @@ export default async function VitrineArtisan({
       ? "rounded-2xl shadow-md"
       : "rounded-2xl";
 
+  // Style cards & blocs (rayon/ombre/bordure/espacement)
+  const cardsConfig = vitrineConfig.cards;
+  const cardInlineStyle: React.CSSProperties = {
+    borderRadius: `${cardsConfig.rayon}px`,
+    boxShadow: ombreCSS(cardsConfig.ombre),
+    ...(cardsConfig.bordure_active
+      ? { border: `${cardsConfig.bordure_epaisseur}px solid ${cardsConfig.bordure_couleur}` }
+      : {}),
+  };
+
+  // Style boutons CTA
+  const boutonsConfig = vitrineConfig.boutons;
+  const ctaStyle = {
+    forme: boutonsConfig.forme,
+    style: boutonsConfig.style,
+    taille: boutonsConfig.taille,
+    icone: boutonsConfig.icone,
+    couleur: vitrineCouleur,
+  };
+
   // Hero
   const heroHeight = heroHeightCSS(vitrineConfig.hero.style);
   const heroOverlay = vitrineConfig.hero.overlay_couleur;
   const heroOpacity = vitrineConfig.hero.overlay_opacite;
+  const heroDegradeCouleur = /^#[0-9A-Fa-f]{6}$/.test(vitrineConfig.hero.overlay_degrade_couleur)
+    ? vitrineConfig.hero.overlay_degrade_couleur
+    : "#000000";
+  const heroDegradeOpacite = vitrineConfig.hero.overlay_degrade_opacite;
   const overlayColorMap: Record<string, string> = {
     sombre: `rgba(0,0,0,${heroOpacity / 100})`,
     colore: `${vitrineCouleur}${Math.round(heroOpacity * 2.55).toString(16).padStart(2, "0")}`,
-    degrade: `linear-gradient(to bottom, transparent, rgba(0,0,0,${heroOpacity / 100}))`,
+    degrade: `linear-gradient(to bottom, transparent, ${heroDegradeCouleur}${Math.round(heroDegradeOpacite * 2.55).toString(16).padStart(2, "0")})`,
     aucun: "transparent",
   };
   const overlayStyle = overlayColorMap[heroOverlay] ?? "transparent";
+
+  // Position du texte dans le hero
+  const positionTexte = vitrineConfig.hero.position_texte;
+  const heroContentAlignClass =
+    positionTexte === "gauche"
+      ? "items-start text-left"
+      : positionTexte === "bas_gauche"
+      ? "items-start text-left justify-end"
+      : "items-center text-center";
+
+  // Fond vidéo du hero (desktop uniquement, fallback photo sur mobile)
+  const heroVideoEmbed = vitrineConfig.hero.video_url ? parseVideoEmbedUrl(vitrineConfig.hero.video_url, true) : null;
+
+  // Espacement vertical entre sections
+  const espacementSections = cardsConfig.espacement_sections;
 
   // Background
   const fondTexture = textureCSS(vitrineConfig.fond.texture, vitrineCouleur);
@@ -278,7 +330,7 @@ export default async function VitrineArtisan({
 
   // Video
   const videoSection = vitrineConfig.sections.video;
-  const videoEmbed = videoSection.visible ? parseVideoEmbed(videoSection.url) : null;
+  const videoEmbed = videoSection.visible ? parseVideoEmbedUrl(videoSection.url) : null;
 
   // Limit slices
   const chantiersLimited = chantiersWithUrls.slice(0, vitrineNombre);
@@ -337,7 +389,7 @@ export default async function VitrineArtisan({
       }
     : null;
 
-  const hasHeroPhoto = !!photoCouverture;
+  const hasHeroPhoto = !!photoCouverture || !!heroVideoEmbed;
 
   return (
     <>
@@ -414,11 +466,12 @@ export default async function VitrineArtisan({
           .vitrine-page::before { left: 0; content: '🔨\\A📐\\A🧱\\A🪚\\A🔧\\A🏗️\\A🔨\\A📐\\A🧱\\A🪚'; }
           .vitrine-page::after { right: 0; content: '📐\\A🧱\\A🪚\\A🔧\\A🏗️\\A🔨\\A📐\\A🧱\\A🪚\\A🔧'; }
         ` : ""}
+        main.vitrine-main > .vitrine-fadein + .vitrine-fadein {
+          position: relative;
+          margin-top: ${espacementSections}px !important;
+          padding-top: ${separateurCSS ? "2rem" : "0"};
+        }
         ${separateurCSS ? `
-          main.vitrine-main > .vitrine-fadein + .vitrine-fadein {
-            position: relative;
-            padding-top: 2rem;
-          }
           main.vitrine-main > .vitrine-fadein + .vitrine-fadein::before {
             content: '${separateurStyle === "icone" ? "⚒" : ""}';
             display: block;
@@ -433,17 +486,25 @@ export default async function VitrineArtisan({
             ${separateurCSS}
           }
         ` : ""}
+        ${ANIM_KEYFRAMES_CSS}
         :root {
           --vitrine-couleur: ${vitrineCouleur};
           --vitrine-font: ${bodyFont};
+          --vitrine-primary: ${couleurPrincipale};
+          --vitrine-secondary: ${couleurSecondaire};
+          --vitrine-accent: ${couleurAccent};
         }
       `}</style>
 
       <div
-        className="vitrine-page min-h-screen bg-[#F8F5F2] relative"
+        className="vitrine-page min-h-screen relative"
         style={{
           color: "#2B2521",
           fontFamily: bodyFont,
+          backgroundColor: couleurFond,
+          ["--vitrine-primary" as string]: couleurPrincipale,
+          ["--vitrine-secondary" as string]: couleurSecondaire,
+          ["--vitrine-accent" as string]: couleurAccent,
           ...(fondTexture ? { backgroundImage: fondTexture.replace("background-image: ", "").replace(";", "") } : {}),
         }}
       >
@@ -452,31 +513,53 @@ export default async function VitrineArtisan({
         <header
           className="relative overflow-hidden"
           style={{
-            ...(hasHeroPhoto ? {
+            ...(photoCouverture ? {
               backgroundImage: `url(${photoCouverture})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
               ...(vitrineConfig.hero.parallaxe ? { backgroundAttachment: "fixed" } : {}),
-            } : { backgroundColor: vitrineTemplate === "moderne" ? `${vitrineCouleur}10` : "white" }),
+            } : !hasHeroPhoto ? { backgroundColor: vitrineTemplate === "moderne" ? `${vitrineCouleur}10` : "white" } : {}),
             [heroHeight.split(":")[0].trim()]: heroHeight.split(":")[1].trim(),
             display: "flex",
             flexDirection: "column",
           }}
         >
+          {/* Fond vidéo (desktop uniquement, fallback photo sur mobile) */}
+          {heroVideoEmbed && (
+            <div className="hidden sm:block absolute inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
+              <iframe
+                src={heroVideoEmbed}
+                title=""
+                allow="autoplay; encrypted-media"
+                className="absolute top-1/2 left-1/2"
+                style={{
+                  width: "100vw",
+                  height: "56.25vw",
+                  minHeight: "100%",
+                  minWidth: "177.78vh",
+                  transform: "translate(-50%, -50%)",
+                  border: "none",
+                }}
+              />
+            </div>
+          )}
+
           {/* Overlay */}
           {hasHeroPhoto && heroOverlay !== "aucun" && (
             <div
               className="absolute inset-0 z-0"
               style={{
-                background: heroOverlay === "degrade"
-                  ? `linear-gradient(to bottom, transparent, rgba(0,0,0,${heroOpacity / 100}))`
-                  : overlayStyle,
+                background: heroOverlay === "degrade" ? overlayColorMap.degrade : overlayStyle,
               }}
             />
           )}
 
           {/* Hero content */}
-          <div className={`relative z-10 flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto w-full px-5 ${hasHeroPhoto ? "py-16 sm:py-24" : "py-10 sm:py-14"} gap-5 text-center`}>
+          <ScrollReveal
+            effet={vitrineConfig.animations.hero.effet}
+            intensite={vitrineConfig.animations.hero.intensite}
+            className={`relative z-10 flex-1 flex flex-col max-w-2xl mx-auto w-full px-5 ${hasHeroPhoto ? "py-16 sm:py-24" : "py-10 sm:py-14"} gap-5 ${heroContentAlignClass}`}
+          >
 
             {/* Photo profil / Logo / initiales */}
             {photoProfilUrl ? (
@@ -669,7 +752,12 @@ export default async function VitrineArtisan({
 
             {/* CTA contact */}
             {showContact && (
-              <ContactModal slug={slug} artisanNom={artisanNom} ctaLabel={vitrineCtaTexte} />
+              <ScrollReveal
+                effet={vitrineConfig.animations.contact.effet}
+                intensite={vitrineConfig.animations.contact.intensite}
+              >
+                <ContactModal slug={slug} artisanNom={artisanNom} ctaLabel={vitrineCtaTexte} ctaStyle={ctaStyle} />
+              </ScrollReveal>
             )}
 
             {/* Compteurs dans le hero (position "bas") */}
@@ -682,7 +770,7 @@ export default async function VitrineArtisan({
                 clair={hasHeroPhoto}
               />
             )}
-          </div>
+          </ScrollReveal>
 
           {/* Compteurs dans le hero (position "overlay", sur la photo) */}
           {heroCompteursActifs && heroCompteursPosition === "overlay" && hasHeroPhoto && (
@@ -714,40 +802,53 @@ export default async function VitrineArtisan({
 
         {/* ── Ruban certifications ── */}
         {showRuban && vitrineCertifListe.length > 0 && (
-          <div className="overflow-hidden border-y border-[#2B2521]/6 bg-white py-3">
-            <div className="flex whitespace-nowrap">
-              <div className="marquee-track flex items-center gap-6 pr-6">
-                {[...vitrineCertifListe, ...vitrineCertifListe].map((c, i) => (
-                  <span key={i} className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full"
-                    style={{ backgroundColor: `${vitrineCouleur}12`, color: vitrineCouleur }}>
-                    <ShieldCheck size={11} weight="fill" />
-                    {c}
-                  </span>
-                ))}
+          <ScrollReveal
+            effet={vitrineConfig.animations.certifications_ruban.effet}
+            intensite={vitrineConfig.animations.certifications_ruban.intensite}
+          >
+            <div className="overflow-hidden border-y border-[#2B2521]/6 bg-white py-3">
+              <div className="flex whitespace-nowrap">
+                <div className="marquee-track flex items-center gap-6 pr-6">
+                  {[...vitrineCertifListe, ...vitrineCertifListe].map((c, i) => (
+                    <span key={i} className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full"
+                      style={{ backgroundColor: `${vitrineCouleur}12`, color: vitrineCouleur }}>
+                      <ShieldCheck size={11} weight="fill" />
+                      {c}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          </ScrollReveal>
         )}
 
         {/* ── Chiffres clés ── */}
         {showChiffres && (
-          <AnimatedCounters
-            nbChantiers={chantiersWithUrls.length}
-            nbAvis={allAvisCount}
-            expYears={expYears}
-            satisfaction={chiffres.satisfaction}
-            couleur={vitrineCouleur}
-            styleVariant={chiffres.style}
-          />
+          <ScrollReveal
+            effet={vitrineConfig.animations.chiffres_cles.effet}
+            intensite={vitrineConfig.animations.chiffres_cles.intensite}
+          >
+            <AnimatedCounters
+              nbChantiers={chantiersWithUrls.length}
+              nbAvis={allAvisCount}
+              expYears={expYears}
+              satisfaction={chiffres.satisfaction}
+              couleur={vitrineCouleur}
+              styleVariant={chiffres.style}
+            />
+          </ScrollReveal>
         )}
 
         {/* ── Témoignage vedette ── */}
         {temoVedette.visible && temoVedette.texte_custom && (
-          <FadeIn>
+          <ScrollReveal
+            effet={vitrineConfig.animations.temoignage_vedette.effet}
+            intensite={vitrineConfig.animations.temoignage_vedette.intensite}
+          >
             <div className="max-w-2xl mx-auto px-5 py-8">
               <div
                 className="rounded-3xl px-8 py-8 text-center relative overflow-hidden"
-                style={{ backgroundColor: `${vitrineCouleur}10`, border: `1px solid ${vitrineCouleur}25` }}
+                style={{ backgroundColor: `${vitrineCouleur}10`, border: `1px solid ${vitrineCouleur}25`, ...cardInlineStyle }}
               >
                 <div className="text-5xl font-serif text-center mb-4 leading-none" style={{ color: `${vitrineCouleur}40` }}>
                   &ldquo;
@@ -762,15 +863,15 @@ export default async function VitrineArtisan({
                 </p>
                 {temoVedette.auteur_custom && (
                   <p className="mt-4 text-sm font-semibold" style={{ color: vitrineCouleur }}>
-                    — {temoVedette.auteur_custom}
+                    {temoVedette.auteur_custom}
                   </p>
                 )}
               </div>
             </div>
-          </FadeIn>
+          </ScrollReveal>
         )}
 
-        <main className="vitrine-main max-w-2xl mx-auto px-5 py-10 space-y-14">
+        <main className="vitrine-main max-w-2xl mx-auto px-5 py-10">
 
           {/* ── Avis Google ── */}
           {showAvis && avisLimited.length > 0 && (
@@ -782,6 +883,7 @@ export default async function VitrineArtisan({
                     <div
                       key={a.id}
                       className={`bg-white ${cardRadius} border border-[#2B2521]/6 px-5 py-4`}
+                      style={cardInlineStyle}
                     >
                       <div className="flex items-center justify-between gap-3 mb-1">
                         <span className="inline-flex gap-0.5">
@@ -815,7 +917,11 @@ export default async function VitrineArtisan({
 
           {/* ── Chantiers réalisés ── */}
           {showChantiers && chantiersLimited.length > 0 && (
-            <FadeIn delay={80}>
+            <ScrollReveal
+              effet={vitrineConfig.animations.chantiers.effet}
+              intensite={vitrineConfig.animations.chantiers.intensite}
+              className="vitrine-fadein"
+            >
               <section aria-labelledby="section-chantiers">
                 <SectionTitle id="section-chantiers" icon="🏗️" sizeClass={sectionTitleSize}>Réalisations</SectionTitle>
                 <div className={`mt-5 ${vitrineConfig.sections.chantiers.disposition === "liste" ? "space-y-3" : "grid grid-cols-2 sm:grid-cols-3 gap-3"}`}>
@@ -824,7 +930,7 @@ export default async function VitrineArtisan({
                     if (!displayUrl) return null;
                     return (
                       <div key={c.id} className="group">
-                        <div className={`relative aspect-square ${cardRadius} overflow-hidden bg-[#E8E0D2]`}>
+                        <div className={`relative aspect-square ${cardRadius} overflow-hidden bg-[#E8E0D2]`} style={cardInlineStyle}>
                           <Image
                             src={displayUrl}
                             alt={c.titre}
@@ -842,7 +948,7 @@ export default async function VitrineArtisan({
                   })}
                 </div>
               </section>
-            </FadeIn>
+            </ScrollReveal>
           )}
 
           {/* ── Tarifs ── */}
@@ -852,7 +958,7 @@ export default async function VitrineArtisan({
                 <SectionTitle id="section-tarifs" icon="💶" sizeClass={sectionTitleSize}>Tarifs</SectionTitle>
                 <div className="space-y-3 mt-5">
                   {vitrineTarifs.lignes.map((l, i) => (
-                    <div key={i} className={`bg-white ${cardRadius} border border-[#2B2521]/6 px-5 py-4 flex justify-between items-center gap-4`}>
+                    <div key={i} className={`bg-white ${cardRadius} border border-[#2B2521]/6 px-5 py-4 flex justify-between items-center gap-4`} style={cardInlineStyle}>
                       <span className="text-sm text-[#2B2521]/70">{l.description}</span>
                       <span className="text-sm font-semibold shrink-0" style={{ color: vitrineCouleur }}>{l.prix}</span>
                     </div>
@@ -887,19 +993,27 @@ export default async function VitrineArtisan({
 
           {/* ── FAQ ── */}
           {showFaq && (
-            <FadeIn>
+            <ScrollReveal
+              effet={vitrineConfig.animations.faq.effet}
+              intensite={vitrineConfig.animations.faq.intensite}
+              className="vitrine-fadein"
+            >
               <section aria-labelledby="section-faq">
                 <SectionTitle id="section-faq" icon="💬" sizeClass={sectionTitleSize}>Questions fréquentes</SectionTitle>
                 <div className="mt-5">
                   <FaqAccordion items={faqSection.items} couleur={vitrineCouleur} />
                 </div>
               </section>
-            </FadeIn>
+            </ScrollReveal>
           )}
 
           {/* ── Vidéo ── */}
           {videoEmbed && (
-            <FadeIn>
+            <ScrollReveal
+              effet={vitrineConfig.animations.video.effet}
+              intensite={vitrineConfig.animations.video.intensite}
+              className="vitrine-fadein"
+            >
               <section aria-labelledby="section-video">
                 <SectionTitle id="section-video" icon="🎬" sizeClass={sectionTitleSize}>Vidéo de présentation</SectionTitle>
                 <div className="mt-5 rounded-2xl overflow-hidden aspect-video bg-black">
@@ -912,7 +1026,7 @@ export default async function VitrineArtisan({
                   />
                 </div>
               </section>
-            </FadeIn>
+            </ScrollReveal>
           )}
 
           {/* ── Posts Instagram ── */}

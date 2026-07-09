@@ -21,8 +21,18 @@ import {
   CERTIFICATIONS_DISPONIBLES,
   COULEURS_PREDEFINIES,
   POLICES_TITRES,
+  THEMES_VISUELS,
   mergeVitrineConfig,
+  applyThemeVisuel,
   textureCSS,
+  ombreCSS,
+  boutonRadiusCSS,
+  boutonTailleCSS,
+  boutonStyleCSS,
+  animationClass,
+  animationDurationMs,
+  animationAmplitude,
+  ANIM_KEYFRAMES_CSS,
   type VitrineConfig,
   type HeroStyle,
   type HeroOverlay,
@@ -31,6 +41,14 @@ import {
   type SeparateurStyle,
   type PoliceTitres,
   type TailleTitres,
+  type AnimSectionKey,
+  type AnimEffet,
+  type AnimIntensite,
+  type OmbreStyle,
+  type BoutonForme,
+  type BoutonStyle,
+  type BoutonTaille,
+  type PositionTexteHero,
 } from "@/lib/vitrine/defaults";
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -204,6 +222,19 @@ function ChipGroup<T extends string>({
 
 // ── Live Preview ──────────────────────────────────────────────────────────────
 
+function animationClassName(effet: AnimEffet): string {
+  return effet === "aucun" ? "" : animationClass(effet);
+}
+
+function animationVars(intensite: AnimIntensite): Record<string, string> {
+  const { amp, scale } = animationAmplitude(intensite);
+  return {
+    ["--vitrine-anim-duree"]: `${animationDurationMs(intensite)}ms`,
+    ["--vitrine-anim-amp"]: amp,
+    ["--vitrine-anim-scale"]: scale,
+  };
+}
+
 function VitrinePreview({
   config,
   profile,
@@ -213,13 +244,22 @@ function VitrinePreview({
 }) {
   const artisanNom =
     [profile.prenom, profile.nom].filter(Boolean).join(" ") || "Votre nom";
-  const couleur = config.hero.couleur_principale || "#C75D3B";
+  const couleur = config.couleurs.principale || config.hero.couleur_principale || "#C75D3B";
+  const couleurSecondaire = config.couleurs.secondaire || config.hero.couleur_secondaire;
   const cardRadius =
     config.mise_en_page.style_cards === "carre"
       ? "rounded-lg"
       : config.mise_en_page.style_cards === "ombre"
       ? "rounded-2xl shadow-md"
       : "rounded-2xl";
+  const cardInlineStyle: React.CSSProperties = {
+    borderRadius: `${config.cards.rayon}px`,
+    boxShadow: ombreCSS(config.cards.ombre),
+    ...(config.cards.bordure_active
+      ? { border: `${config.cards.bordure_epaisseur}px solid ${config.cards.bordure_couleur}` }
+      : {}),
+  };
+  const espacement = Math.round(config.cards.espacement_sections / 4);
 
   const heroH =
     config.hero.style === "plein_ecran"
@@ -249,6 +289,9 @@ function VitrinePreview({
       style={{
         fontSize: "13px",
         fontFamily,
+        ["--vitrine-primary" as string]: couleur,
+        ["--vitrine-secondary" as string]: couleurSecondaire,
+        ["--vitrine-accent" as string]: config.couleurs.accent,
         ...(config.fond.type === "degrade"
           ? { backgroundImage: `linear-gradient(160deg, ${couleur}12, transparent 60%)` }
           : {}),
@@ -257,6 +300,8 @@ function VitrinePreview({
           : {}),
       }}
     >
+      <style>{ANIM_KEYFRAMES_CSS}</style>
+
       {/* Décorations latérales */}
       {decorLaterale === "bordure" && (
         <div className="absolute top-0 left-0 bottom-0 w-1 z-10" style={{ backgroundColor: couleur }} />
@@ -272,20 +317,33 @@ function VitrinePreview({
 
       {/* Hero */}
       <div
-        className={`relative ${heroH} flex flex-col items-center justify-center text-center px-4 py-8 overflow-hidden`}
+        key={`hero-${config.animations.hero.effet}-${config.animations.hero.intensite}`}
+        className={`vitrine-anim-visible relative ${heroH} flex flex-col px-4 py-8 overflow-hidden ${
+          config.hero.position_texte === "gauche"
+            ? "items-start text-left"
+            : config.hero.position_texte === "bas_gauche"
+            ? "items-start text-left justify-end"
+            : "items-center justify-center text-center"
+        } ${animationClassName(config.animations.hero.effet)}`}
         style={{
           backgroundColor:
             config.hero.overlay_couleur === "colore" ? `${couleur}dd` : undefined,
           background:
             config.hero.overlay_couleur === "degrade"
-              ? `linear-gradient(135deg, ${couleur}cc 0%, ${config.hero.couleur_secondaire}cc 100%)`
+              ? `linear-gradient(135deg, ${config.hero.overlay_degrade_couleur}${Math.round(config.hero.overlay_degrade_opacite * 2.55).toString(16).padStart(2, "0")} 0%, transparent 100%)`
               : config.hero.overlay_couleur === "sombre"
               ? `rgba(30,20,15,${config.hero.overlay_opacite / 100})`
               : undefined,
+          ...animationVars(config.animations.hero.intensite),
         }}
       >
+        {config.hero.video_url && (
+          <span className="absolute top-2 right-2 text-[9px] bg-black/60 text-white px-2 py-0.5 rounded-full z-10">
+            🎥 Fond vidéo (desktop)
+          </span>
+        )}
         <div
-          className="w-12 h-12 rounded-2xl mx-auto mb-2 flex items-center justify-center text-white font-bold"
+          className="w-12 h-12 rounded-2xl mb-2 flex items-center justify-center text-white font-bold"
           style={{ backgroundColor: couleur }}
         >
           {((profile.prenom?.[0] ?? "") + (profile.nom?.[0] ?? "")).toUpperCase() || "A"}
@@ -308,10 +366,15 @@ function VitrinePreview({
         )}
 
         <button
-          className="mt-3 px-3 py-1.5 rounded-full text-[10px] font-semibold text-white"
-          style={{ backgroundColor: couleur }}
+          className="mt-3 inline-flex items-center gap-1 text-[10px] font-semibold"
+          style={{
+            borderRadius: boutonRadiusCSS(config.boutons.forme),
+            padding: "6px 14px",
+            ...boutonStyleCSS(config.boutons.style, couleur),
+          }}
         >
           {config.hero.cta_texte || "Contactez-moi"}
+          {config.boutons.icone && <span aria-hidden="true">→</span>}
         </button>
 
         {/* Compteurs hero preview */}
@@ -342,12 +405,16 @@ function VitrinePreview({
         )}
       </div>
 
-      <div className="px-4 py-4 space-y-4">
+      <div className="px-4 py-4" style={{ display: "flex", flexDirection: "column", gap: `${Math.max(8, espacement)}px` }}>
         {/* Chiffres clés */}
         {config.sections.chiffres_cles.visible && (
           <div
-            className={`py-3 rounded-xl ${config.sections.chiffres_cles.style === "bande" ? "" : "grid grid-cols-2 gap-2"}`}
-            style={config.sections.chiffres_cles.style === "bande" ? { backgroundColor: couleur } : {}}
+            key={`chiffres-${config.animations.chiffres_cles.effet}-${config.animations.chiffres_cles.intensite}`}
+            className={`vitrine-anim-visible py-3 rounded-xl ${animationClassName(config.animations.chiffres_cles.effet)} ${config.sections.chiffres_cles.style === "bande" ? "" : "grid grid-cols-2 gap-2"}`}
+            style={{
+              ...(config.sections.chiffres_cles.style === "bande" ? { backgroundColor: couleur } : {}),
+              ...animationVars(config.animations.chiffres_cles.intensite),
+            }}
           >
             {config.sections.chiffres_cles.style === "bande" ? (
               <div className="flex justify-around">
@@ -372,7 +439,7 @@ function VitrinePreview({
 
         {/* À propos */}
         {config.sections.a_propos.visible && (
-          <div className={`bg-white p-3 border border-[#2B2521]/6 ${cardRadius}`}>
+          <div className={`bg-white p-3 border border-[#2B2521]/6 ${cardRadius}`} style={cardInlineStyle}>
             <p className="font-semibold text-[10px] text-[#2B2521]/40 uppercase tracking-wider mb-1">À propos</p>
             {config.sections.a_propos.texte ? (
               <p className="text-[11px] text-[#2B2521]/70 leading-relaxed line-clamp-3">
@@ -386,23 +453,31 @@ function VitrinePreview({
 
         {/* Témoignage vedette */}
         {config.sections.temoignage_vedette.visible && (
-          <div className={`p-3 ${cardRadius}`} style={{ backgroundColor: couleur }}>
+          <div
+            key={`temoi-${config.animations.temoignage_vedette.effet}-${config.animations.temoignage_vedette.intensite}`}
+            className={`vitrine-anim-visible p-3 ${cardRadius} ${animationClassName(config.animations.temoignage_vedette.effet)}`}
+            style={{ backgroundColor: couleur, ...cardInlineStyle, ...animationVars(config.animations.temoignage_vedette.intensite) }}
+          >
             <p className="text-[11px] text-white/90 italic">
               &ldquo;{config.sections.temoignage_vedette.texte_custom || "Témoignage client…"}&rdquo;
             </p>
             <p className="text-[10px] text-white/70 mt-1">
-              — {config.sections.temoignage_vedette.auteur_custom || "Client satisfait"}
+              {config.sections.temoignage_vedette.auteur_custom || "Client satisfait"}
             </p>
           </div>
         )}
 
         {/* Chantiers */}
         {config.sections.chantiers.visible && (
-          <div>
+          <div
+            key={`chantiers-${config.animations.chantiers.effet}-${config.animations.chantiers.intensite}`}
+            className={`vitrine-anim-visible ${animationClassName(config.animations.chantiers.effet)}`}
+            style={animationVars(config.animations.chantiers.intensite)}
+          >
             <p className="font-semibold text-[10px] text-[#2B2521]/40 uppercase tracking-wider mb-1">Réalisations</p>
             <div className="grid grid-cols-3 gap-1.5">
               {[1, 2, 3].map((i) => (
-                <div key={i} className={`aspect-square bg-[#E8E0D2] ${cardRadius}`} />
+                <div key={i} className={`aspect-square bg-[#E8E0D2] ${cardRadius}`} style={cardInlineStyle} />
               ))}
             </div>
           </div>
@@ -410,10 +485,14 @@ function VitrinePreview({
 
         {/* FAQ preview */}
         {config.sections.faq.visible && config.sections.faq.items.length > 0 && (
-          <div>
+          <div
+            key={`faq-${config.animations.faq.effet}-${config.animations.faq.intensite}`}
+            className={`vitrine-anim-visible ${animationClassName(config.animations.faq.effet)}`}
+            style={animationVars(config.animations.faq.intensite)}
+          >
             <p className="font-semibold text-[10px] text-[#2B2521]/40 uppercase tracking-wider mb-1">FAQ</p>
             {config.sections.faq.items.slice(0, 2).map((item, i) => (
-              <div key={i} className={`bg-white p-2 border border-[#2B2521]/6 mb-1 ${cardRadius}`}>
+              <div key={i} className={`bg-white p-2 border border-[#2B2521]/6 mb-1 ${cardRadius}`} style={cardInlineStyle}>
                 <p className="text-[10px] font-semibold text-[#2B2521]">{item.question}</p>
               </div>
             ))}
@@ -422,7 +501,11 @@ function VitrinePreview({
 
         {/* Ruban certifications */}
         {config.sections.certifications_ruban.visible && config.sections.certifications.liste.length > 0 && (
-          <div className="overflow-hidden">
+          <div
+            key={`ruban-${config.animations.certifications_ruban.effet}-${config.animations.certifications_ruban.intensite}`}
+            className={`vitrine-anim-visible overflow-hidden ${animationClassName(config.animations.certifications_ruban.effet)}`}
+            style={animationVars(config.animations.certifications_ruban.intensite)}
+          >
             <p className="font-semibold text-[10px] text-[#2B2521]/40 uppercase tracking-wider mb-1">Certifications</p>
             <div className="flex gap-2">
               {config.sections.certifications.liste.slice(0, 4).map((c) => (
@@ -434,7 +517,11 @@ function VitrinePreview({
 
         {/* Video */}
         {config.sections.video.visible && config.sections.video.url && (
-          <div className="bg-[#1a1a1a] rounded-xl aspect-video flex items-center justify-center">
+          <div
+            key={`video-${config.animations.video.effet}-${config.animations.video.intensite}`}
+            className={`vitrine-anim-visible bg-[#1a1a1a] rounded-xl aspect-video flex items-center justify-center ${animationClassName(config.animations.video.effet)}`}
+            style={animationVars(config.animations.video.intensite)}
+          >
             <span className="text-2xl">▶️</span>
           </div>
         )}
@@ -443,7 +530,7 @@ function VitrinePreview({
         {config.sections.avis.visible && (
           <div>
             <p className="font-semibold text-[10px] text-[#2B2521]/40 uppercase tracking-wider mb-1">Avis</p>
-            <div className={`bg-white p-3 border border-[#2B2521]/6 ${cardRadius}`}>
+            <div className={`bg-white p-3 border border-[#2B2521]/6 ${cardRadius}`} style={cardInlineStyle}>
               <div className="flex gap-0.5">
                 {[1,2,3,4,5].map((v) => <span key={v} className="text-amber-400 text-xs">★</span>)}
               </div>
@@ -461,6 +548,17 @@ function VitrinePreview({
     </div>
   );
 }
+
+const ANIM_SECTIONS: Array<{ key: AnimSectionKey; label: string }> = [
+  { key: "hero", label: "Hero" },
+  { key: "chiffres_cles", label: "Chiffres clés" },
+  { key: "chantiers", label: "Galerie de chantiers" },
+  { key: "temoignage_vedette", label: "Témoignages" },
+  { key: "faq", label: "FAQ" },
+  { key: "certifications_ruban", label: "Certifications" },
+  { key: "video", label: "Vidéo" },
+  { key: "contact", label: "Contact" },
+];
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -531,6 +629,40 @@ export function VitrineEditor({
       setConfig((c) => ({ ...c, typographie: { ...c.typographie, [key]: value } }));
     }, []
   );
+
+  const updateCouleurs = useCallback(
+    <K extends keyof VitrineConfig["couleurs"]>(key: K, value: VitrineConfig["couleurs"][K]) => {
+      setConfig((c) => ({ ...c, couleurs: { ...c.couleurs, [key]: value } }));
+    }, []
+  );
+
+  const updateCards = useCallback(
+    <K extends keyof VitrineConfig["cards"]>(key: K, value: VitrineConfig["cards"][K]) => {
+      setConfig((c) => ({ ...c, cards: { ...c.cards, [key]: value } }));
+    }, []
+  );
+
+  const updateBoutons = useCallback(
+    <K extends keyof VitrineConfig["boutons"]>(key: K, value: VitrineConfig["boutons"][K]) => {
+      setConfig((c) => ({ ...c, boutons: { ...c.boutons, [key]: value } }));
+    }, []
+  );
+
+  const updateAnimation = useCallback(
+    (section: AnimSectionKey, patch: Partial<VitrineConfig["animations"][AnimSectionKey]>) => {
+      setConfig((c) => ({
+        ...c,
+        animations: { ...c.animations, [section]: { ...c.animations[section], ...patch } },
+      }));
+    }, []
+  );
+
+  const handleApplyTheme = useCallback((themeId: string) => {
+    const theme = THEMES_VISUELS.find((t) => t.id === themeId);
+    if (!theme) return;
+    if (!confirm(`Appliquer le thème « ${theme.label} » remplacera tes personnalisations visuelles actuelles (couleurs, cards, boutons, animations). Continuer ?`)) return;
+    setConfig((c) => applyThemeVisuel(c, themeId));
+  }, []);
 
   const handleGenerateSlogan = useCallback(async () => {
     setIsGeneratingSlogan(true);
@@ -677,6 +809,60 @@ export function VitrineEditor({
         <div className={`w-full lg:w-[42%] space-y-4 overflow-y-auto ${mobileTab === "preview" ? "hidden lg:block" : ""}`}>
 
           {/* ── Hero & Identité ── */}
+          {/* ── Thèmes prédéfinis ── */}
+          <SectionCard title="Thèmes prédéfinis" icon="✨">
+            <p className="text-xs text-dusk/50 mb-3">
+              Un point de départ visuel à personnaliser ensuite.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {THEMES_VISUELS.map((theme) => (
+                <button
+                  key={theme.id}
+                  type="button"
+                  onClick={() => handleApplyTheme(theme.id)}
+                  className="text-left p-3 rounded-xl border border-dusk/12 hover:border-ambre/50 transition-all group"
+                >
+                  <div
+                    className="w-full h-10 rounded-lg mb-2 flex items-center px-2 gap-1"
+                    style={{ backgroundColor: theme.apercu.fond, border: "1px solid rgba(0,0,0,0.06)" }}
+                  >
+                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: theme.apercu.principale }} />
+                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: theme.apercu.secondaire }} />
+                  </div>
+                  <p className="text-xs font-semibold text-dusk group-hover:text-ambre transition-colors">{theme.label}</p>
+                  <p className="text-[11px] text-dusk/45 leading-snug mt-0.5">{theme.description}</p>
+                </button>
+              ))}
+            </div>
+          </SectionCard>
+
+          {/* ── Palette de couleurs ── */}
+          <SectionCard title="Palette de couleurs" icon="🎨" defaultOpen={false}>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <FieldLabel>Principale</FieldLabel>
+                <input type="color" value={config.couleurs.principale}
+                  onChange={(e) => updateCouleurs("principale", e.target.value)}
+                  className="w-full h-10 rounded-lg border border-dusk/15 cursor-pointer bg-transparent" />
+              </div>
+              <div>
+                <FieldLabel>Secondaire</FieldLabel>
+                <input type="color" value={config.couleurs.secondaire}
+                  onChange={(e) => updateCouleurs("secondaire", e.target.value)}
+                  className="w-full h-10 rounded-lg border border-dusk/15 cursor-pointer bg-transparent" />
+              </div>
+              <div>
+                <FieldLabel>Accent</FieldLabel>
+                <input type="color" value={config.couleurs.accent}
+                  onChange={(e) => updateCouleurs("accent", e.target.value)}
+                  className="w-full h-10 rounded-lg border border-dusk/15 cursor-pointer bg-transparent" />
+              </div>
+            </div>
+            <p className="text-xs text-dusk/40 mt-3">
+              Ces couleurs s&apos;appliquent aux boutons, titres, séparateurs, bordures et icônes de ta vitrine.
+            </p>
+          </SectionCard>
+
           <SectionCard title="Hero & identité" icon="🎨">
             {/* Slogan */}
             <div className="mb-4">
@@ -822,6 +1008,49 @@ export function VitrineEditor({
                   ]} />
               </div>
             </div>
+
+            {/* Hero avancé */}
+            <div className="mt-5 pt-5 border-t border-dusk/8 space-y-4">
+              <div>
+                <FieldLabel>Fond vidéo (YouTube ou Vimeo, remplace la photo sur desktop)</FieldLabel>
+                <Input value={config.hero.video_url}
+                  onChange={(v) => updateHero("video_url", v)}
+                  placeholder="https://www.youtube.com/watch?v=..." />
+                <p className="text-xs text-dusk/40 mt-1">Lecture automatique, muet, en boucle. Sur mobile, ta photo de couverture reste affichée.</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <FieldLabel>Couleur du dégradé overlay</FieldLabel>
+                  <div className="flex items-center gap-2">
+                    <input type="color" value={config.hero.overlay_degrade_couleur}
+                      onChange={(e) => updateHero("overlay_degrade_couleur", e.target.value)}
+                      className="w-8 h-8 rounded-lg border border-dusk/15 cursor-pointer bg-transparent" />
+                    <span className="text-xs text-dusk/50 font-mono">{config.hero.overlay_degrade_couleur}</span>
+                  </div>
+                </div>
+                <div>
+                  <FieldLabel>Opacité du dégradé ({config.hero.overlay_degrade_opacite}%)</FieldLabel>
+                  <input type="range" min={0} max={100} step={5}
+                    value={config.hero.overlay_degrade_opacite}
+                    onChange={(e) => updateHero("overlay_degrade_opacite", parseInt(e.target.value))}
+                    className="w-full accent-ambre" />
+                </div>
+              </div>
+
+              <div>
+                <FieldLabel>Position du texte dans le hero</FieldLabel>
+                <ChipGroup<PositionTexteHero>
+                  value={config.hero.position_texte}
+                  onChange={(v) => updateHero("position_texte", v)}
+                  options={[
+                    { value: "centre", label: "Centré" },
+                    { value: "gauche", label: "Aligné gauche" },
+                    { value: "bas_gauche", label: "Bas gauche" },
+                  ]}
+                />
+              </div>
+            </div>
           </SectionCard>
 
           {/* ── Arrière-plan ── */}
@@ -866,6 +1095,122 @@ export function VitrineEditor({
                   { value: "bande", label: "Bande" },
                   { value: "watermark", label: "Watermark" },
                 ]} />
+            </div>
+          </SectionCard>
+
+          {/* ── Style des cards & blocs ── */}
+          <SectionCard title="Style des cards & blocs" icon="🗃️" defaultOpen={false}>
+            <div className="mb-4">
+              <FieldLabel>Rayon des coins ({config.cards.rayon}px)</FieldLabel>
+              <input type="range" min={0} max={24} step={1}
+                value={config.cards.rayon}
+                onChange={(e) => updateCards("rayon", parseInt(e.target.value))}
+                className="w-full accent-ambre" />
+            </div>
+
+            <div className="mb-4">
+              <FieldLabel>Ombre portée</FieldLabel>
+              <ChipGroup<OmbreStyle>
+                value={config.cards.ombre}
+                onChange={(v) => updateCards("ombre", v)}
+                options={[
+                  { value: "aucune", label: "Aucune" },
+                  { value: "legere", label: "Légère" },
+                  { value: "normale", label: "Normale" },
+                  { value: "prononcee", label: "Prononcée" },
+                ]}
+              />
+            </div>
+
+            <div className="mb-4">
+              <Toggle checked={config.cards.bordure_active}
+                onChange={(v) => updateCards("bordure_active", v)} label="Bordure active" />
+            </div>
+
+            {config.cards.bordure_active && (
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div>
+                  <FieldLabel>Épaisseur</FieldLabel>
+                  <ChipGroup value={String(config.cards.bordure_epaisseur)}
+                    onChange={(v) => updateCards("bordure_epaisseur", parseInt(v) as 1 | 2 | 3)}
+                    options={[{ value: "1", label: "1px" }, { value: "2", label: "2px" }, { value: "3", label: "3px" }]} />
+                </div>
+                <div>
+                  <FieldLabel>Couleur de bordure</FieldLabel>
+                  <div className="flex items-center gap-2">
+                    <input type="color" value={config.cards.bordure_couleur.slice(0, 7)}
+                      onChange={(e) => updateCards("bordure_couleur", e.target.value)}
+                      className="w-8 h-8 rounded-lg border border-dusk/15 cursor-pointer bg-transparent" />
+                    <span className="text-xs text-dusk/50 font-mono">{config.cards.bordure_couleur}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div>
+              <FieldLabel>Espacement vertical entre sections ({config.cards.espacement_sections}px)</FieldLabel>
+              <input type="range" min={40} max={120} step={8}
+                value={config.cards.espacement_sections}
+                onChange={(e) => updateCards("espacement_sections", parseInt(e.target.value))}
+                className="w-full accent-ambre" />
+            </div>
+          </SectionCard>
+
+          {/* ── Style des boutons CTA ── */}
+          <SectionCard title="Style des boutons CTA" icon="🔘" defaultOpen={false}>
+            <div className="mb-4">
+              <FieldLabel>Forme</FieldLabel>
+              <ChipGroup<BoutonForme>
+                value={config.boutons.forme}
+                onChange={(v) => updateBoutons("forme", v)}
+                options={[
+                  { value: "pill", label: "Pill" },
+                  { value: "arrondi", label: "Arrondi" },
+                  { value: "carre", label: "Carré" },
+                ]}
+              />
+            </div>
+            <div className="mb-4">
+              <FieldLabel>Style</FieldLabel>
+              <ChipGroup<BoutonStyle>
+                value={config.boutons.style}
+                onChange={(v) => updateBoutons("style", v)}
+                options={[
+                  { value: "plein", label: "Plein" },
+                  { value: "contour", label: "Contour" },
+                  { value: "fantome", label: "Fantôme" },
+                ]}
+              />
+            </div>
+            <div className="mb-4">
+              <FieldLabel>Taille</FieldLabel>
+              <ChipGroup<BoutonTaille>
+                value={config.boutons.taille}
+                onChange={(v) => updateBoutons("taille", v)}
+                options={[
+                  { value: "petit", label: "Petit" },
+                  { value: "moyen", label: "Moyen" },
+                  { value: "grand", label: "Grand" },
+                ]}
+              />
+            </div>
+            <Toggle checked={config.boutons.icone}
+              onChange={(v) => updateBoutons("icone", v)} label="Afficher une flèche à droite du texte" />
+
+            {/* Aperçu bouton */}
+            <div className="mt-4 p-4 rounded-xl bg-dust flex items-center justify-center">
+              <button
+                type="button"
+                className="inline-flex items-center justify-center gap-2 font-semibold"
+                style={{
+                  borderRadius: boutonRadiusCSS(config.boutons.forme),
+                  ...boutonTailleCSS(config.boutons.taille),
+                  ...boutonStyleCSS(config.boutons.style, config.hero.couleur_principale),
+                }}
+              >
+                {config.hero.cta_texte || "Contactez-moi"}
+                {config.boutons.icone && <span aria-hidden="true">→</span>}
+              </button>
             </div>
           </SectionCard>
 
@@ -1216,6 +1561,43 @@ export function VitrineEditor({
                   </button>
                 ))}
               </div>
+            </div>
+          </SectionCard>
+
+          {/* ── Animations au scroll ── */}
+          <SectionCard title="Animations au scroll" icon="🌀" defaultOpen={false}>
+            <p className="text-xs text-dusk/50 mb-4">
+              Choisis un effet d&apos;apparition et son intensité pour chaque section de ta vitrine.
+            </p>
+            <div className="space-y-4">
+              {ANIM_SECTIONS.map(({ key, label }) => (
+                <div key={key} className="p-3 rounded-xl bg-dust border border-dusk/8">
+                  <p className="text-xs font-semibold text-dusk mb-2">{label}</p>
+                  <div className="grid grid-cols-2 gap-2 mb-2">
+                    <SelectField
+                      value={config.animations[key].effet}
+                      onChange={(v) => updateAnimation(key, { effet: v as AnimEffet })}
+                      options={[
+                        { value: "aucun", label: "Aucun" },
+                        { value: "fondu", label: "Fondu" },
+                        { value: "glissement_gauche", label: "Glissement gauche" },
+                        { value: "glissement_droite", label: "Glissement droite" },
+                        { value: "zoom", label: "Zoom" },
+                        { value: "rebond", label: "Rebond" },
+                      ]}
+                    />
+                    <div className={config.animations[key].effet === "aucun" ? "opacity-40 pointer-events-none" : ""}>
+                      <input type="range" min={1} max={3} step={1}
+                        value={config.animations[key].intensite}
+                        onChange={(e) => updateAnimation(key, { intensite: parseInt(e.target.value) as AnimIntensite })}
+                        className="w-full accent-ambre mt-2" />
+                      <div className="flex justify-between text-[10px] text-dusk/40 px-0.5">
+                        <span>Léger</span><span>Normal</span><span>Marqué</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </SectionCard>
 

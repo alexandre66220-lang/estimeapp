@@ -21,7 +21,52 @@ export type PoliceTitres =
   | "Space Grotesk";
 export type TailleTitres = "normal" | "grand" | "tres_grand";
 
+export type PositionTexteHero = "centre" | "gauche" | "bas_gauche";
+export type AnimEffet = "aucun" | "fondu" | "glissement_gauche" | "glissement_droite" | "zoom" | "rebond";
+export type AnimIntensite = 1 | 2 | 3;
+export type OmbreStyle = "aucune" | "legere" | "normale" | "prononcee";
+export type BoutonForme = "pill" | "arrondi" | "carre";
+export type BoutonStyle = "plein" | "contour" | "fantome";
+export type BoutonTaille = "petit" | "moyen" | "grand";
+
+export type AnimSectionKey =
+  | "hero"
+  | "chiffres_cles"
+  | "chantiers"
+  | "temoignage_vedette"
+  | "faq"
+  | "certifications_ruban"
+  | "video"
+  | "contact";
+
+export interface AnimSectionConfig {
+  effet: AnimEffet;
+  intensite: AnimIntensite;
+}
+
 export interface VitrineConfig {
+  couleurs: {
+    principale: string;
+    secondaire: string;
+    accent: string;
+    // Non exposé directement dans l'éditeur (3 pickers seulement), utilisé par les thèmes prédéfinis
+    fond?: string;
+  };
+  animations: Record<AnimSectionKey, AnimSectionConfig>;
+  cards: {
+    rayon: number;
+    ombre: OmbreStyle;
+    bordure_active: boolean;
+    bordure_epaisseur: 1 | 2 | 3;
+    bordure_couleur: string;
+    espacement_sections: number;
+  };
+  boutons: {
+    forme: BoutonForme;
+    style: BoutonStyle;
+    taille: BoutonTaille;
+    icone: boolean;
+  };
   hero: {
     slogan: string;
     photo_couverture: string;
@@ -37,6 +82,11 @@ export interface VitrineConfig {
     parallaxe: boolean;
     compteurs_hero: boolean;
     compteurs_position: "bas" | "overlay";
+    // hero avancé
+    video_url: string;
+    overlay_degrade_couleur: string;
+    overlay_degrade_opacite: number;
+    position_texte: PositionTexteHero;
   };
   fond: {
     type: "uni" | "degrade" | "texture";
@@ -120,6 +170,36 @@ export interface VitrineConfig {
 // ── Defaults ──────────────────────────────────────────────────────────────────
 
 export const DEFAULT_VITRINE_CONFIG: VitrineConfig = {
+  couleurs: {
+    principale: "#C75D3B",
+    secondaire: "#2B2521",
+    accent: "#C75D3B",
+    fond: "#F8F5F2",
+  },
+  animations: {
+    hero: { effet: "fondu", intensite: 2 },
+    chiffres_cles: { effet: "fondu", intensite: 2 },
+    chantiers: { effet: "fondu", intensite: 2 },
+    temoignage_vedette: { effet: "fondu", intensite: 2 },
+    faq: { effet: "fondu", intensite: 2 },
+    certifications_ruban: { effet: "aucun", intensite: 2 },
+    video: { effet: "fondu", intensite: 2 },
+    contact: { effet: "fondu", intensite: 2 },
+  },
+  cards: {
+    rayon: 16,
+    ombre: "aucune",
+    bordure_active: true,
+    bordure_epaisseur: 1,
+    bordure_couleur: "#2B25210F",
+    espacement_sections: 56,
+  },
+  boutons: {
+    forme: "pill",
+    style: "plein",
+    taille: "moyen",
+    icone: false,
+  },
   hero: {
     slogan: "",
     photo_couverture: "",
@@ -134,6 +214,10 @@ export const DEFAULT_VITRINE_CONFIG: VitrineConfig = {
     parallaxe: false,
     compteurs_hero: false,
     compteurs_position: "bas",
+    video_url: "",
+    overlay_degrade_couleur: "#000000",
+    overlay_degrade_opacite: 40,
+    position_texte: "centre",
   },
   fond: {
     type: "uni",
@@ -192,7 +276,22 @@ export function mergeVitrineConfig(stored: unknown): VitrineConfig {
   const s = stored as Partial<VitrineConfig>;
   const ds = DEFAULT_VITRINE_CONFIG.sections;
   const ss: Partial<VitrineConfig["sections"]> = s.sections ?? {};
+  const da = DEFAULT_VITRINE_CONFIG.animations;
+  const sa: Partial<VitrineConfig["animations"]> = s.animations ?? {};
   return {
+    couleurs: { ...DEFAULT_VITRINE_CONFIG.couleurs, ...(s.couleurs ?? {}) },
+    animations: {
+      hero: { ...da.hero, ...(sa.hero ?? {}) },
+      chiffres_cles: { ...da.chiffres_cles, ...(sa.chiffres_cles ?? {}) },
+      chantiers: { ...da.chantiers, ...(sa.chantiers ?? {}) },
+      temoignage_vedette: { ...da.temoignage_vedette, ...(sa.temoignage_vedette ?? {}) },
+      faq: { ...da.faq, ...(sa.faq ?? {}) },
+      certifications_ruban: { ...da.certifications_ruban, ...(sa.certifications_ruban ?? {}) },
+      video: { ...da.video, ...(sa.video ?? {}) },
+      contact: { ...da.contact, ...(sa.contact ?? {}) },
+    },
+    cards: { ...DEFAULT_VITRINE_CONFIG.cards, ...(s.cards ?? {}) },
+    boutons: { ...DEFAULT_VITRINE_CONFIG.boutons, ...(s.boutons ?? {}) },
     hero: { ...DEFAULT_VITRINE_CONFIG.hero, ...(s.hero ?? {}) },
     fond: { ...DEFAULT_VITRINE_CONFIG.fond, ...(s.fond ?? {}) },
     sections: {
@@ -320,4 +419,268 @@ export function separateurSVG(style: SeparateurStyle, couleur: string): string {
     default:
       return "";
   }
+}
+
+// ── Cards / boutons helpers ────────────────────────────────────────────────────
+
+export function ombreCSS(style: OmbreStyle): string {
+  switch (style) {
+    case "legere":
+      return "0 1px 3px rgba(43,37,33,0.08)";
+    case "normale":
+      return "0 4px 12px rgba(43,37,33,0.10)";
+    case "prononcee":
+      return "0 12px 32px rgba(43,37,33,0.16)";
+    default:
+      return "none";
+  }
+}
+
+export function boutonRadiusCSS(forme: BoutonForme): string {
+  switch (forme) {
+    case "pill": return "999px";
+    case "arrondi": return "8px";
+    case "carre": return "0px";
+  }
+}
+
+export function boutonTailleCSS(taille: BoutonTaille): { padding: string; fontSize: string } {
+  switch (taille) {
+    case "petit": return { padding: "8px 18px", fontSize: "13px" };
+    case "grand": return { padding: "16px 32px", fontSize: "16px" };
+    default: return { padding: "12px 24px", fontSize: "14px" };
+  }
+}
+
+export function boutonStyleCSS(
+  style: BoutonStyle,
+  couleur: string
+): { background: string; color: string; border: string } {
+  switch (style) {
+    case "contour":
+      return { background: "transparent", color: couleur, border: `2px solid ${couleur}` };
+    case "fantome":
+      return { background: `${couleur}18`, color: couleur, border: "none" };
+    default:
+      return { background: couleur, color: "#FFFFFF", border: "none" };
+  }
+}
+
+// ── Vidéo hero ──────────────────────────────────────────────────────────────
+
+export function parseVideoEmbedUrl(url: string, autoplay = false): string | null {
+  if (!url) return null;
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if (ytMatch) {
+    const id = ytMatch[1];
+    return autoplay
+      ? `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&showinfo=0&modestbranding=1`
+      : `https://www.youtube.com/embed/${id}`;
+  }
+  const viMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (viMatch) {
+    const id = viMatch[1];
+    return autoplay
+      ? `https://player.vimeo.com/video/${id}?autoplay=1&muted=1&loop=1&background=1`
+      : `https://player.vimeo.com/video/${id}`;
+  }
+  return null;
+}
+
+// ── Animations au scroll ──────────────────────────────────────────────────────
+
+export function animationClass(effet: AnimEffet): string {
+  if (effet === "aucun") return "";
+  return `vitrine-anim-${effet.replace(/_/g, "-")}`;
+}
+
+export function animationDurationMs(intensite: AnimIntensite): number {
+  return { 1: 400, 2: 600, 3: 900 }[intensite];
+}
+
+export const ANIM_KEYFRAMES_CSS = `
+  .vitrine-anim-fondu, .vitrine-anim-glissement-gauche, .vitrine-anim-glissement-droite, .vitrine-anim-zoom, .vitrine-anim-rebond {
+    opacity: 0;
+    will-change: opacity, transform;
+  }
+  .vitrine-anim-fondu.vitrine-anim-visible {
+    animation: vitrineAnimFondu var(--vitrine-anim-duree, 600ms) ease both;
+  }
+  .vitrine-anim-glissement-gauche.vitrine-anim-visible {
+    animation: vitrineAnimGlisseGauche var(--vitrine-anim-duree, 600ms) ease both;
+  }
+  .vitrine-anim-glissement-droite.vitrine-anim-visible {
+    animation: vitrineAnimGlisseDroite var(--vitrine-anim-duree, 600ms) ease both;
+  }
+  .vitrine-anim-zoom.vitrine-anim-visible {
+    animation: vitrineAnimZoom var(--vitrine-anim-duree, 600ms) ease both;
+  }
+  .vitrine-anim-rebond.vitrine-anim-visible {
+    animation: vitrineAnimRebond var(--vitrine-anim-duree, 600ms) cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  @keyframes vitrineAnimFondu {
+    from { opacity: 0; transform: translateY(var(--vitrine-anim-amp, 20px)); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes vitrineAnimGlisseGauche {
+    from { opacity: 0; transform: translateX(calc(-1 * var(--vitrine-anim-amp, 20px))); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes vitrineAnimGlisseDroite {
+    from { opacity: 0; transform: translateX(var(--vitrine-anim-amp, 20px)); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes vitrineAnimZoom {
+    from { opacity: 0; transform: scale(calc(1 - var(--vitrine-anim-scale, 0.06))); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes vitrineAnimRebond {
+    from { opacity: 0; transform: translateY(var(--vitrine-anim-amp, 20px)) scale(0.94); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+`;
+
+export function animationAmplitude(intensite: AnimIntensite): { amp: string; scale: string } {
+  switch (intensite) {
+    case 1: return { amp: "10px", scale: "0.03" };
+    case 3: return { amp: "36px", scale: "0.12" };
+    default: return { amp: "20px", scale: "0.06" };
+  }
+}
+
+// ── Thèmes prédéfinis ─────────────────────────────────────────────────────────
+
+export interface ThemeVisuelPreset {
+  id: string;
+  label: string;
+  description: string;
+  apercu: { fond: string; principale: string; secondaire: string };
+  config: Partial<Pick<VitrineConfig, "couleurs" | "cards" | "boutons" | "fond" | "typographie" | "mise_en_page" | "separateurs" | "animations">> & {
+    hero?: Partial<Pick<VitrineConfig["hero"], "style" | "overlay_couleur" | "overlay_opacite" | "forme_transition" | "parallaxe" | "position_texte">>;
+  };
+}
+
+export const THEMES_VISUELS: ThemeVisuelPreset[] = [
+  {
+    id: "moderne_epure",
+    label: "Moderne épuré",
+    description: "Fond blanc, typographie fine, coins carrés",
+    apercu: { fond: "#FFFFFF", principale: "#2B2521", secondaire: "#6B6560" },
+    config: {
+      couleurs: { principale: "#2B2521", secondaire: "#6B6560", accent: "#C75D3B", fond: "#FFFFFF" },
+      fond: { type: "uni", texture: "aucune", decorations_laterales: "aucune" },
+      typographie: { police_titres: "Inter", taille_titres: "normal" },
+      mise_en_page: { template: "minimaliste", police: "sans-serif", style_cards: "carre" },
+      separateurs: "ligne",
+      cards: { rayon: 0, ombre: "aucune", bordure_active: true, bordure_epaisseur: 1, bordure_couleur: "#2B25211A", espacement_sections: 64 },
+      boutons: { forme: "carre", style: "contour", taille: "moyen", icone: false },
+      hero: { style: "compact", overlay_couleur: "aucun", overlay_opacite: 0, forme_transition: "droite", parallaxe: false, position_texte: "centre" },
+      animations: {
+        hero: { effet: "fondu", intensite: 1 },
+        chiffres_cles: { effet: "fondu", intensite: 1 },
+        chantiers: { effet: "fondu", intensite: 1 },
+        temoignage_vedette: { effet: "fondu", intensite: 1 },
+        faq: { effet: "fondu", intensite: 1 },
+        certifications_ruban: { effet: "aucun", intensite: 1 },
+        video: { effet: "fondu", intensite: 1 },
+        contact: { effet: "fondu", intensite: 1 },
+      },
+    },
+  },
+  {
+    id: "chaud_artisanal",
+    label: "Chaud artisanal",
+    description: "Fond crème, typographie serif, textures bois",
+    apercu: { fond: "#F8F5F2", principale: "#C75D3B", secondaire: "#8B5A2B" },
+    config: {
+      couleurs: { principale: "#C75D3B", secondaire: "#8B5A2B", accent: "#C8922A", fond: "#F8F5F2" },
+      fond: { type: "texture", texture: "bois", decorations_laterales: "aucune" },
+      typographie: { police_titres: "Merriweather", taille_titres: "grand" },
+      mise_en_page: { template: "classique", police: "serif", style_cards: "arrondi" },
+      separateurs: "vague",
+      cards: { rayon: 16, ombre: "legere", bordure_active: true, bordure_epaisseur: 1, bordure_couleur: "#C75D3B33", espacement_sections: 80 },
+      boutons: { forme: "arrondi", style: "plein", taille: "moyen", icone: true },
+      hero: { style: "grand", overlay_couleur: "sombre", overlay_opacite: 25, forme_transition: "vague", parallaxe: true, position_texte: "centre" },
+      animations: {
+        hero: { effet: "fondu", intensite: 2 },
+        chiffres_cles: { effet: "fondu", intensite: 2 },
+        chantiers: { effet: "glissement_gauche", intensite: 2 },
+        temoignage_vedette: { effet: "fondu", intensite: 2 },
+        faq: { effet: "fondu", intensite: 2 },
+        certifications_ruban: { effet: "aucun", intensite: 2 },
+        video: { effet: "fondu", intensite: 2 },
+        contact: { effet: "fondu", intensite: 2 },
+      },
+    },
+  },
+  {
+    id: "sombre_premium",
+    label: "Sombre premium",
+    description: "Fond très sombre, accents dorés, ombres marquées",
+    apercu: { fond: "#1A1512", principale: "#C8922A", secondaire: "#D4AF6A" },
+    config: {
+      couleurs: { principale: "#C8922A", secondaire: "#D4AF6A", accent: "#C8922A", fond: "#1A1512" },
+      fond: { type: "uni", texture: "aucune", decorations_laterales: "aucune" },
+      typographie: { police_titres: "Playfair Display", taille_titres: "tres_grand" },
+      mise_en_page: { template: "moderne", police: "serif", style_cards: "ombre" },
+      separateurs: "aucun",
+      cards: { rayon: 12, ombre: "prononcee", bordure_active: false, bordure_epaisseur: 1, bordure_couleur: "#C8922A33", espacement_sections: 96 },
+      boutons: { forme: "pill", style: "plein", taille: "grand", icone: true },
+      hero: { style: "plein_ecran", overlay_couleur: "degrade", overlay_opacite: 55, forme_transition: "courbe", parallaxe: true, position_texte: "gauche" },
+      animations: {
+        hero: { effet: "zoom", intensite: 3 },
+        chiffres_cles: { effet: "zoom", intensite: 3 },
+        chantiers: { effet: "zoom", intensite: 2 },
+        temoignage_vedette: { effet: "zoom", intensite: 2 },
+        faq: { effet: "fondu", intensite: 2 },
+        certifications_ruban: { effet: "aucun", intensite: 2 },
+        video: { effet: "zoom", intensite: 2 },
+        contact: { effet: "fondu", intensite: 2 },
+      },
+    },
+  },
+  {
+    id: "lumineux_minimaliste",
+    label: "Lumineux minimaliste",
+    description: "Fond blanc cassé, espace généreux, animations douces",
+    apercu: { fond: "#FBFAF8", principale: "#2B2521", secondaire: "#9A8F8B" },
+    config: {
+      couleurs: { principale: "#2B2521", secondaire: "#9A8F8B", accent: "#C75D3B", fond: "#FBFAF8" },
+      fond: { type: "uni", texture: "aucune", decorations_laterales: "aucune" },
+      typographie: { police_titres: "Raleway", taille_titres: "normal" },
+      mise_en_page: { template: "minimaliste", police: "sans-serif", style_cards: "arrondi" },
+      separateurs: "aucun",
+      cards: { rayon: 20, ombre: "aucune", bordure_active: false, bordure_epaisseur: 1, bordure_couleur: "#2B25210F", espacement_sections: 112 },
+      boutons: { forme: "pill", style: "fantome", taille: "moyen", icone: false },
+      hero: { style: "compact", overlay_couleur: "aucun", overlay_opacite: 0, forme_transition: "droite", parallaxe: false, position_texte: "centre" },
+      animations: {
+        hero: { effet: "glissement_gauche", intensite: 1 },
+        chiffres_cles: { effet: "glissement_droite", intensite: 1 },
+        chantiers: { effet: "glissement_gauche", intensite: 1 },
+        temoignage_vedette: { effet: "glissement_droite", intensite: 1 },
+        faq: { effet: "fondu", intensite: 1 },
+        certifications_ruban: { effet: "aucun", intensite: 1 },
+        video: { effet: "fondu", intensite: 1 },
+        contact: { effet: "fondu", intensite: 1 },
+      },
+    },
+  },
+];
+
+export function applyThemeVisuel(current: VitrineConfig, themeId: string): VitrineConfig {
+  const theme = THEMES_VISUELS.find((t) => t.id === themeId);
+  if (!theme) return current;
+  const c = theme.config;
+  return {
+    ...current,
+    couleurs: c.couleurs ? { ...current.couleurs, ...c.couleurs } : current.couleurs,
+    cards: c.cards ? { ...current.cards, ...c.cards } : current.cards,
+    boutons: c.boutons ? { ...current.boutons, ...c.boutons } : current.boutons,
+    fond: c.fond ? { ...current.fond, ...c.fond } : current.fond,
+    typographie: c.typographie ? { ...current.typographie, ...c.typographie } : current.typographie,
+    mise_en_page: c.mise_en_page ? { ...current.mise_en_page, ...c.mise_en_page } : current.mise_en_page,
+    separateurs: c.separateurs ?? current.separateurs,
+    animations: c.animations ? { ...current.animations, ...c.animations } : current.animations,
+    hero: c.hero ? { ...current.hero, ...c.hero } : current.hero,
+  };
 }
