@@ -24,7 +24,8 @@ export async function analyserPhotoMateriau(formData: FormData): Promise<{
   if (!user) return { error: "Non autorisé." };
 
   const file = formData.get("image") as File | null;
-  const chantierId = (formData.get("chantier_id") as string) || null;
+  const chantierIdRaw = (formData.get("chantier_id") as string) || null;
+  const chantierId = chantierIdRaw || null;
 
   if (!file || file.size === 0) return { error: "Aucune image fournie." };
   if (file.size > MAX_BYTES) return { error: "Image trop volumineuse (max 10 Mo)." };
@@ -75,6 +76,26 @@ export async function analyserPhotoMateriau(formData: FormData): Promise<{
   revalidatePath("/espace/securite");
 
   return { analyse, scanId: inserted.id };
+}
+
+export async function associerScanMateriau(
+  scanId: string,
+  chantierId: string | null
+): Promise<{ error?: string }> {
+  const { supabase, user } = await getUser();
+  if (!user) return { error: "Non autorisé." };
+
+  const { error } = await supabase
+    .from("materiau_scans")
+    .update({ chantier_id: chantierId })
+    .eq("id", scanId)
+    .eq("artisan_id", user.id);
+
+  if (error) return { error: "Impossible d'associer ce scan au chantier." };
+
+  if (chantierId) revalidatePath(`/espace/chantiers/${chantierId}`);
+  revalidatePath("/espace/securite");
+  return {};
 }
 
 export async function getScanMateriauSignedUrl(imagePath: string): Promise<string | null> {

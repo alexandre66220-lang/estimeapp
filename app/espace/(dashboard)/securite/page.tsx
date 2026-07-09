@@ -74,6 +74,52 @@ export default async function SecuritePage() {
 
   const nbCritiques = scansAvecUrl.filter((s) => niveauMax(s.analyse_json) === "critique").length;
 
+  const scansAssocies = scansAvecUrl.filter((s) => s.chantierTitre);
+  const scansNonAssocies = scansAvecUrl.filter((s) => !s.chantierTitre);
+
+  function ScanRow({ scan }: { scan: (typeof scansAvecUrl)[number] }) {
+    const niveau = niveauMax(scan.analyse_json);
+    return (
+      <Link
+        href={`/espace/materiaux/${scan.id}`}
+        className="flex items-center gap-4 px-5 py-4 hover:bg-dust/30 transition-colors"
+      >
+        {scan.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={scan.imageUrl}
+            alt={scan.analyse_json.nom_materiau}
+            className="w-14 h-14 rounded-lg object-cover shrink-0 border border-dusk/10"
+          />
+        ) : (
+          <div className="w-14 h-14 rounded-lg bg-dust shrink-0" />
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium text-dusk truncate">{scan.analyse_json.nom_materiau}</p>
+          <div className="flex items-center gap-2 mt-0.5">
+            {scan.chantierTitre && (
+              <span className="text-xs text-dusk/40 truncate">{scan.chantierTitre}</span>
+            )}
+            {scan.chantierTitre && <span className="text-xs text-dusk/25">·</span>}
+            <span className="text-xs text-dusk/40">
+              {new Date(scan.created_at).toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
+          </div>
+        </div>
+        {niveau && (
+          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold shrink-0 ${NIVEAU_BADGE[niveau]}`}>
+            {niveau === "critique" && <Warning size={12} weight="fill" />}
+            {NIVEAU_LABELS[niveau]}
+          </span>
+        )}
+      </Link>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-12 lg:py-16">
       <div className="flex items-start justify-between gap-4 mb-8 flex-wrap">
@@ -106,50 +152,31 @@ export default async function SecuritePage() {
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-dusk/8 divide-y divide-dusk/8">
-          {scansAvecUrl.map((scan) => {
-            const niveau = niveauMax(scan.analyse_json);
-            return (
-              <Link
-                key={scan.id}
-                href={`/espace/materiaux/${scan.id}`}
-                className="flex items-center gap-4 px-5 py-4 hover:bg-dust/30 transition-colors"
-              >
-                {scan.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={scan.imageUrl}
-                    alt={scan.analyse_json.nom_materiau}
-                    className="w-14 h-14 rounded-lg object-cover shrink-0 border border-dusk/10"
-                  />
-                ) : (
-                  <div className="w-14 h-14 rounded-lg bg-dust shrink-0" />
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-dusk truncate">{scan.analyse_json.nom_materiau}</p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    {scan.chantierTitre && (
-                      <span className="text-xs text-dusk/40 truncate">{scan.chantierTitre}</span>
-                    )}
-                    <span className="text-xs text-dusk/25">·</span>
-                    <span className="text-xs text-dusk/40">
-                      {new Date(scan.created_at).toLocaleDateString("fr-FR", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </span>
-                  </div>
-                </div>
-                {niveau && (
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold shrink-0 ${NIVEAU_BADGE[niveau]}`}>
-                    {niveau === "critique" && <Warning size={12} weight="fill" />}
-                    {NIVEAU_LABELS[niveau]}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+        <div className="space-y-8">
+          {scansAssocies.length > 0 && (
+            <section>
+              <h2 className="font-display text-lg font-bold text-dusk mb-3">Scans liés à un chantier</h2>
+              <div className="bg-white rounded-2xl border border-dusk/8 divide-y divide-dusk/8">
+                {scansAssocies.map((scan) => (
+                  <ScanRow key={scan.id} scan={scan} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {scansNonAssocies.length > 0 && (
+            <section>
+              <h2 className="font-display text-lg font-bold text-dusk mb-3">Scans non associés</h2>
+              <p className="text-dusk/45 text-xs mb-3">
+                Ces matériaux ont été scannés sans être rattachés à un chantier.
+              </p>
+              <div className="bg-white rounded-2xl border border-dusk/8 divide-y divide-dusk/8">
+                {scansNonAssocies.map((scan) => (
+                  <ScanRow key={scan.id} scan={scan} />
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       )}
     </div>

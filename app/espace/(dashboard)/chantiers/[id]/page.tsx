@@ -24,6 +24,7 @@ import { ProgrammerPublicationButton } from "@/components/espace/ProgrammerPubli
 import { SuiviPaiements } from "@/components/espace/SuiviPaiements";
 import { getPaiementsChantier } from "@/lib/supabase/paiements";
 import { JournalMateriauxChantier } from "@/components/espace/JournalMateriauxChantier";
+import { NotesVocalesChantier } from "@/components/espace/NotesVocalesChantier";
 
 export const metadata: Metadata = {
   title: "Chantier - Estime",
@@ -65,6 +66,7 @@ export default async function FicheChantier({
     { data: notes },
     paiements,
     { data: materiauScans },
+    { data: notesVocales },
   ] = await Promise.all([
     supabase
       .from("chantiers")
@@ -109,6 +111,12 @@ export default async function FicheChantier({
       .eq("chantier_id", id)
       .eq("artisan_id", user.id)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("notes_vocales")
+      .select("id, created_at, duree_secondes, audio_url")
+      .eq("chantier_id", id)
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false }),
   ]);
 
   const materiauScansAvecUrl = await Promise.all(
@@ -121,6 +129,20 @@ export default async function FicheChantier({
         created_at: scan.created_at,
         analyse_json: scan.analyse_json,
         imageUrl: signed?.signedUrl ?? null,
+      };
+    })
+  );
+
+  const notesVocalesAvecUrl = await Promise.all(
+    (notesVocales ?? []).map(async (note) => {
+      const { data: signed } = await supabase.storage
+        .from("notes-vocales")
+        .createSignedUrl(note.audio_url, 3600);
+      return {
+        id: note.id,
+        created_at: note.created_at,
+        duree_secondes: note.duree_secondes,
+        audioUrl: signed?.signedUrl ?? null,
       };
     })
   );
@@ -397,6 +419,10 @@ export default async function FicheChantier({
 
       <div className="mb-6">
         <JournalMateriauxChantier chantierId={id} scans={materiauScansAvecUrl as any} />
+      </div>
+
+      <div className="mb-6">
+        <NotesVocalesChantier chantierId={id} notes={notesVocalesAvecUrl} />
       </div>
 
       <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8 mb-6">

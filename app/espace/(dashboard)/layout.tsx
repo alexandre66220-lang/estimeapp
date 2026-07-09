@@ -51,10 +51,31 @@ export default function DashboardLayout({
           </Suspense>
           <main>{children}</main>
         </div>
-        <QuickDock />
+        <Suspense fallback={null}>
+          <QuickDockSection />
+        </Suspense>
       </PointsToastProvider>
     </div>
   );
+}
+
+async function QuickDockSection() {
+  const { supabase, user } = await getCurrentUser();
+  if (!user) return null;
+
+  const { data: chantiersListe } = await supabase
+    .from("chantiers")
+    .select("id, titre")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  const chantiers = (chantiersListe ?? []).map((c: { id: string; titre: string | null }) => ({
+    id: c.id,
+    titre: c.titre ?? "Chantier sans titre",
+  }));
+
+  return <QuickDock chantiers={chantiers} />;
 }
 
 async function TrialBannerSection() {

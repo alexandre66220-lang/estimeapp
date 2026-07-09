@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import { X, Camera, Warning } from "@phosphor-icons/react";
-import { analyserPhotoMateriau } from "@/app/actions/materiau";
+import { X, Camera, Warning, Check } from "@phosphor-icons/react";
+import { analyserPhotoMateriau, associerScanMateriau } from "@/app/actions/materiau";
 import { MateriauScanResult } from "./MateriauScanResult";
 import type { AnalyseMateriau } from "@/lib/anthropic/analyze-materiau";
 
@@ -23,14 +23,22 @@ export function ScannerMateriauModal({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [analyse, setAnalyse] = useState<AnalyseMateriau | null>(null);
-  const [chantierChoisi, setChantierChoisi] = useState(chantierId ?? "");
+  const [scanId, setScanId] = useState<string | null>(null);
+  const [chantierAssocie, setChantierAssocie] = useState("");
+  const [associationSauvegardee, setAssociationSauvegardee] = useState(false);
+  const [isAssociating, startAssociating] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const chantierPreselectionne = Boolean(chantierId);
 
   function reset() {
     setPreview(null);
     setFile(null);
     setError(null);
     setAnalyse(null);
+    setScanId(null);
+    setChantierAssocie("");
+    setAssociationSauvegardee(false);
   }
 
   function handleClose() {
@@ -52,7 +60,7 @@ export function ScannerMateriauModal({
     setError(null);
     const formData = new FormData();
     formData.set("image", file);
-    if (chantierChoisi) formData.set("chantier_id", chantierChoisi);
+    if (chantierId) formData.set("chantier_id", chantierId);
 
     startTransition(async () => {
       const result = await analyserPhotoMateriau(formData);
@@ -60,7 +68,18 @@ export function ScannerMateriauModal({
         setError(result.error);
         return;
       }
-      if (result.analyse) setAnalyse(result.analyse);
+      if (result.analyse) {
+        setAnalyse(result.analyse);
+        setScanId(result.scanId ?? null);
+      }
+    });
+  }
+
+  function handleAssocier() {
+    if (!scanId || !chantierAssocie) return;
+    startAssociating(async () => {
+      const result = await associerScanMateriau(scanId, chantierAssocie);
+      if (!result.error) setAssociationSauvegardee(true);
     });
   }
 
@@ -101,22 +120,6 @@ export function ScannerMateriauModal({
             <div className="p-6 overflow-y-auto space-y-4">
               {!analyse && (
                 <>
-                  {!chantierId && chantiers && chantiers.length > 0 && (
-                    <div>
-                      <label className="block text-xs text-dusk/50 mb-1.5">Chantier associé (optionnel)</label>
-                      <select
-                        value={chantierChoisi}
-                        onChange={(e) => setChantierChoisi(e.target.value)}
-                        className="w-full px-4 py-2.5 border border-dusk/15 rounded-xl text-sm text-dusk focus:outline-none focus:ring-2 focus:ring-braise/30 bg-white"
-                      >
-                        <option value="">Aucun chantier</option>
-                        {chantiers.map((c) => (
-                          <option key={c.id} value={c.id}>{c.titre}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
                   <input
                     ref={inputRef}
                     type="file"
@@ -180,11 +183,47 @@ export function ScannerMateriauModal({
                   imagePreview={preview}
                   onFermer={handleClose}
                   footer={
-                    <p className="text-xs text-green-600 font-medium text-center">
-                      {chantierChoisi
-                        ? "Ajouté au journal du chantier"
-                        : "Fiche enregistrée dans vos scans"}
-                    </p>
+                    chantierPreselectionne ? (
+                      <p className="text-xs text-green-600 font-medium text-center">
+                        Ajouté au journal du chantier
+                      </p>
+                    ) : associationSauvegardee ? (
+                      <p className="text-xs text-green-600 font-medium text-center">
+                        Associé au chantier
+                      </p>
+                    ) : chantiers && chantiers.length > 0 ? (
+                      <div className="space-y-2 rounded-xl bg-dust/60 border border-dusk/8 p-3">
+                        <label className="block text-xs text-dusk/50">Associer à un chantier (optionnel)</label>
+                        <div className="flex gap-2">
+                          <select
+                            value={chantierAssocie}
+                            onChange={(e) => setChantierAssocie(e.target.value)}
+                            className="flex-1 px-3 py-2 border border-dusk/15 rounded-xl text-sm text-dusk focus:outline-none focus:ring-2 focus:ring-braise/30 bg-white"
+                          >
+                            <option value="">Aucun chantier</option>
+                            {chantiers.map((c) => (
+                              <option key={c.id} value={c.id}>{c.titre}</option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            onClick={handleAssocier}
+                            disabled={!chantierAssocie || isAssociating}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-braise text-white text-sm font-semibold rounded-xl hover:bg-ambre transition-colors disabled:opacity-50 shrink-0"
+                          >
+                            <Check size={14} weight="bold" />
+                            {isAssociating ? "…" : "OK"}
+                          </button>
+                        </div>
+                        <p className="text-xs text-dusk/35">
+                          Sans association, la fiche reste dans vos scans non associés.
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-green-600 font-medium text-center">
+                        Fiche enregistrée dans vos scans
+                      </p>
+                    )
                   }
                 />
               )}
