@@ -1,20 +1,20 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
 import {
   ArrowLeft,
   Crown,
   Check,
   WarningCircle,
 } from "@phosphor-icons/react/dist/ssr";
-import { getCurrentUser } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/client";
 import { updateClientDetails } from "@/app/actions/crm";
 import { NotesClient } from "@/components/espace/NotesClient";
 import { StatutSelector } from "@/components/espace/StatutSelector";
 import { COLONNES } from "@/components/espace/KanbanBoard";
 import type { ClientStatut } from "@/lib/supabase/clients";
-
-export const metadata: Metadata = { title: "Fiche client — Estime" };
 
 const SOURCES = [
   "Bouche à oreille",
@@ -25,85 +25,208 @@ const SOURCES = [
   "Autre",
 ];
 
-export default async function FicheClient({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ message?: string; error?: string }>;
-}) {
-  const { id } = await params;
-  const { message, error } = await searchParams;
-  const { supabase, user } = await getCurrentUser();
+type Client = {
+  id: string;
+  prenom: string;
+  nom: string;
+  email: string;
+  telephone: string | null;
+  statut: ClientStatut;
+  source: string | null;
+  est_vip: boolean;
+  derniere_interaction: string | null;
+  montant_estime: number | null;
+  created_at: string;
+  est_mauvais_payeur: boolean;
+  delai_moyen_paiement: number | null;
+  taux_recouvrement: number | null;
+  total_encaisse: number | null;
+};
 
-  if (!user) {
-    redirect("/connexion");
+type Note = { id: string; contenu: string; created_at: string };
+type Chantier = { id: string; titre: string; montant: number | null; statut: string; created_at: string };
+type Paiement = {
+  id: string;
+  chantier_id: string;
+  type: string;
+  montant: number | null;
+  statut: string;
+  date_prevue: string | null;
+  date_encaissement: string | null;
+};
+
+export default function FicheClient() {
+  const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const message = searchParams.get("message");
+  const error = searchParams.get("error");
+
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [notFoundState, setNotFoundState] = useState(false);
+  const [client, setClient] = useState<Client | null>(null);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [chantiers, setChantiers] = useState<Chantier[]>([]);
+  const [avisCount, setAvisCount] = useState(0);
+  const [paiementsClient, setPaiementsClient] = useState<Paiement[]>([]);
+
+  useEffect(() => {
+    document.title = "Fiche client — Estime";
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const id = params.id;
+
+    async function load() {
+      setLoading(true);
+      setLoadError(null);
+      setNotFoundState(false);
+
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+          router.replace("/connexion");
+          return;
+        }
+
+        const [
+          { data: clientData, error: clientError },
+          { data: notesData, error: notesError },
+          { data: chantiersData, error: chantiersError },
+          { data: avisData, error: avisError },
+          { data: paiementsData, error: paiementsError },
+        ] = await Promise.all([
+          supabase
+            .from("clients")
+            .select(
+              "id, prenom, nom, email, telephone, statut, source, est_vip, derniere_interaction, montant_estime, created_at, est_mauvais_payeur, delai_moyen_paiement, taux_recouvrement, total_encaisse"
+            )
+            .eq("id", id)
+            .eq("user_id", user.id)
+            .maybeSingle(),
+          supabase
+            .from("notes_client")
+            .select("id, contenu, created_at")
+            .eq("client_id", id)
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(50),
+          supabase
+            .from("chantiers")
+            .select("id, titre, montant, statut, created_at")
+            .eq("client_id", id)
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false }),
+          supabase
+            .from("avis")
+            .select("id, note_google")
+            .eq("user_id", user.id),
+          supabase
+            .from("paiements_chantier")
+            .select("id, chantier_id, type, montant, statut, date_prevue, date_encaissement")
+            .eq("user_id", user.id)
+            .order("date_encaissement", { ascending: false })
+            .order("created_at", { ascending: false }),
+        ]);
+
+        if (cancelled) return;
+
+        if (clientError) throw clientError;
+        if (notesError) throw notesError;
+        if (chantiersError) throw chantiersError;
+        if (avisError) throw avisError;
+        if (paiementsError) throw paiementsError;
+
+        if (!clientData) {
+          setNotFoundState(true);
+          return;
+        }
+
+        setClient(clientData);
+        setNotes(notesData ?? []);
+        setChantiers(chantiersData ?? []);
+        setAvisCount(avisData?.length ?? 0);
+        setPaiementsClient(paiementsData ?? []);
+      } catch (err) {
+        if (cancelled) return;
+        console.error("[fiche-client]", err);
+        setLoadError(
+          err instanceof Error ? err.message : "Une erreur inattendue est survenue."
+        );
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [params.id, router]);
+
+  if (loading) {
+    return <FicheClientSkeleton />;
   }
 
-  // Toutes les données en parallèle
-  const [
-    { data: client, error: clientError },
-    { data: notes, error: notesError },
-    { data: chantiers, error: chantiersError },
-    { data: avis, error: avisError },
-    { data: paiementsClient, error: paiementsError },
-  ] = await Promise.all([
-    supabase
-      .from("clients")
-      .select(
-        "id, prenom, nom, email, telephone, statut, source, est_vip, derniere_interaction, montant_estime, created_at, est_mauvais_payeur, delai_moyen_paiement, taux_recouvrement, total_encaisse"
-      )
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .maybeSingle(),
-    supabase
-      .from("notes_client")
-      .select("id, contenu, created_at")
-      .eq("client_id", id)
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(50),
-    supabase
-      .from("chantiers")
-      .select("id, titre, montant, statut, created_at")
-      .eq("client_id", id)
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("avis")
-      .select("id, note_google")
-      .eq("user_id", user.id),
-    supabase
-      .from("paiements_chantier")
-      .select("id, chantier_id, type, montant, statut, date_prevue, date_encaissement")
-      .eq("user_id", user.id)
-      .order("date_encaissement", { ascending: false })
-      .order("created_at", { ascending: false }),
-  ]);
-
-  if (clientError) {
-    console.error("[fiche-client] Erreur clients:", clientError.message, clientError.code);
-  }
-  if (notesError) {
-    console.error("[fiche-client] Erreur notes_client:", notesError.message, notesError.code);
-  }
-  if (chantiersError) {
-    console.error("[fiche-client] Erreur chantiers:", chantiersError.message, chantiersError.code);
-  }
-  if (avisError) {
-    console.error("[fiche-client] Erreur avis:", avisError.message, avisError.code);
-  }
-  if (paiementsError) {
-    console.error("[fiche-client] Erreur paiements_chantier:", paiementsError.message, paiementsError.code);
+  if (notFoundState) {
+    return (
+      <div className="max-w-3xl mx-auto px-6 py-16 text-center">
+        <h1 className="font-display text-xl font-bold text-dusk mb-2">Client introuvable</h1>
+        <p className="text-dusk/50 text-sm mb-6">
+          Ce client n&apos;existe pas ou vous n&apos;y avez pas accès.
+        </p>
+        <Link
+          href="/espace/clients"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-braise hover:text-dusk transition-colors"
+        >
+          <ArrowLeft size={16} weight="bold" aria-hidden="true" />
+          Retour aux clients
+        </Link>
+      </div>
+    );
   }
 
-  if (!client) notFound();
+  if (loadError || !client) {
+    return (
+      <div className="max-w-3xl mx-auto px-6 py-16 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-50">
+          <WarningCircle size={28} weight="bold" className="text-red-600" />
+        </div>
+        <h1 className="font-display text-xl font-bold text-dusk mb-2">
+          Impossible d&apos;afficher cette fiche client
+        </h1>
+        <p className="text-dusk/50 text-sm mb-6">{loadError ?? "Une erreur inattendue est survenue."}</p>
+        <div className="flex items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => router.refresh()}
+            className="px-5 py-2.5 rounded-full bg-braise text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+          >
+            Réessayer
+          </button>
+          <Link
+            href="/espace/clients"
+            className="flex items-center gap-1.5 px-5 py-2.5 rounded-full border border-dusk/15 text-dusk text-sm font-semibold hover:bg-dusk/5 transition-colors"
+          >
+            <ArrowLeft size={16} weight="bold" />
+            Retour aux clients
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const col = COLONNES.find((c) => c.statut === client.statut);
-  const totalCA = (chantiers ?? []).reduce((s, c) => s + (c.montant ?? 0), 0);
-  const nbChantiers = (chantiers ?? []).length;
-  const premierChantier = (chantiers ?? []).at(-1)?.created_at;
-  const dernierChantier = (chantiers ?? []).at(0)?.created_at;
+  const totalCA = chantiers.reduce((s, c) => s + (c.montant ?? 0), 0);
+  const nbChantiers = chantiers.length;
+  const premierChantier = chantiers.at(-1)?.created_at;
+  const dernierChantier = chantiers.at(0)?.created_at;
 
   const fmt = (iso: string) =>
     new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
@@ -173,7 +296,7 @@ export default async function FicheClient({
         {/* Statut pipeline */}
         <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
           <h2 className="font-display text-lg font-bold text-dusk mb-4">Statut pipeline</h2>
-          <StatutSelector clientId={client.id} currentStatut={client.statut as ClientStatut} />
+          <StatutSelector clientId={client.id} currentStatut={client.statut} />
         </div>
 
         {/* Infos client */}
@@ -253,7 +376,7 @@ export default async function FicheClient({
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <StatCard emoji="💶" label="CA total" value={totalCA > 0 ? `${totalCA.toLocaleString("fr-FR")} €` : "—"} />
             <StatCard emoji="🏗️" label="Chantiers" value={nbChantiers > 0 ? String(nbChantiers) : "—"} />
-            <StatCard emoji="⭐" label="Avis Google" value={String(avis?.length ?? 0)} />
+            <StatCard emoji="⭐" label="Avis Google" value={String(avisCount)} />
             {premierChantier && (
               <StatCard emoji="📅" label="1er chantier" value={fmt(premierChantier)} small />
             )}
@@ -267,11 +390,11 @@ export default async function FicheClient({
         </div>
 
         {/* Chantiers liés */}
-        {(chantiers ?? []).length > 0 && (
+        {chantiers.length > 0 && (
           <div className="bg-white rounded-2xl border border-dusk/8 p-6 lg:p-8">
             <h2 className="font-display text-lg font-bold text-dusk mb-4">Chantiers réalisés</h2>
             <ul className="divide-y divide-dusk/8">
-              {(chantiers ?? []).map((c) => (
+              {chantiers.map((c) => (
                 <li key={c.id} className="flex items-center justify-between gap-4 py-3">
                   <div>
                     <Link
@@ -296,13 +419,28 @@ export default async function FicheClient({
         {/* Historique financier */}
         <HistoriqueFinancier
           client={client}
-          paiements={paiementsClient ?? []}
-          chantiersIds={(chantiers ?? []).map((c) => c.id)}
-          chantiersMap={Object.fromEntries((chantiers ?? []).map((c) => [c.id, c.titre]))}
+          paiements={paiementsClient}
+          chantiersIds={chantiers.map((c) => c.id)}
+          chantiersMap={Object.fromEntries(chantiers.map((c) => [c.id, c.titre]))}
         />
 
         {/* Notes */}
-        <NotesClient clientId={client.id} notes={notes ?? []} />
+        <NotesClient clientId={client.id} notes={notes} />
+      </div>
+    </div>
+  );
+}
+
+function FicheClientSkeleton() {
+  return (
+    <div className="max-w-3xl mx-auto px-6 py-12 lg:py-16 animate-pulse">
+      <div className="h-4 w-24 bg-dusk/10 rounded mb-6" />
+      <div className="h-8 w-64 bg-dusk/10 rounded mb-2" />
+      <div className="h-4 w-40 bg-dusk/10 rounded mb-8" />
+      <div className="space-y-6">
+        <div className="h-24 bg-white rounded-2xl border border-dusk/8" />
+        <div className="h-64 bg-white rounded-2xl border border-dusk/8" />
+        <div className="h-40 bg-white rounded-2xl border border-dusk/8" />
       </div>
     </div>
   );
@@ -354,7 +492,6 @@ function HistoriqueFinancier({
   chantiersIds: string[];
   chantiersMap: Record<string, string>;
 }) {
-  // Only show payments linked to this client's chantiers
   const filtered = paiements.filter((p) => chantiersIds.includes(p.chantier_id));
   if (filtered.length === 0 && !client.total_encaisse) return null;
 
