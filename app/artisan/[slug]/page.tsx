@@ -17,6 +17,7 @@ import {
   textureCSS,
   heroHeightCSS,
   waveTransitionSVG,
+  separateurSVG,
 } from "@/lib/vitrine/defaults";
 
 export const revalidate = 3600;
@@ -257,6 +258,24 @@ export default async function VitrineArtisan({
   const faqSection = vitrineConfig.sections.faq;
   const showFaq = faqSection.visible && faqSection.items.length > 0;
 
+  // Compteurs dans le hero
+  const heroCompteursActifs = vitrineConfig.hero.compteurs_hero;
+  const heroCompteursPosition = vitrineConfig.hero.compteurs_position;
+
+  // Séparateurs entre sections
+  const separateurStyle = vitrineConfig.separateurs;
+  const separateurCSS = (() => {
+    if (separateurStyle === "aucun") return "";
+    if (separateurStyle === "ligne") {
+      return `border-top: 1px solid ${vitrineCouleur}25;`;
+    }
+    if (separateurStyle === "icone") {
+      return "";
+    }
+    const bg = separateurSVG(separateurStyle, vitrineCouleur);
+    return bg ? `background-image: ${bg}; background-repeat: repeat-x; background-position: top center; background-size: 24px 16px;` : "";
+  })();
+
   // Video
   const videoSection = vitrineConfig.sections.video;
   const videoEmbed = videoSection.visible ? parseVideoEmbed(videoSection.url) : null;
@@ -375,6 +394,43 @@ export default async function VitrineArtisan({
             width: 48px;
             background: ${vitrineCouleur}12;
             z-index: 0;
+          }
+        ` : ""}
+        ${decorLaterale === "watermark" ? `
+          .vitrine-page::before, .vitrine-page::after {
+            content: '🔨';
+            position: fixed;
+            top: 0; bottom: 0;
+            width: 64px;
+            font-size: 28px;
+            line-height: 90px;
+            text-align: center;
+            white-space: pre-wrap;
+            word-break: break-all;
+            opacity: 0.05;
+            z-index: 0;
+            pointer-events: none;
+          }
+          .vitrine-page::before { left: 0; content: '🔨\\A📐\\A🧱\\A🪚\\A🔧\\A🏗️\\A🔨\\A📐\\A🧱\\A🪚'; }
+          .vitrine-page::after { right: 0; content: '📐\\A🧱\\A🪚\\A🔧\\A🏗️\\A🔨\\A📐\\A🧱\\A🪚\\A🔧'; }
+        ` : ""}
+        ${separateurCSS ? `
+          main.vitrine-main > .vitrine-fadein + .vitrine-fadein {
+            position: relative;
+            padding-top: 2rem;
+          }
+          main.vitrine-main > .vitrine-fadein + .vitrine-fadein::before {
+            content: '${separateurStyle === "icone" ? "⚒" : ""}';
+            display: block;
+            position: absolute;
+            top: 0.5rem; left: 50%;
+            transform: translateX(-50%);
+            width: ${separateurStyle === "icone" ? "auto" : "100%"};
+            height: ${separateurStyle === "icone" ? "auto" : "16px"};
+            font-size: 14px;
+            color: ${vitrineCouleur}80;
+            text-align: center;
+            ${separateurCSS}
           }
         ` : ""}
         :root {
@@ -615,7 +671,31 @@ export default async function VitrineArtisan({
             {showContact && (
               <ContactModal slug={slug} artisanNom={artisanNom} ctaLabel={vitrineCtaTexte} />
             )}
+
+            {/* Compteurs dans le hero (position "bas") */}
+            {heroCompteursActifs && heroCompteursPosition === "bas" && (
+              <HeroCompteurs
+                nbChantiers={chantiersWithUrls.length}
+                nbAvis={allAvisCount}
+                expYears={expYears}
+                satisfaction={chiffres.satisfaction}
+                clair={hasHeroPhoto}
+              />
+            )}
           </div>
+
+          {/* Compteurs dans le hero (position "overlay", sur la photo) */}
+          {heroCompteursActifs && heroCompteursPosition === "overlay" && hasHeroPhoto && (
+            <div className="relative z-10 w-full pb-4">
+              <HeroCompteurs
+                nbChantiers={chantiersWithUrls.length}
+                nbAvis={allAvisCount}
+                expYears={expYears}
+                satisfaction={chiffres.satisfaction}
+                clair
+              />
+            </div>
+          )}
 
           {/* Hero → page wave transition */}
           {heroWaveEncoded && (
@@ -690,7 +770,7 @@ export default async function VitrineArtisan({
           </FadeIn>
         )}
 
-        <main className="max-w-2xl mx-auto px-5 py-10 space-y-14">
+        <main className="vitrine-main max-w-2xl mx-auto px-5 py-10 space-y-14">
 
           {/* ── Avis Google ── */}
           {showAvis && avisLimited.length > 0 && (
@@ -909,6 +989,40 @@ export default async function VitrineArtisan({
 }
 
 // ── Sub-components ─────────────────────────────────────────────────────────
+
+function HeroCompteurs({
+  nbChantiers,
+  nbAvis,
+  expYears,
+  satisfaction,
+  clair,
+}: {
+  nbChantiers: number;
+  nbAvis: number;
+  expYears: number | null;
+  satisfaction: number;
+  clair: boolean;
+}) {
+  const items = [
+    { icon: "🏗️", value: nbChantiers, label: "chantiers" },
+    { icon: "⭐", value: nbAvis, label: "avis" },
+    ...(expYears !== null ? [{ icon: "📅", value: expYears, label: "ans" }] : []),
+    { icon: "✅", value: satisfaction, label: "% satisfaits" },
+  ];
+
+  return (
+    <div className="flex items-center justify-center gap-5">
+      {items.map((it) => (
+        <div key={it.label} className="flex flex-col items-center">
+          <span className={`text-sm font-bold ${clair ? "text-white" : "text-[#2B2521]"}`}>
+            {it.icon} {it.value}
+          </span>
+          <span className={`text-[10px] ${clair ? "text-white/70" : "text-[#2B2521]/50"}`}>{it.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function SectionTitle({
   id,

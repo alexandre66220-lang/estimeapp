@@ -14,8 +14,8 @@ const FEATURES = [
   },
   {
     icon: "🌐",
-    title: "Page vitrine publique offerte",
-    body: "Une page personnalisée à partager à vos prospects, incluse dans chaque abonnement.",
+    title: "Mini site vitrine publique offert",
+    body: "Un mini site vitrine personnalisé à partager à vos prospects, inclus dans chaque abonnement.",
   },
   {
     icon: "📈",
@@ -31,6 +31,26 @@ const FEATURES = [
     icon: "📋",
     title: "Carnet d'adresses intégré",
     body: "Gérez vos clients directement dans Estime pour envoyer vos demandes d'avis en quelques clics.",
+  },
+  {
+    icon: "💰",
+    title: "Suivi financier avancé",
+    body: "Prévisionnel de trésorerie, impayés et rentabilité par chantier, tout au même endroit.",
+  },
+  {
+    icon: "🎨",
+    title: "Génération d'images IA",
+    body: "Créez des visuels de chantier percutants pour vos réseaux, générés automatiquement par IA.",
+  },
+  {
+    icon: "🧠",
+    title: "Alter ego stratégique",
+    body: "Un profil comportemental qui détecte vos patterns à risque et vous alerte avant de les reproduire.",
+  },
+  {
+    icon: "🔍",
+    title: "Langage des matériaux",
+    body: "Scannez un matériau sur chantier, Estime identifie les risques et génère une fiche de sécurité.",
   },
 ];
 

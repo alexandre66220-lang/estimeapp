@@ -22,6 +22,7 @@ import {
   COULEURS_PREDEFINIES,
   POLICES_TITRES,
   mergeVitrineConfig,
+  textureCSS,
   type VitrineConfig,
   type HeroStyle,
   type HeroOverlay,
@@ -238,11 +239,37 @@ function VitrinePreview({
       ? "text-base"
       : "text-sm";
 
+  const fondTexture =
+    config.fond.type === "texture" ? textureCSS(config.fond.texture, couleur) : "";
+  const decorLaterale = config.fond.decorations_laterales;
+
   return (
     <div
-      className="bg-[#F8F5F2] min-h-[600px] text-[#2B2521] text-sm overflow-hidden"
-      style={{ fontSize: "13px", fontFamily }}
+      className="relative bg-[#F8F5F2] min-h-[600px] text-[#2B2521] text-sm overflow-hidden"
+      style={{
+        fontSize: "13px",
+        fontFamily,
+        ...(config.fond.type === "degrade"
+          ? { backgroundImage: `linear-gradient(160deg, ${couleur}12, transparent 60%)` }
+          : {}),
+        ...(fondTexture
+          ? { backgroundImage: fondTexture.replace("background-image: ", "").replace(";", "") }
+          : {}),
+      }}
     >
+      {/* Décorations latérales */}
+      {decorLaterale === "bordure" && (
+        <div className="absolute top-0 left-0 bottom-0 w-1 z-10" style={{ backgroundColor: couleur }} />
+      )}
+      {decorLaterale === "bande" && (
+        <div className="absolute top-0 left-0 bottom-0 w-3 z-10" style={{ backgroundColor: `${couleur}20` }} />
+      )}
+      {decorLaterale === "watermark" && (
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-[0.06] text-2xl leading-[3] text-center select-none">
+          {"🔨📐🧱🪚🔧🏗️".repeat(20)}
+        </div>
+      )}
+
       {/* Hero */}
       <div
         className={`relative ${heroH} flex flex-col items-center justify-center text-center px-4 py-8 overflow-hidden`}

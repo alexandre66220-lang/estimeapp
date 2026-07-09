@@ -1,6 +1,8 @@
 "use server";
 
+import { revalidatePath, updateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { profileCacheTag } from "@/lib/supabase/profile";
 import type { VitrineConfig } from "@/lib/vitrine/defaults";
 
 function isVitrineComplete(config: VitrineConfig): boolean {
@@ -22,14 +24,22 @@ export async function saveVitrineConfig(
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("profiles")
     .update({ vitrine_config: config })
-    .eq("id", user.id);
+    .eq("id", user.id)
+    .select("slug")
+    .maybeSingle();
 
   if (error) {
     console.error("[saveVitrineConfig]", error.message, error.code);
     return { error: "Erreur de sauvegarde" };
+  }
+
+  updateTag(profileCacheTag(user.id));
+  revalidatePath("/espace/ma-vitrine");
+  if (updated?.slug) {
+    revalidatePath(`/artisan/${updated.slug}`);
   }
 
   if (isVitrineComplete(config)) {
@@ -51,11 +61,20 @@ export async function resetVitrineConfig(): Promise<{ error?: string }> {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("profiles")
     .update({ vitrine_config: {} })
-    .eq("id", user.id);
+    .eq("id", user.id)
+    .select("slug")
+    .maybeSingle();
 
   if (error) return { error: "Erreur de réinitialisation" };
+
+  updateTag(profileCacheTag(user.id));
+  revalidatePath("/espace/ma-vitrine");
+  if (updated?.slug) {
+    revalidatePath(`/artisan/${updated.slug}`);
+  }
+
   return {};
 }
