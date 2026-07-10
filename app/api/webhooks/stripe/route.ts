@@ -4,6 +4,8 @@ import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { devLog, devError } from "@/lib/log";
 import { sendStripeMatchFailureAlert } from "@/lib/resend/send-stripe-alert";
+import { sendNewSubscriberAlert } from "@/lib/resend/send-new-subscriber-alert";
+import { notifyError } from "@/lib/resend/notify-error";
 
 // Reste en Node.js runtime (Serverless) : stripe.webhooks.constructEvent est
 // synchrone et dépend du module crypto de Node, indisponible sur Edge.
@@ -39,7 +41,11 @@ export async function POST(request: NextRequest) {
 
   try {
     if (event.type === "customer.subscription.created") {
-      await handleSubscriptionActive(stripe, event.data.object as Stripe.Subscription, event);
+      const subscription = event.data.object as Stripe.Subscription;
+      await handleSubscriptionActive(stripe, subscription, event);
+      if (subscription.status === "active") {
+        await notifyNewSubscriber(stripe, subscription);
+      }
     } else if (event.type === "customer.subscription.updated") {
       const subscription = event.data.object as Stripe.Subscription;
       if (isActiveStatus(subscription.status)) {
@@ -168,6 +174,60 @@ async function alertMatchFailure(stripe: Stripe, subscription: Stripe.Subscripti
     });
   } catch (alertError) {
     console.error("[stripe-webhook] échec de l'envoi de l'alerte de matching :", alertError);
+  }
+}
+
+/**
+ * Notifie spark@alcalspark.com quand un artisan souscrit un abonnement
+ * payant actif (pas les essais gratuits). Ne doit jamais faire échouer le
+ * webhook : toute erreur est journalisée via notifyError sans être relancée.
+ */
+async function notifyNewSubscriber(stripe: Stripe, subscription: Stripe.Subscription) {
+  try {
+    const match = await findProfileId(stripe, subscription);
+    if (!match) return;
+
+    const { data: profile } = await match.supabase
+      .from("profiles")
+      .select("prenom, nom, email, company_name")
+      .eq("id", match.profileId)
+      .maybeSingle();
+
+    const nom =
+      [profile?.prenom, profile?.nom].filter(Boolean).join(" ") ||
+      profile?.company_name ||
+      "Artisan inconnu";
+
+    const customerId = getCustomerId(subscription);
+    let customerEmail = profile?.email ?? null;
+    if (!customerEmail) {
+      const customer = await stripe.customers.retrieve(customerId);
+      customerEmail = !customer.deleted ? customer.email ?? null : null;
+    }
+
+    const item = subscription.items.data[0];
+    const price = item?.price;
+    let plan = price?.nickname ?? null;
+    if (!plan && price?.product) {
+      const productId = typeof price.product === "string" ? price.product : price.product.id;
+      const product = await stripe.products.retrieve(productId);
+      plan = product.name;
+    }
+
+    const montant = price?.unit_amount != null
+      ? `${(price.unit_amount / 100).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${price.currency.toUpperCase()}/${price.recurring?.interval === "year" ? "an" : "mois"}`
+      : "montant inconnu";
+
+    await sendNewSubscriberAlert({
+      nom,
+      email: customerEmail ?? "email inconnu",
+      dateInscription: new Date(subscription.created * 1000),
+      plan: plan ?? "plan inconnu",
+      montant,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    await notifyError("webhook-stripe-nouvel-abonne", message, error instanceof Error ? error.stack : undefined);
   }
 }
 
