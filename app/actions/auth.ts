@@ -50,6 +50,12 @@ export async function signup(formData: FormData) {
     );
   }
 
+  if (password.length < 8) {
+    redirect(
+      `/inscription?error=${encodeURIComponent("Le mot de passe doit contenir au moins 8 caractères.")}`
+    );
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email,

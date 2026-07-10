@@ -71,10 +71,10 @@ export function InscriptionForm() {
             id="password"
             name="password"
             required
-            minLength={6}
+            minLength={8}
             autoComplete="new-password"
             className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200"
-            placeholder="6 caractères minimum"
+            placeholder="8 caractères minimum"
           />
         </div>
         <button

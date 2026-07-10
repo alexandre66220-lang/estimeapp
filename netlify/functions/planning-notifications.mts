@@ -76,6 +76,7 @@ async function handler() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          secret: process.env.RAPPORT_SECRET_KEY,
           subscription: profile.push_subscription,
           title: "⏰ Heure de publier !",
           body: post.texte_post.slice(0, 100) + (post.texte_post.length > 100 ? "…" : ""),
