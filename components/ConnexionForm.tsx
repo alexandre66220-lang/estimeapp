@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { login } from "@/app/actions/auth";
 
 function LoadingOverlay() {
@@ -141,6 +142,14 @@ export function ConnexionForm() {
             className="w-full px-4 py-3 rounded-xl border border-dusk/15 bg-dust text-dusk text-sm placeholder:text-dusk/30 focus:outline-none focus:ring-2 focus:ring-ambre/30 focus:border-ambre/50 transition-all duration-200"
             placeholder="••••••••"
           />
+          <div className="text-right mt-1.5">
+            <Link
+              href="/mot-de-passe-oublie"
+              className="text-xs font-medium text-dusk/50 hover:text-braise transition-colors"
+            >
+              Mot de passe oublié ?
+            </Link>
+          </div>
         </div>
         <button
           type="submit"
