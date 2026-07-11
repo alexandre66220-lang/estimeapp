@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { devLog, devError } from "@/lib/log";
 import { sendStripeMatchFailureAlert } from "@/lib/resend/send-stripe-alert";
 import { sendNewSubscriberAlert } from "@/lib/resend/send-new-subscriber-alert";
+import { sendPaymentFailedEmail } from "@/lib/resend/send-payment-failed";
 import { notifyError } from "@/lib/resend/notify-error";
 
 // Reste en Node.js runtime (Serverless) : stripe.webhooks.constructEvent est
@@ -55,6 +56,8 @@ export async function POST(request: NextRequest) {
       }
     } else if (event.type === "customer.subscription.deleted") {
       await handleSubscriptionInactive(stripe, event.data.object as Stripe.Subscription, event);
+    } else if (event.type === "invoice.payment_failed") {
+      await notifyPaymentFailed(stripe, event.data.object as Stripe.Invoice);
     }
   } catch (error) {
     console.error("[stripe-webhook] erreur inattendue lors du traitement :", error);
@@ -228,6 +231,43 @@ async function notifyNewSubscriber(stripe: Stripe, subscription: Stripe.Subscrip
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     await notifyError("webhook-stripe-nouvel-abonne", message, error instanceof Error ? error.stack : undefined);
+  }
+}
+
+/**
+ * Notifie l'artisan par email quand un paiement d'abonnement échoue, avec
+ * un lien vers le portail Stripe pour mettre à jour son moyen de paiement.
+ * Ne doit jamais faire échouer le webhook : toute erreur est journalisée
+ * via notifyError sans être relancée.
+ */
+async function notifyPaymentFailed(stripe: Stripe, invoice: Stripe.Invoice) {
+  try {
+    const subscriptionRef = invoice.parent?.subscription_details?.subscription;
+    const subscriptionId = typeof subscriptionRef === "string" ? subscriptionRef : subscriptionRef?.id;
+    if (!subscriptionId) return;
+
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const match = await findProfileId(stripe, subscription);
+    if (!match) return;
+
+    const { data: profile } = await match.supabase
+      .from("profiles")
+      .select("prenom, email")
+      .eq("id", match.profileId)
+      .maybeSingle();
+
+    let email = profile?.email ?? null;
+    if (!email) {
+      const customerId = getCustomerId(subscription);
+      const customer = await stripe.customers.retrieve(customerId);
+      email = !customer.deleted ? customer.email ?? null : null;
+    }
+    if (!email) return;
+
+    await sendPaymentFailedEmail({ email, prenom: profile?.prenom ?? null });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    await notifyError("webhook-stripe-paiement-echoue", message, error instanceof Error ? error.stack : undefined);
   }
 }
 

@@ -1,5 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 function slugifyBase(value: string) {
   return value
@@ -79,16 +80,25 @@ export async function registerFilleulParrainage(
   filleulId: string,
   filleulEmail: string
 ): Promise<void> {
-  const { data: rows } = await supabase.rpc("resolve_parrain_info", {
+  const { data: parrainId } = await supabase.rpc("resolve_parrain_info", {
     p_code: code,
   });
-  const parrain = rows?.[0] as { id: string; email: string } | undefined;
 
-  if (!parrain || parrain.id === filleulId) return;
+  if (!parrainId || parrainId === filleulId) return;
+
+  // L'email du parrain n'est utilisé que pour l'affichage admin ; il est
+  // récupéré via le client admin (bypass RLS côté serveur uniquement, ne
+  // transite jamais dans une réponse renvoyée au filleul).
+  const admin = createAdminClient();
+  const { data: parrainProfile } = await admin
+    .from("profiles")
+    .select("email")
+    .eq("id", parrainId)
+    .maybeSingle();
 
   await supabase.from("parrainages").insert({
-    parrain_id: parrain.id,
-    parrain_email: parrain.email,
+    parrain_id: parrainId,
+    parrain_email: parrainProfile?.email ?? null,
     filleul_id: filleulId,
     filleul_email: filleulEmail,
     code_parrainage: code,

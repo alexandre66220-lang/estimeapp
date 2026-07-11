@@ -72,10 +72,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Erreur de stockage" }, { status: 500 });
     }
 
-    // Get signed URL (valid 1 year)
+    // URL signée à courte durée de vie, uniquement pour un usage immédiat
+    // (pièce jointe email + lien "Voir mon rapport" consommés dans la
+    // foulée). Seul le path est persisté : la consultation ultérieure
+    // (page /espace/rapports) régénère une URL signée à la demande.
     const { data: signedData } = await admin.storage
       .from("rapports")
-      .createSignedUrl(storagePath, 60 * 60 * 24 * 365);
+      .createSignedUrl(storagePath, 60 * 60);
 
     const pdfUrl = signedData?.signedUrl ?? null;
 
@@ -84,7 +87,7 @@ export async function POST(request: Request) {
       {
         user_id: userId,
         mois: data.moisKey,
-        pdf_url: pdfUrl,
+        pdf_path: storagePath,
         statut: "success",
         erreur: null,
       },

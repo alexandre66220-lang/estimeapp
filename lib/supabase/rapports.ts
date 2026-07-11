@@ -45,7 +45,7 @@ export type RapportData = {
 export type RapportLog = {
   id: string;
   mois: string;
-  pdf_url: string | null;
+  pdf_path: string | null;
   email_envoye: boolean;
   statut: string;
   created_at: string;
@@ -214,7 +214,7 @@ export async function getRapportLogs(
 ): Promise<RapportLog[]> {
   const { data } = await supabase
     .from("rapport_logs")
-    .select("id, mois, pdf_url, email_envoye, statut, created_at")
+    .select("id, mois, pdf_path, email_envoye, statut, created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(24);

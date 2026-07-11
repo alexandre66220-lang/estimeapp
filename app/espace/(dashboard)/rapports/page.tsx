@@ -9,6 +9,7 @@ import {
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getRapportLogs } from "@/lib/supabase/rapports";
 import { GenererRapportButton } from "@/components/espace/GenererRapportButton";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const metadata: Metadata = { title: "Mes rapports, Estime" };
 
@@ -30,6 +31,21 @@ function canGenerate() {
 export default async function RapportsPage() {
   const { supabase, user } = await getCurrentUser();
   const logs = await getRapportLogs(supabase, user!.id);
+
+  // URL signée générée à la demande (1h) au moment de la consultation,
+  // jamais persistée en base : seul le path du fichier est stocké.
+  const admin = createAdminClient();
+  const pdfUrls = new Map<string, string>();
+  await Promise.all(
+    logs
+      .filter((log) => log.statut === "success" && log.pdf_path)
+      .map(async (log) => {
+        const { data } = await admin.storage
+          .from("rapports")
+          .createSignedUrl(log.pdf_path!, 60 * 60);
+        if (data?.signedUrl) pdfUrls.set(log.id, data.signedUrl);
+      })
+  );
 
   const now = new Date();
   const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -103,9 +119,9 @@ export default async function RapportsPage() {
                 {log.statut === "error" && (
                   <span className="text-xs text-red-500 font-medium">Erreur</span>
                 )}
-                {log.pdf_url && log.statut === "success" && (
+                {pdfUrls.has(log.id) && log.statut === "success" && (
                   <a
-                    href={log.pdf_url}
+                    href={pdfUrls.get(log.id)}
                     target="_blank"
                     rel="noopener noreferrer"
                     download
