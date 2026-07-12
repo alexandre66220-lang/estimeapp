@@ -7,9 +7,9 @@ import { FAQ_FONCTIONNALITES, buildFaqJsonLd } from "@/lib/seo/faq";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Toutes les fonctionnalités, Estime",
+  title: "Fonctionnalités pour artisans BTP, Estime",
   description:
-    "Posts Instagram IA, gestion clients, tableau de bord financier, page vitrine publique, score de réputation comparatif. Découvrez tout ce qu'Estime fait pour vous.",
+    "Posts Instagram générés par IA, gestion clients, tableau de bord financier et page vitrine publique. Simplifiez la gestion de votre activité d'artisan BTP.",
   alternates: { canonical: "https://estime-app.com/fonctionnalites" },
 };
 

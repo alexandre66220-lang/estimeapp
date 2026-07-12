@@ -7,7 +7,7 @@ export const dynamic = "force-static";
 export const metadata: Metadata = {
   title: "À propos d'Estime, l'app de réputation pour les artisans BTP",
   description:
-    "Découvrez l'histoire d'Estime, le SaaS créé pour aider les artisans du BTP à développer leur réputation en ligne automatiquement.",
+    "Découvrez l'histoire d'Estime, le SaaS créé pour aider les artisans du BTP à développer leur réputation en ligne automatiquement, sans compétences techniques.",
   alternates: { canonical: "https://estime-app.com/a-propos" },
   robots: { index: true, follow: true },
 };
@@ -17,8 +17,14 @@ const organizationJsonLd = {
   "@type": "Organization",
   name: "Estime",
   url: "https://estime-app.com",
+  logo: "https://estime-app.com/og-image.png",
   description:
     "SaaS B2B pour les artisans du BTP : génération de posts Instagram et demandes d'avis Google automatiques",
+  contactPoint: {
+    "@type": "ContactPoint",
+    email: "contact@alcalspark.com",
+    contactType: "customer support",
+  },
   founder: {
     "@type": "Person",
     name: "Alexandre",
