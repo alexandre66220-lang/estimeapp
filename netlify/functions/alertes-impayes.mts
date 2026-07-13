@@ -3,7 +3,7 @@
  * Se déclenche chaque matin à 08h00 UTC
  *
  * Variables d'environnement requises :
- *   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+ *   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
  *   RESEND_API_KEY
  *   APP_URL (ex: https://estime-app.com)
  */
@@ -17,7 +17,7 @@ export const config: Config = {
 };
 
 async function handler() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const resendKey = process.env.RESEND_API_KEY;
 
