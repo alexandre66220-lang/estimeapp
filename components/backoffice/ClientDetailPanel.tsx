@@ -2,20 +2,40 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { FilePdf } from "@phosphor-icons/react";
 import { modifierClient, marquerInteraction } from "@/app/actions/backoffice-clients";
 import { ClientForm } from "./ClientForm";
 import { Card } from "./Card";
 import { StatusBadge } from "./StatusBadge";
+import { EnvoyerDocumentForm } from "./EnvoyerDocumentForm";
+import { EnvoyerEmailForm } from "./EnvoyerEmailForm";
 import { STATUT_TONE, statutLabel } from "@/lib/backoffice/client-statut";
 import type { AdminClient } from "@/lib/backoffice/clients";
+import type { AdminDocument } from "@/lib/backoffice/documents";
+import type { AdminEmailTemplate } from "@/lib/backoffice/email-templates";
+import type { AdminEmail } from "@/lib/backoffice/emails";
 
 function formatDate(iso: string | null) {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 }
 
-export function ClientDetailPanel({ client }: { client: AdminClient }) {
+export function ClientDetailPanel({
+  client,
+  templates,
+  documentsEnvoyes,
+  emailTemplates,
+  emailsEnvoyes,
+}: {
+  client: AdminClient;
+  templates: AdminDocument[];
+  documentsEnvoyes: AdminDocument[];
+  emailTemplates: AdminEmailTemplate[];
+  emailsEnvoyes: AdminEmail[];
+}) {
   const [editing, setEditing] = useState(false);
+  const [sendingDoc, setSendingDoc] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   if (editing) {
@@ -106,6 +126,109 @@ export function ClientDetailPanel({ client }: { client: AdminClient }) {
             Créer un devis
           </Link>
         </div>
+      </Card>
+
+      <Card
+        title="Documents"
+        action={
+          !sendingDoc && (
+            <button
+              type="button"
+              onClick={() => setSendingDoc(true)}
+              className="text-xs font-medium bg-[#4ADE80]/10 text-[#4ADE80] px-3 py-1.5 rounded-md hover:bg-[#4ADE80]/20 transition-colors duration-150"
+            >
+              Envoyer un document
+            </button>
+          )
+        }
+      >
+        {sendingDoc && (
+          <div className="p-5 border-b border-[#232326]">
+            <EnvoyerDocumentForm
+              clientId={client.id}
+              clientNom={client.nom}
+              clientEntreprise={client.entreprise}
+              templates={templates}
+              onDone={() => setSendingDoc(false)}
+            />
+          </div>
+        )}
+
+        {documentsEnvoyes.length === 0 ? (
+          <p className="px-5 py-6 text-sm text-[#55555A]">Aucun document envoyé pour l&apos;instant.</p>
+        ) : (
+          <ul className="divide-y divide-[#232326]">
+            {documentsEnvoyes.map((d) => (
+              <li key={d.id} className="px-5 py-3 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm text-[#EDEDED] truncate">{d.titre}</p>
+                  <p className="text-xs text-[#55555A]">{formatDate(d.date_envoi)}</p>
+                </div>
+                <a
+                  href={`/api/backoffice/documents/${d.id}/pdf`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1.5 text-xs font-medium text-[#8B8B8D] hover:text-[#EDEDED] transition-colors duration-150 shrink-0"
+                >
+                  <FilePdf size={14} weight="bold" />
+                  PDF
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+
+      <Card
+        title="Emails"
+        action={
+          !sendingEmail && (
+            <button
+              type="button"
+              onClick={() => setSendingEmail(true)}
+              className="text-xs font-medium bg-[#4ADE80]/10 text-[#4ADE80] px-3 py-1.5 rounded-md hover:bg-[#4ADE80]/20 transition-colors duration-150"
+            >
+              Envoyer un email
+            </button>
+          )
+        }
+      >
+        {sendingEmail && (
+          <div className="p-5 border-b border-[#232326]">
+            {client.email ? (
+              <EnvoyerEmailForm
+                clientId={client.id}
+                clientNom={client.nom}
+                clientEntreprise={client.entreprise}
+                templates={emailTemplates}
+                onDone={() => setSendingEmail(false)}
+              />
+            ) : (
+              <p className="text-sm text-[#F87171]">
+                Ce client n&apos;a pas d&apos;adresse email renseignée. Ajoutez-en une pour pouvoir lui écrire.
+              </p>
+            )}
+          </div>
+        )}
+
+        {emailsEnvoyes.length === 0 ? (
+          <p className="px-5 py-6 text-sm text-[#55555A]">Aucun email envoyé pour l&apos;instant.</p>
+        ) : (
+          <ul className="divide-y divide-[#232326]">
+            {emailsEnvoyes.map((e) => (
+              <li key={e.id} className="px-5 py-3 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm text-[#EDEDED] truncate">{e.sujet}</p>
+                  <p className="text-xs text-[#55555A]">{formatDate(e.date_envoi)}</p>
+                </div>
+                <StatusBadge
+                  tone={e.statut === "envoye" ? "success" : "error"}
+                  label={e.statut === "envoye" ? "Envoyé" : "Échec"}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
       </Card>
     </div>
   );
