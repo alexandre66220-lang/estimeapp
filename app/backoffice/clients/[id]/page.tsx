@@ -6,6 +6,8 @@ import { ClientDetailPanel } from "@/components/backoffice/ClientDetailPanel";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getClient } from "@/lib/backoffice/clients";
 import { getTemplates, getDocumentsEnvoyesParClient } from "@/lib/backoffice/documents";
+import { getEmailTemplates } from "@/lib/backoffice/email-templates";
+import { getEmailsParClient } from "@/lib/backoffice/emails";
 
 export default async function ClientDetailPage({
   params,
@@ -18,9 +20,11 @@ export default async function ClientDetailPage({
 
   if (!client) notFound();
 
-  const [templates, documentsEnvoyes] = await Promise.all([
+  const [templates, documentsEnvoyes, emailTemplates, emailsEnvoyes] = await Promise.all([
     getTemplates(supabase),
     getDocumentsEnvoyesParClient(supabase, id),
+    getEmailTemplates(supabase),
+    getEmailsParClient(supabase, id),
   ]);
 
   return (
@@ -34,7 +38,13 @@ export default async function ClientDetailPage({
           <ArrowLeft size={14} weight="bold" />
           Retour aux clients
         </Link>
-        <ClientDetailPanel client={client} templates={templates} documentsEnvoyes={documentsEnvoyes} />
+        <ClientDetailPanel
+          client={client}
+          templates={templates}
+          documentsEnvoyes={documentsEnvoyes}
+          emailTemplates={emailTemplates}
+          emailsEnvoyes={emailsEnvoyes}
+        />
       </div>
     </>
   );
