@@ -18,8 +18,8 @@ const SECTIONS: NavSection[] = [
   {
     items: [
       { label: "Vue d'ensemble", href: "/backoffice" },
-      { label: "Finances" },
-      { label: "Estime" },
+      { label: "Finances", href: "/backoffice/finances" },
+      { label: "Estime", href: "/backoffice/estime" },
     ],
   },
   {
@@ -35,7 +35,7 @@ const SECTIONS: NavSection[] = [
     items: [
       { label: "Documents", href: "/backoffice/documents" },
       { label: "Emails", href: "/backoffice/emails" },
-      { label: "Sandbox" },
+      { label: "Sandbox", href: "/backoffice/sandbox" },
     ],
   },
 ];
