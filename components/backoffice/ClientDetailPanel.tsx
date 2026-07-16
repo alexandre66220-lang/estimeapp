@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { modifierClient, marquerInteraction } from "@/app/actions/backoffice-clients";
 import { ClientForm } from "./ClientForm";
 import { Card } from "./Card";
@@ -98,9 +99,12 @@ export function ClientDetailPanel({ client }: { client: AdminClient }) {
       <Card title="Devis">
         <div className="p-5 flex items-center justify-between gap-3">
           <p className="text-sm text-[#55555A]">Créer un devis pour ce client</p>
-          <span className="text-[10px] text-[#55555A] border border-[#232326] rounded-full px-2 py-1">
-            Bientôt (étape 2)
-          </span>
+          <Link
+            href={`/backoffice/devis/nouveau?client=${client.id}`}
+            className="text-xs font-medium bg-[#4ADE80]/10 text-[#4ADE80] px-3 py-1.5 rounded-md hover:bg-[#4ADE80]/20 transition-colors duration-150 shrink-0"
+          >
+            Créer un devis
+          </Link>
         </div>
       </Card>
     </div>

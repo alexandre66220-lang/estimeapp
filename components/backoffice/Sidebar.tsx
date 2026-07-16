@@ -26,7 +26,7 @@ const SECTIONS: NavSection[] = [
     label: "ALCALSPARK",
     items: [
       { label: "Clients", href: "/backoffice/clients" },
-      { label: "Devis" },
+      { label: "Devis", href: "/backoffice/devis" },
       { label: "Factures" },
     ],
   },
