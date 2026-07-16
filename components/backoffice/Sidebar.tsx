@@ -25,9 +25,9 @@ const SECTIONS: NavSection[] = [
   {
     label: "ALCALSPARK",
     items: [
-      { label: "Clients" },
-      { label: "Devis" },
-      { label: "Factures" },
+      { label: "Clients", href: "/backoffice/clients" },
+      { label: "Devis", href: "/backoffice/devis" },
+      { label: "Factures", href: "/backoffice/factures" },
     ],
   },
   {
@@ -73,7 +73,11 @@ export function Sidebar() {
               )}
               <div className="flex flex-col gap-0.5">
                 {section.items.map((item) => {
-                  const isActive = item.href && pathname === item.href;
+                  const isActive =
+                    item.href &&
+                    (item.href === "/backoffice"
+                      ? pathname === item.href
+                      : pathname.startsWith(item.href));
 
                   if (!item.href) {
                     return (
