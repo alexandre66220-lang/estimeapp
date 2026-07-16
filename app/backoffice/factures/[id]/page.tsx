@@ -5,50 +5,49 @@ import { Header } from "@/components/backoffice/Header";
 import { Card } from "@/components/backoffice/Card";
 import { Table, TableHead, Th, Tr, Td } from "@/components/backoffice/Table";
 import { StatusBadge } from "@/components/backoffice/StatusBadge";
-import { DevisActions } from "@/components/backoffice/DevisActions";
-import { ConvertirDevisButton } from "@/components/backoffice/ConvertirDevisButton";
+import { FactureActions } from "@/components/backoffice/FactureActions";
 import { getCurrentUser } from "@/lib/supabase/server";
-import { getDevis } from "@/lib/backoffice/devis";
-import { DEVIS_STATUT_TONE, devisStatutLabel } from "@/lib/backoffice/devis-statut";
+import { getFacture } from "@/lib/backoffice/factures";
+import { FACTURE_STATUT_TONE, factureStatutLabel } from "@/lib/backoffice/facture-statut";
 
 function formatDate(iso: string | null) {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 }
 
-export default async function DevisDetailPage({
+export default async function FactureDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
   const { supabase } = await getCurrentUser();
-  const devis = await getDevis(supabase, id);
+  const facture = await getFacture(supabase, id);
 
-  if (!devis) notFound();
+  if (!facture) notFound();
 
   return (
     <>
-      <Header title={devis.numero} subtitle={devis.client_nom} />
+      <Header title={facture.numero} subtitle={facture.client_nom} />
       <div className="p-4 sm:p-8 max-w-2xl space-y-4">
         <Link
-          href="/backoffice/devis"
+          href="/backoffice/factures"
           className="inline-flex items-center gap-1.5 text-xs font-medium text-[#8B8B8D] hover:text-[#EDEDED] transition-colors duration-150"
         >
           <ArrowLeft size={14} weight="bold" />
-          Retour aux devis
+          Retour aux factures
         </Link>
 
         <Card>
           <div className="p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <StatusBadge tone={DEVIS_STATUT_TONE[devis.statut]} label={devisStatutLabel(devis.statut)} />
-              <p className="text-xs text-[#55555A]">Valide jusqu&apos;au {formatDate(devis.date_validite)}</p>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <StatusBadge tone={FACTURE_STATUT_TONE[facture.statut]} label={factureStatutLabel(facture.statut)} />
+              <p className="text-xs text-[#55555A]">
+                Émise le {formatDate(facture.date_emission)} · Échéance {formatDate(facture.date_echeance)}
+                {facture.date_paiement && ` · Payée le ${formatDate(facture.date_paiement)}`}
+              </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <DevisActions devisId={devis.id} statut={devis.statut} />
-              {devis.statut === "accepte" && <ConvertirDevisButton devisId={devis.id} />}
-            </div>
+            <FactureActions factureId={facture.id} statut={facture.statut} />
           </div>
         </Card>
 
@@ -61,7 +60,7 @@ export default async function DevisDetailPage({
               <Th align="right">Total</Th>
             </TableHead>
             <tbody>
-              {devis.lignes.map((l, i) => (
+              {facture.lignes.map((l, i) => (
                 <Tr key={i}>
                   <Td>
                     <p>{l.nom}</p>
@@ -77,7 +76,7 @@ export default async function DevisDetailPage({
           <div className="px-5 py-3 border-t border-[#232326] flex justify-between items-center">
             <p className="text-xs text-[#55555A]">TVA non applicable, art. 293 B du CGI</p>
             <p className="text-sm font-semibold text-[#EDEDED]">
-              Total HT : {devis.total_ht.toLocaleString("fr-FR")} €
+              Total TTC : {facture.total_ttc.toLocaleString("fr-FR")} €
             </p>
           </div>
         </Card>

@@ -27,7 +27,7 @@ const SECTIONS: NavSection[] = [
     items: [
       { label: "Clients", href: "/backoffice/clients" },
       { label: "Devis", href: "/backoffice/devis" },
-      { label: "Factures" },
+      { label: "Factures", href: "/backoffice/factures" },
     ],
   },
   {
