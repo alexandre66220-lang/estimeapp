@@ -29,8 +29,8 @@ export default function BackofficePage() {
     <>
       <Header title="Vue d'ensemble" subtitle="ALCALSPARK & Estime" />
 
-      <div className="p-8 space-y-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="p-4 sm:p-8 space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="CA du mois" value="3 830 €" sublabel="Saisi manuellement" />
           <StatCard label="MRR Estime" value="—" sublabel="Câblage étape 3" accent />
           <StatCard label="En attente de paiement" value="2 830 €" sublabel="1 facture" />
