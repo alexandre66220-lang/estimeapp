@@ -1,22 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
-
-const ADMIN_USER_ID = "dece2cb2-9f6e-4cba-89b1-7c5a35989ae2"; // spark@alcalspark.com
-
-async function requireAdmin() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user || user.id !== ADMIN_USER_ID) {
-    throw new Error("Non autorisé.");
-  }
-
-  return supabase;
-}
+import { requireAdmin } from "@/lib/backoffice/auth";
 
 export async function upsertCaManuel(formData: FormData) {
   const supabase = await requireAdmin();
