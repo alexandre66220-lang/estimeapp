@@ -33,7 +33,7 @@ const SECTIONS: NavSection[] = [
   {
     label: "Outils",
     items: [
-      { label: "Documents" },
+      { label: "Documents", href: "/backoffice/documents" },
       { label: "Sandbox" },
     ],
   },
