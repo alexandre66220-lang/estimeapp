@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase/server";
+import { BackofficeShell } from "@/components/backoffice/BackofficeShell";
+
+const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -30,5 +34,9 @@ export default async function BackofficeLayout({
     notFound();
   }
 
-  return <>{children}</>;
+  return (
+    <div className={inter.className}>
+      <BackofficeShell>{children}</BackofficeShell>
+    </div>
+  );
 }
